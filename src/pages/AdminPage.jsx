@@ -9,6 +9,7 @@ import {
   adminGetFundExtractions, adminDeleteExtraction,
   adminBulkDeleteFunds, adminBulkDeleteExtractions,
   adminGetFundGaps,
+  adminGetCacheStats, adminClearCache,
   getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes,
 } from '../api/client.js';
 import api from '../api/client.js';
@@ -1873,6 +1874,120 @@ function FeatureFlagsTab() {
   );
 }
 
+// ─── Tab: Cache ───────────────────────────────────────────────────────────────
+function CacheTab() {
+  const [stats, setStats]     = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const { toast, show, hide } = useToast();
+
+  async function loadStats() {
+    setLoading(true);
+    try { setStats(await adminGetCacheStats()); }
+    catch (e) { show(e.response?.data?.error || e.message, false); }
+    finally { setLoading(false); }
+  }
+
+  async function clearCache() {
+    setClearing(true);
+    try {
+      await adminClearCache();
+      show('Cache cleared — all entries invalidated');
+      setStats({ total: 0, alive: 0, expired: 0 });
+    } catch (e) {
+      show(e.response?.data?.error || e.message, false);
+    } finally { setClearing(false); }
+  }
+
+  useEffect(() => { loadStats(); }, []);
+
+  return (
+    <div className="space-y-4">
+      {toast && <Toast {...toast} onClose={hide} />}
+
+      <SectionCard className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900">In-memory response cache</h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Heavy analytics routes (cross-fund, overlap, rising conviction, etc.) are cached for 1 hour.
+              Cache resets automatically when funds or extractions are deleted, or on server restart.
+            </p>
+          </div>
+          <button onClick={loadStats} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white transition-colors">
+            <RefreshCw className="w-3 h-3" /> Refresh
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-8"><Spinner /></div>
+        ) : stats ? (
+          <div className="space-y-4">
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'Total entries', value: stats.total, color: 'text-slate-700', bg: 'bg-slate-50 border-slate-200' },
+                { label: 'Alive (fresh)', value: stats.alive, color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
+                { label: 'Expired', value: stats.expired, color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200' },
+              ].map(({ label, value, color, bg }) => (
+                <div key={label} className={`border rounded-xl px-4 py-3 ${bg}`}>
+                  <p className={`text-2xl font-bold ${color}`}>{value}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Clear button */}
+            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+              <p className="text-xs text-slate-400">
+                Clearing forces the next request to re-query the database for all cached routes.
+              </p>
+              <button
+                onClick={clearCache}
+                disabled={clearing || stats.alive === 0}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                {clearing ? <Spinner /> : null}
+                {stats.alive === 0 ? 'Cache is empty' : `Clear ${stats.alive} live entries`}
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </SectionCard>
+
+      <SectionCard className="p-5">
+        <h3 className="text-sm font-semibold text-slate-900 mb-3">What gets cached</h3>
+        <div className="divide-y divide-slate-100 text-sm">
+          {[
+            { route: '/api/holdings/cross-fund',          ttl: '24 hours', desc: 'Cross-fund stock analysis' },
+            { route: '/api/holdings/overlap-matrix',      ttl: '24 hours', desc: 'Pairwise fund overlap' },
+            { route: '/api/holdings/overlap-trend',       ttl: '24 hours', desc: 'Overlap trend per fund pair' },
+            { route: '/api/holdings/rising-conviction',   ttl: '24 hours', desc: 'Rising / losing conviction' },
+            { route: '/api/holdings/hidden-gems',         ttl: '24 hours', desc: 'Hidden gems' },
+            { route: '/api/holdings/entry-exit/:fundId',  ttl: '24 hours', desc: 'Entry & exit timeline' },
+            { route: '/api/holdings/sector-drift/:id',    ttl: '24 hours', desc: 'Sector drift per fund' },
+            { route: '/api/holdings/stock-tracker/:isin', ttl: '24 hours', desc: 'Stock tracker' },
+            { route: '/api/holdings/churn-rates',         ttl: '24 hours', desc: 'Fund churn rates' },
+            { route: '/api/holdings/sector-rotation',     ttl: '24 hours', desc: 'Sector rotation calendar' },
+            { route: '/api/holdings/discovery-chain',     ttl: '24 hours', desc: 'Stock discovery chain' },
+            { route: '/api/holdings/concentration',       ttl: '24 hours', desc: 'Concentration scores' },
+            { route: '/api/extractions/:id/holdings/summary', ttl: '24 hours', desc: 'Holdings summary (immutable)' },
+            { route: '/api/extractions/trend/:id/:isin',  ttl: '24 hours', desc: 'Stock % NAV trend' },
+          ].map(({ route, ttl, desc }) => (
+            <div key={route} className="flex items-center justify-between py-2.5">
+              <div>
+                <p className="font-mono text-xs text-blue-700">{route}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+              </div>
+              <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full shrink-0 ml-4">{ttl}</span>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
 // ─── Main AdminPage ───────────────────────────────────────────────────────────
 const TABS = [
   { id: 'isin',        label: 'ISIN Remap' },
@@ -1882,6 +1997,7 @@ const TABS = [
   { id: 'continuity',  label: 'Data Continuity' },
   { id: 'nav',         label: 'NAV Mapping' },
   { id: 'features',    label: 'Feature Flags' },
+  { id: 'cache',       label: 'Cache' },
 ];
 
 export default function AdminPage() {
@@ -1935,6 +2051,7 @@ export default function AdminPage() {
         {tab === 'continuity' && <ContinuityTab />}
         {tab === 'nav'        && <NavTab />}
         {tab === 'features'   && <FeatureFlagsTab />}
+        {tab === 'cache'      && <CacheTab />}
       </div>
     </div>
   );
