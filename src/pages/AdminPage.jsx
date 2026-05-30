@@ -1973,6 +1973,11 @@ function CacheTab() {
             { route: '/api/holdings/concentration',       ttl: '24 hours', desc: 'Concentration scores' },
             { route: '/api/extractions/:id/holdings/summary', ttl: '24 hours', desc: 'Holdings summary (immutable)' },
             { route: '/api/extractions/trend/:id/:isin',  ttl: '24 hours', desc: 'Stock % NAV trend' },
+            { route: '/api/feed',                          ttl: '24 hours', desc: 'Activity feed' },
+            { route: '/api/funds',                         ttl: '24 hours',    desc: 'Fund list' },
+            { route: '/api/funds/:id',                     ttl: '24 hours',    desc: 'Fund detail' },
+            { route: '/api/funds/:id/extractions',         ttl: '24 hours',    desc: 'Extractions list per fund' },
+            { route: '/api/funds/:id/compare',             ttl: '24 hours', desc: 'Month comparison (immutable data)' },
           ].map(({ route, ttl, desc }) => (
             <div key={route} className="flex items-center justify-between py-2.5">
               <div>
