@@ -4,7 +4,7 @@ import {
   Loader2, Plus, Trash2, ChevronDown, ChevronUp, Save, RotateCcw,
   Info, AlertCircle,
 } from 'lucide-react';
-import { uploadSingleFile, uploadBatchStream, importExtraction } from '../../api/client.js';
+import { uploadSingleFile, uploadBatchStream, importExtraction, getFunds } from '../../api/client.js';
 
 // ─── LocalStorage helpers ─────────────────────────────────────────────────────
 const DRAFT_KEY = 'fs_upload_drafts';
@@ -236,6 +236,72 @@ function HoldingsEditor({ holdings, onChange }) {
   );
 }
 
+// ─── FundNameAutocomplete ─────────────────────────────────────────────────────
+function FundNameAutocomplete({ value, onChange }) {
+  const [funds, setFunds]       = useState([]);
+  const [open, setOpen]         = useState(false);
+  const [focused, setFocused]   = useState(false);
+  const containerRef            = useRef(null);
+
+  // Load fund names once
+  useEffect(() => {
+    getFunds().then(data => setFunds(data.map(f => f.name))).catch(() => {});
+  }, []);
+
+  // Close on outside click
+  useEffect(() => {
+    function handle(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, []);
+
+  const suggestions = funds.filter(n =>
+    n.toLowerCase().includes(value.toLowerCase()) && n !== value
+  ).slice(0, 8);
+
+  const showDropdown = open && focused && suggestions.length > 0;
+
+  return (
+    <div ref={containerRef} className="relative">
+      <input
+        value={value}
+        onChange={e => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => { setFocused(true); setOpen(true); }}
+        onBlur={() => setFocused(false)}
+        className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        placeholder="Fund name"
+        autoComplete="off"
+      />
+      {showDropdown && (
+        <ul className="absolute z-20 left-0 top-full mt-1 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-lg max-h-56 overflow-y-auto">
+          {suggestions.map(name => (
+            <li
+              key={name}
+              onMouseDown={e => { e.preventDefault(); onChange(name); setOpen(false); }}
+              className="px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 cursor-pointer leading-snug"
+            >
+              {/* Bold the matching part */}
+              {(() => {
+                const idx = name.toLowerCase().indexOf(value.toLowerCase());
+                if (idx === -1 || !value) return name;
+                return (
+                  <>
+                    {name.slice(0, idx)}
+                    <span className="font-semibold text-indigo-600 dark:text-indigo-400">{name.slice(idx, idx + value.length)}</span>
+                    {name.slice(idx + value.length)}
+                  </>
+                );
+              })()}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 // ─── ExtractionReview ─────────────────────────────────────────────────────────
 function ExtractionReview({ draft, onDiscard, onSaved }) {
   const [data, setData] = useState(() => ({
@@ -306,11 +372,9 @@ function ExtractionReview({ draft, onDiscard, onSaved }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Fund Name</label>
-            <input
+            <FundNameAutocomplete
               value={data.fund_name}
-              onChange={e => update({ fund_name: e.target.value })}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              placeholder="Fund name"
+              onChange={v => update({ fund_name: v })}
             />
           </div>
           <div>
