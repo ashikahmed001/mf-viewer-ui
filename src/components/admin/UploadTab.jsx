@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Upload, FileSpreadsheet, X, CheckCircle, AlertTriangle,
   Loader2, Plus, Trash2, ChevronDown, ChevronUp, Save, RotateCcw,
@@ -250,7 +249,6 @@ function ExtractionReview({ draft, onDiscard, onSaved }) {
   const [saving, setSaving] = useState(false);
   const [conflict, setConflict] = useState(null);
   const [toast, setToast]   = useState(null);
-  const navigate = useNavigate();
 
   function update(patch) { setData(d => ({ ...d, ...patch })); }
 
@@ -261,9 +259,9 @@ function ExtractionReview({ draft, onDiscard, onSaved }) {
       const res = await importExtraction(data, replace);
       setToast({ type: 'success', msg: `Saved! ${res.holding_count} holdings for "${res.fund_name}"` });
       setTimeout(() => {
-        onSaved?.();
-        navigate(`/funds/${res.fund_id}`);
-      }, 1500);
+        setToast(null);
+        onSaved?.(res);
+      }, 4000);
     } catch (err) {
       if (err.response?.status === 409) {
         const info = err.response.data;
@@ -278,10 +276,10 @@ function ExtractionReview({ draft, onDiscard, onSaved }) {
 
   return (
     <div className="space-y-5">
-      {/* Toast */}
+      {/* Toast — fixed bottom-right */}
       {toast && (
-        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
-          ${toast.type === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-xl text-sm font-medium
+          ${toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}>
           {toast.type === 'success' ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
           {toast.msg}
         </div>
