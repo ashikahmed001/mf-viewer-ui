@@ -1407,15 +1407,17 @@ function SchemeSearchDropdown({ fundName, value, onChange }) {
 
 // ─── Tab: NAV Mapping ─────────────────────────────────────────────────────────
 function NavTab() {
-  const [mappings, setMappings]       = useState([]);
-  const [loading, setLoading]         = useState(false);
-  const [matching, setMatching]       = useState(false);
-  const [syncingAll, setSyncingAll]   = useState(false);
+  const [mappings, setMappings]           = useState([]);
+  const [loading, setLoading]             = useState(false);
+  const [matching, setMatching]           = useState(false);
+  const [syncingAll, setSyncingAll]       = useState(false);
   const [syncingLatest, setSyncingLatest] = useState(false);
-  const [syncingId, setSyncingId]     = useState(null);
-  const [editRow, setEditRow]         = useState(null);  // { fund_id, scheme_code, scheme_name }
-  const [search, setSearch]           = useState('');
-  const { show, toast, hide }         = useToast();
+  const [syncingId, setSyncingId]         = useState(null);
+  const [editRow, setEditRow]             = useState(null);
+  const [removeTarget, setRemoveTarget]   = useState(null); // { id, name }
+  const [removing, setRemoving]           = useState(false);
+  const [search, setSearch]               = useState('');
+  const { show, toast, hide }             = useToast();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -1486,14 +1488,18 @@ function NavTab() {
     }
   }
 
-  async function removeMapping(fundId, fundName) {
-    if (!window.confirm(`Remove NAV mapping for "${fundName}"? The NAV history data will be kept.`)) return;
+  async function confirmRemove() {
+    if (!removeTarget) return;
+    setRemoving(true);
     try {
-      await removeNavMapping(fundId);
+      await removeNavMapping(removeTarget.id);
       show('Mapping removed');
+      setRemoveTarget(null);
       await load();
     } catch (e) {
       show(e.response?.data?.error || e.message, false);
+    } finally {
+      setRemoving(false);
     }
   }
 
@@ -1509,6 +1515,41 @@ function NavTab() {
   return (
     <div className="space-y-5">
       {toast && <Toast {...toast} onClose={hide} />}
+
+      {/* Remove mapping confirmation dialog */}
+      {removeTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Remove NAV mapping?</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  This will unlink <span className="font-medium text-slate-700 dark:text-slate-200">"{removeTarget.name}"</span> from its AMFI scheme. The NAV history data will be kept.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={() => setRemoveTarget(null)}
+                disabled={removing}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRemove}
+                disabled={removing}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
+              >
+                {removing ? 'Removing…' : 'Remove mapping'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header card */}
       <SectionCard className="p-5">
@@ -1669,7 +1710,7 @@ function NavTab() {
                                   Sync
                                 </button>
                                 <button
-                                  onClick={() => removeMapping(m.id, m.name)}
+                                  onClick={() => setRemoveTarget({ id: m.id, name: m.name })}
                                   className="text-xs px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg transition-colors font-medium"
                                 >
                                   Remove
