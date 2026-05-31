@@ -182,3 +182,57 @@ export const syncAllNav        = ()                                  => api.post
 export const getFundNav        = (fundId)                            => api.get(`/nav/${fundId}`).then(r => r.data);
 
 export default api;
+
+// ─── UPLOAD / EXTRACT ────────────────────────────────────────────────────────
+
+export const uploadSingleFile = async (file) => {
+  const form = new FormData();
+  form.append('file', file);
+  const r = await api.post('/admin/upload/single', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 120000,
+  });
+  return r.data;
+};
+
+export const uploadBatchStream = (files, { onStart, onProgress, onResult, onDone, onError } = {}) => {
+  const form = new FormData();
+  for (const f of files) form.append('files', f);
+  const token = api.defaults.headers.common?.Authorization;
+  let closed = false;
+  const abort = new AbortController();
+  (async () => {
+    try {
+      const res = await fetch(
+        (api.defaults.baseURL || '') + '/admin/upload/batch',
+        { method: 'POST', body: form, signal: abort.signal, headers: token ? { Authorization: token } : {} }
+      );
+      if (!res.ok) { onError?.({ error: `Server ${res.status}` }); return; }
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      while (!closed) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const parts = buf.split('\n\n');
+        buf = parts.pop();
+        for (const chunk of parts) {
+          const eventLine = chunk.match(/^event: (.+)$/m)?.[1];
+          const dataLine  = chunk.match(/^data: (.+)$/m)?.[1];
+          if (!dataLine) continue;
+          let data; try { data = JSON.parse(dataLine); } catch { continue; }
+          if (eventLine === 'start')    onStart?.(data);
+          if (eventLine === 'progress') onProgress?.(data);
+          if (eventLine === 'result')   onResult?.(data);
+          if (eventLine === 'done')     onDone?.(data);
+          if (eventLine === 'error')    onError?.(data);
+        }
+      }
+    } catch (err) { if (!closed) onError?.({ error: err.message }); }
+  })();
+  return () => { closed = true; abort.abort(); };
+};
+
+export const importExtraction = (draft, replace = false) =>
+  api.post('/admin/import', { ...draft, replace }, { timeout: 60000 }).then(r => r.data);

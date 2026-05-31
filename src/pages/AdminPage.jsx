@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { Navigate } from 'react-router-dom';
+import UploadTab from '../components/admin/UploadTab.jsx';
 import {
   adminGetIsinIssues, adminRemapIsin,
   adminGetNameIssues, adminFixName,
@@ -2058,6 +2059,7 @@ function CacheTab() {
 
 // ─── Main AdminPage ───────────────────────────────────────────────────────────
 const TABS = [
+  { id: 'upload',      label: '⬆ Upload' },
   { id: 'isin',        label: 'ISIN Remap' },
   { id: 'names',       label: 'Name Normalisation' },
   { id: 'scanner',     label: 'Duplicate Scanner' },
@@ -2114,6 +2116,7 @@ export default function AdminPage() {
 
       {/* Tab content */}
       <div>
+        {tab === 'upload'     && <UploadTab />}
         {tab === 'isin'       && <IsinRemapTab />}
         {tab === 'names'      && <NameNormTab />}
         {tab === 'scanner'    && <ScannerTab />}
