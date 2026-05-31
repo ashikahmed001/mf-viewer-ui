@@ -11,7 +11,7 @@ import {
   adminBulkDeleteFunds, adminBulkDeleteExtractions,
   adminGetFundGaps,
   adminGetCacheStats, adminClearCache, adminSetCacheEnabled,
-  getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping,
+  getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping, syncLatestNav,
 } from '../api/client.js';
 import api from '../api/client.js';
 import { AlertTriangle, CheckCircle, RefreshCw, ChevronDown, ChevronRight, Settings, X, Search, Activity, TrendingUp, Lock, Unlock } from 'lucide-react';
@@ -1411,6 +1411,7 @@ function NavTab() {
   const [loading, setLoading]         = useState(false);
   const [matching, setMatching]       = useState(false);
   const [syncingAll, setSyncingAll]   = useState(false);
+  const [syncingLatest, setSyncingLatest] = useState(false);
   const [syncingId, setSyncingId]     = useState(null);
   const [editRow, setEditRow]         = useState(null);  // { fund_id, scheme_code, scheme_name }
   const [search, setSearch]           = useState('');
@@ -1424,6 +1425,19 @@ function NavTab() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  async function fetchLatest() {
+    setSyncingLatest(true);
+    try {
+      const r = await syncLatestNav();
+      show(r.message || 'NAV sync started in background');
+      setTimeout(load, 5000); // refresh table after a few seconds
+    } catch (e) {
+      show(e.response?.data?.error || e.message, false);
+    } finally {
+      setSyncingLatest(false);
+    }
+  }
 
   async function runAutoMatch() {
     setMatching(true);
@@ -1509,6 +1523,14 @@ function NavTab() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={fetchLatest}
+              disabled={syncingLatest || loading}
+              className="flex items-center gap-2 text-sm px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white rounded-lg transition-colors font-medium"
+            >
+              {syncingLatest ? <Spinner /> : <RefreshCw className="w-4 h-4" />}
+              {syncingLatest ? 'Starting…' : 'Fetch latest AMFI data'}
+            </button>
             <button
               onClick={runAutoMatch}
               disabled={matching || loading}

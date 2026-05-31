@@ -192,6 +192,7 @@ export const syncNavFund       = (fundId)                            => api.post
 export const syncAllNav        = ()                                  => api.post('/nav/sync-all', {}, { timeout: 120000 }).then(r => r.data);
 export const getFundNav        = (fundId)                            => api.get(`/nav/${fundId}`).then(r => r.data);
 export const removeNavMapping  = (fundId)                            => api.delete(`/nav/mapping/${fundId}`).then(r => r.data);
+export const syncLatestNav     = ()                                  => api.post('/nav/sync-latest', {}, { timeout: 10000 }).then(r => r.data);
 
 export default api;
 
