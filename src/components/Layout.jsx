@@ -44,8 +44,8 @@ function PreferencesPanel({ onClose }) {
               onClick={() => updatePrefs({ mode: id })}
               className={`flex flex-col items-center gap-1 py-2.5 rounded-xl border text-xs font-medium transition-colors
                 ${prefs.mode === id
-                  ? 'bg-blue-600 border-blue-600 text-white'
-                  : 'bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-blue-300'
+                  ? 'bg-indigo-600 border-indigo-600 text-white'
+                  : 'bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-indigo-300'
                 }`}
             >
               <Icon className="w-4 h-4" />
@@ -70,7 +70,7 @@ function PreferencesPanel({ onClose }) {
                   value={prefs.dayStart}
                   onChange={e => updatePrefs({ dayStart: +e.target.value })}
                   className="w-full text-xs border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1.5
-                             bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                             bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   {Array.from({ length: 13 }, (_, i) => i).map(h => (
                     <option key={h} value={h}>{fmt12(h)}</option>
@@ -83,7 +83,7 @@ function PreferencesPanel({ onClose }) {
                   value={prefs.dayEnd}
                   onChange={e => updatePrefs({ dayEnd: +e.target.value })}
                   className="w-full text-xs border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1.5
-                             bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                             bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   {Array.from({ length: 13 }, (_, i) => i + 12).map(h => (
                     <option key={h} value={h}>{fmt12(h)}</option>
@@ -180,7 +180,7 @@ export default function Layout({ children }) {
               {paymentsEnabled && !isPro && (
                 <Link
                   to="/pricing"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold bg-blue-500 hover:bg-blue-400 text-white transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold bg-indigo-500 hover:bg-indigo-400 text-white transition-colors"
                 >
                   <Zap className="w-3.5 h-3.5" /> Upgrade
                 </Link>
@@ -223,7 +223,7 @@ function NavLink({ to, icon, label, active }) {
     <Link
       to={to}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors ${
-        active ? 'bg-blue-600 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-700'
+        active ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-700'
       }`}
     >
       {icon}

@@ -75,7 +75,7 @@ function overlapColor(pct) {
   if (pct >= 60)   return { bg: 'bg-red-100',      text: 'text-red-800',     border: 'border-red-300',     ring: 'ring-red-400',     shadow: 'shadow-red-100' };
   if (pct >= 40)   return { bg: 'bg-orange-100',   text: 'text-orange-800',  border: 'border-orange-300',  ring: 'ring-orange-400',  shadow: 'shadow-orange-100' };
   if (pct >= 20)   return { bg: 'bg-yellow-50',    text: 'text-yellow-800',  border: 'border-yellow-300',  ring: 'ring-yellow-400',  shadow: 'shadow-yellow-100' };
-  if (pct >= 5)    return { bg: 'bg-blue-50',      text: 'text-blue-700',    border: 'border-blue-200',    ring: 'ring-blue-400',    shadow: 'shadow-blue-100' };
+  if (pct >= 5)    return { bg: 'bg-indigo-50',      text: 'text-indigo-700',    border: 'border-indigo-200',    ring: 'ring-indigo-400',    shadow: 'shadow-blue-100' };
   return             { bg: 'bg-emerald-50',   text: 'text-emerald-700', border: 'border-emerald-200', ring: 'ring-emerald-400', shadow: 'shadow-emerald-100' };
 }
 
@@ -522,9 +522,9 @@ function OverlapTrend({ matrixFunds, shortNames }) {
 
                 {/* Unique to Fund A */}
                 <div>
-                  <div className="px-4 py-2.5 bg-blue-50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <p className="text-xs font-semibold text-blue-700">Only in {shortNames.get(fundA?.fund_name)}</p>
-                    <span className="text-xs text-blue-400">{monthSel.unique_a?.length ?? 0}</span>
+                  <div className="px-4 py-2.5 bg-indigo-50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <p className="text-xs font-semibold text-indigo-700">Only in {shortNames.get(fundA?.fund_name)}</p>
+                    <span className="text-xs text-indigo-400">{monthSel.unique_a?.length ?? 0}</span>
                   </div>
                   <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                     {(monthSel.unique_a ?? []).map(h => (
@@ -534,7 +534,7 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                           {h.industry
                             ? <span className={`inline-flex items-center px-1 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
                             : <span />}
-                          <span className="text-xs font-bold text-blue-600 tabular-nums">{fmt(h.pct, 2)}%</span>
+                          <span className="text-xs font-bold text-indigo-600 tabular-nums">{fmt(h.pct, 2)}%</span>
                         </div>
                       </div>
                     ))}
@@ -559,7 +559,7 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                             ? <span className={`inline-flex items-center px-1 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
                             : <span />}
                           <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
-                            <span className="text-blue-500 font-semibold">{fmt(h.pct_a, 2)}%</span>
+                            <span className="text-indigo-500 font-semibold">{fmt(h.pct_a, 2)}%</span>
                             {' · '}
                             <span className="text-emerald-500 font-semibold">{fmt(h.pct_b, 2)}%</span>
                           </span>
@@ -1162,7 +1162,7 @@ function HiddenGems() {
           sub={`≥ ${minPct}% NAV`}
         />
         <StatCard
-          icon={<Layers className="w-4 h-4 text-blue-500" />}
+          icon={<Layers className="w-4 h-4 text-indigo-500" />}
           label="Funds with gems" value={byFund.size}
           sub="each holding exclusive stocks"
         />
@@ -1727,7 +1727,7 @@ function EntryExitTimeline({ allFunds }) {
 const DIFF_COLORS = {
   new:       { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700', label: 'New entry',  icon: '●' },
   exit:      { bg: 'bg-red-50',     border: 'border-red-200',     text: 'text-red-700',     badge: 'bg-red-100 text-red-700',     label: 'Exited',     icon: '○' },
-  increased: { bg: 'bg-blue-50',    border: 'border-blue-100',    text: 'text-blue-700',    badge: 'bg-blue-100 text-blue-700',   label: 'Increased',  icon: '▲' },
+  increased: { bg: 'bg-indigo-50',    border: 'border-indigo-100',    text: 'text-indigo-700',    badge: 'bg-indigo-100 text-indigo-700',   label: 'Increased',  icon: '▲' },
   decreased: { bg: 'bg-orange-50',  border: 'border-orange-100',  text: 'text-orange-700',  badge: 'bg-orange-100 text-orange-700', label: 'Decreased', icon: '▼' },
   unchanged: { bg: '',              border: 'border-slate-100',   text: 'text-slate-400 dark:text-slate-500',   badge: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400', label: 'Unchanged',  icon: '—' },
 };
@@ -2307,7 +2307,7 @@ function OverlapMatrix() {
           <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Overlap:</span>
           {[
             { label: '< 5%',   cls: 'bg-emerald-50 border-emerald-100 text-emerald-700' },
-            { label: '5–20%',  cls: 'bg-blue-50 border-blue-100 text-blue-700' },
+            { label: '5–20%',  cls: 'bg-indigo-50 border-indigo-100 text-indigo-700' },
             { label: '20–40%', cls: 'bg-yellow-50 border-yellow-200 text-yellow-800' },
             { label: '40–60%', cls: 'bg-orange-100 border-orange-200 text-orange-800' },
             { label: '60%+',   cls: 'bg-red-100 border-red-200 text-red-800' },
@@ -2422,9 +2422,9 @@ function OverlapMatrix() {
 
             {/* Unique to Fund A */}
             <div>
-              <div className="px-4 py-2.5 bg-blue-50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                <p className="text-xs font-semibold text-blue-700">Only in {shortNames.get(selected.pair.fund_a_name)}</p>
-                <span className="text-xs text-blue-400">{selected.pair.unique_a?.length ?? 0}</span>
+              <div className="px-4 py-2.5 bg-indigo-50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <p className="text-xs font-semibold text-indigo-700">Only in {shortNames.get(selected.pair.fund_a_name)}</p>
+                <span className="text-xs text-indigo-400">{selected.pair.unique_a?.length ?? 0}</span>
               </div>
               <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                 {(selected.pair.unique_a ?? []).map(h => (
@@ -2434,7 +2434,7 @@ function OverlapMatrix() {
                       {h.industry
                         ? <span className={`inline-flex items-center px-1 py-0.5 rounded border font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
                         : <span />}
-                      <span className="text-xs font-bold text-blue-600 tabular-nums flex-shrink-0">{fmt(h.pct, 2)}%</span>
+                      <span className="text-xs font-bold text-indigo-600 tabular-nums flex-shrink-0">{fmt(h.pct, 2)}%</span>
                     </div>
                   </div>
                 ))}
@@ -2459,7 +2459,7 @@ function OverlapMatrix() {
                         ? <span className={`inline-flex items-center px-1 py-0.5 rounded border font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
                         : <span />}
                       <span className="text-xs tabular-nums flex-shrink-0">
-                        <span className="text-blue-500 font-semibold">{fmt(h.pct_a, 2)}%</span>
+                        <span className="text-indigo-500 font-semibold">{fmt(h.pct_a, 2)}%</span>
                         <span className="text-slate-300 mx-0.5">·</span>
                         <span className="text-emerald-500 font-semibold">{fmt(h.pct_b, 2)}%</span>
                       </span>
@@ -3171,7 +3171,7 @@ function HighConviction() {
     <div>
       {!loading && !error && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-          <StatCard icon={<TrendingUp className="w-4 h-4 text-blue-500" />}
+          <StatCard icon={<TrendingUp className="w-4 h-4 text-indigo-500" />}
             label="Unique Stocks" value={data.length.toLocaleString()} />
           <StatCard icon={<Layers className="w-4 h-4 text-violet-500" />}
             label="Held by 2+ Funds" value={multiHeld.toLocaleString()} />
@@ -3397,7 +3397,7 @@ function NewEntries() {
                     <td className="px-4 py-3 text-center">
                       <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
                         r.fund_count >= 3 ? 'bg-emerald-100 text-emerald-700' :
-                        r.fund_count === 2 ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                        r.fund_count === 2 ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                       }`}>{r.fund_count}</span>
                     </td>
                     <td className="px-4 py-3">

@@ -36,8 +36,8 @@ export default function HoldingsTable({
   const SortIcon = ({ col }) => {
     if (sort !== col.key) return <ChevronDown className="w-3 h-3 opacity-30" />;
     return order === 'asc'
-      ? <ChevronUp className="w-3 h-3 text-blue-500" />
-      : <ChevronDown className="w-3 h-3 text-blue-500" />;
+      ? <ChevronUp className="w-3 h-3 text-indigo-500" />
+      : <ChevronDown className="w-3 h-3 text-indigo-500" />;
   };
 
   return (
@@ -52,7 +52,7 @@ export default function HoldingsTable({
             value={search || ''}
             onChange={e => onSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
           {search && (
             <button onClick={() => onSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -66,7 +66,7 @@ export default function HoldingsTable({
             value={industry || ''}
             onChange={e => onIndustry(e.target.value)}
             className="pl-9 pr-8 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-sm appearance-none bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[180px]"
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[180px]"
           >
             <option value="">All Industries</option>
             {industries.map(ind => (
@@ -143,7 +143,7 @@ export default function HoldingsTable({
                     {(() => {
                       const pct = (h.pct_nav || 0) * scale;
                       return (
-                        <span className={pct >= 5 ? 'text-blue-700' : pct >= 2 ? 'text-slate-700' : 'text-slate-500'}>
+                        <span className={pct >= 5 ? 'text-indigo-700' : pct >= 2 ? 'text-slate-700' : 'text-slate-500'}>
                           {fmt(pct, 2)}%
                         </span>
                       );

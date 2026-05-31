@@ -99,7 +99,7 @@ export default function PricingPage() {
           <button
             onClick={() => setCycle(c => c === 'monthly' ? 'annual' : 'monthly')}
             style={{ width: 48, height: 26 }}
-            className={`relative rounded-full transition-colors flex-shrink-0 ${cycle === 'annual' ? 'bg-blue-600' : 'bg-slate-200'}`}
+            className={`relative rounded-full transition-colors flex-shrink-0 ${cycle === 'annual' ? 'bg-indigo-600' : 'bg-slate-200'}`}
           >
             <span
               style={{
@@ -146,9 +146,9 @@ export default function PricingPage() {
         </div>
 
         {/* Pro */}
-        <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-7 shadow-xl text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl p-7 shadow-xl text-white relative overflow-hidden">
           {/* Glow */}
-          <div className="absolute -top-8 -right-8 w-32 h-32 bg-blue-400 rounded-full opacity-20 blur-2xl" />
+          <div className="absolute -top-8 -right-8 w-32 h-32 bg-indigo-400 rounded-full opacity-20 blur-2xl" />
 
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-1">
@@ -157,14 +157,14 @@ export default function PricingPage() {
             </div>
             <div className="text-3xl font-bold">{PRICES[cycle].label}</div>
             {PRICES[cycle].save && (
-              <p className="text-blue-200 text-sm mt-1">{PRICES[cycle].save}</p>
+              <p className="text-indigo-200 text-sm mt-1">{PRICES[cycle].save}</p>
             )}
           </div>
 
           <ul className="space-y-3 mb-8">
             {PRO_FEATURES.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-center gap-2.5 text-sm text-blue-50">
-                <Icon className="w-4 h-4 text-blue-200 shrink-0" />
+              <li key={text} className="flex items-center gap-2.5 text-sm text-indigo-50">
+                <Icon className="w-4 h-4 text-indigo-200 shrink-0" />
                 {text}
               </li>
             ))}
@@ -175,14 +175,14 @@ export default function PricingPage() {
               ✓ You're on Pro
             </div>
           ) : !paymentsEnabled ? (
-            <div className="text-center text-sm font-semibold py-3 bg-white/10 rounded-xl text-blue-100">
+            <div className="text-center text-sm font-semibold py-3 bg-white/10 rounded-xl text-indigo-100">
               Coming soon — payments not yet enabled
             </div>
           ) : (
             <button
               onClick={handleUpgrade}
               disabled={loading}
-              className="w-full py-3 bg-white dark:bg-slate-800 text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors disabled:opacity-60 text-sm"
+              className="w-full py-3 bg-white dark:bg-slate-800 text-indigo-700 font-bold rounded-xl hover:bg-indigo-50 transition-colors disabled:opacity-60 text-sm"
             >
               {loading ? 'Opening checkout…' : `Upgrade to Pro – ${PRICES[cycle].label}`}
             </button>

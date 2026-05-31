@@ -51,7 +51,7 @@ const SIGNALS = [
 const TYPE_CFG = {
   new_entry:     { dot: 'bg-emerald-500', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
   exit:          { dot: 'bg-red-500',     color: 'text-red-700',     bg: 'bg-red-50 border-red-200' },
-  weight_change: { dot: 'bg-blue-400',    color: 'text-blue-700',    bg: 'bg-blue-50 border-blue-200' },
+  weight_change: { dot: 'bg-indigo-400',    color: 'text-indigo-700',    bg: 'bg-indigo-50 border-indigo-200' },
 };
 
 // Significance thresholds
@@ -107,7 +107,7 @@ function FundPicker({ funds, selected, onChange }) {
           <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Track funds</span>
             {!allSelected && (
-              <button onClick={() => onChange([])} className="text-xs text-blue-600 hover:underline">
+              <button onClick={() => onChange([])} className="text-xs text-indigo-600 hover:underline">
                 Show all
               </button>
             )}
@@ -122,14 +122,14 @@ function FundPicker({ funds, selected, onChange }) {
                     onClick={() => toggle(f.id)}
                   >
                     <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors
-                      ${checked ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-white dark:bg-slate-800'}`}>
+                      ${checked ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300 bg-white dark:bg-slate-800'}`}>
                       {checked && <Check className="w-2.5 h-2.5 text-white" />}
                     </span>
                     <span className="text-sm text-slate-700 dark:text-slate-300 leading-snug">{shortName(f.name)}</span>
                   </button>
                   <button
                     onClick={() => selectOnly(f.id)}
-                    className="text-xs text-slate-400 dark:text-slate-500 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0"
+                    className="text-xs text-slate-400 dark:text-slate-500 hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0"
                   >
                     only
                   </button>
@@ -269,7 +269,7 @@ function MonthCard({ month, isLatest, index, signal }) {
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className={`font-bold text-sm ${isLatest ? 'text-slate-900 dark:text-slate-100' : 'text-slate-700 dark:text-slate-300'}`}>
               {fmtMonth(month.month)}
-              {isLatest && <span className="ml-2 text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded-full">Latest</span>}
+              {isLatest && <span className="ml-2 text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded-full">Latest</span>}
             </span>
             {new_entries.length > 0 && (
               <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
@@ -282,7 +282,7 @@ function MonthCard({ month, isLatest, index, signal }) {
               </span>
             )}
             {weight_changes.length > 0 && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-semibold">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold">
                 ~{weight_changes.length} shifted
               </span>
             )}
@@ -412,7 +412,7 @@ export default function Feed() {
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Newspaper className="w-5 h-5 text-blue-500" />
+            <Newspaper className="w-5 h-5 text-indigo-500" />
             Activity Feed
           </h1>
           <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm mt-1">
@@ -432,7 +432,7 @@ export default function Feed() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           <StatCard icon={<TrendingUp className="w-4 h-4 text-white" />}     label="New Entries"    value={latest.new_entries.length}    bg="bg-emerald-500" sub="positions opened" />
           <StatCard icon={<TrendingDown className="w-4 h-4 text-white" />}   label="Exits"          value={latest.exits.length}          bg="bg-red-500"     sub="positions closed" />
-          <StatCard icon={<ArrowRightLeft className="w-4 h-4 text-white" />} label="Weight Shifts"  value={latest.weight_changes.length} bg="bg-blue-500"    sub="allocations shifted" />
+          <StatCard icon={<ArrowRightLeft className="w-4 h-4 text-white" />} label="Weight Shifts"  value={latest.weight_changes.length} bg="bg-indigo-500"    sub="allocations shifted" />
           <StatCard icon={<Zap className="w-4 h-4 text-white" />}            label="Convergence"    value={latest.convergence.length}    bg="bg-violet-500"  sub={latest.convergence[0]?.stock_name ?? 'none this month'} />
         </div>
       )}
@@ -484,7 +484,7 @@ export default function Feed() {
               slate:   active ? 'bg-slate-900 text-white border-slate-900'   : 'text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:border-slate-400',
               emerald: active ? 'bg-emerald-600 text-white border-emerald-600' : 'text-emerald-700 border-emerald-200 hover:border-emerald-400 bg-emerald-50',
               red:     active ? 'bg-red-600 text-white border-red-600'       : 'text-red-700 border-red-200 hover:border-red-400 bg-red-50',
-              blue:    active ? 'bg-blue-600 text-white border-blue-600'     : 'text-blue-700 border-blue-200 hover:border-blue-400 bg-blue-50',
+              blue:    active ? 'bg-indigo-600 text-white border-indigo-600'     : 'text-indigo-700 border-indigo-200 hover:border-indigo-400 bg-indigo-50',
               violet:  active ? 'bg-violet-600 text-white border-violet-600' : 'text-violet-700 border-violet-200 hover:border-violet-400 bg-violet-50',
             }[color];
             return (
@@ -551,7 +551,7 @@ export default function Feed() {
               <SlidersHorizontal className="w-8 h-8 mx-auto mb-3 opacity-40" />
               <p className="text-sm font-medium">No events match your current filters.</p>
               <button onClick={() => { setSignal('all'); setNotable(false); setFavFunds([]); }}
-                className="mt-2 text-sm text-blue-600 hover:underline">
+                className="mt-2 text-sm text-indigo-600 hover:underline">
                 Reset filters
               </button>
             </div>

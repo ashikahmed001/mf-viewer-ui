@@ -50,7 +50,7 @@ export default function Home() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm bg-white
-                     focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
         />
       </div>
 
@@ -81,24 +81,24 @@ export default function Home() {
           {filtered.map(fund => (
             <Link key={fund.id} to={`/funds/${fund.id}`}>
               <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm
-                              hover:shadow-md hover:border-blue-200 transition-all group h-36 flex flex-col justify-between">
+                              hover:shadow-md hover:border-indigo-200 transition-all group h-36 flex flex-col justify-between">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <TrendingUp className="w-5 h-5 text-blue-600" />
+                    <div className="w-9 h-9 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <TrendingUp className="w-5 h-5 text-indigo-600" />
                     </div>
-                    <h2 className="font-semibold text-slate-800 dark:text-slate-200 text-sm leading-snug line-clamp-3 group-hover:text-blue-700 transition-colors">
+                    <h2 className="font-semibold text-slate-800 dark:text-slate-200 text-sm leading-snug line-clamp-3 group-hover:text-indigo-700 transition-colors">
                       {fund.name}
                     </h2>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-400 flex-shrink-0 mt-1 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-400 flex-shrink-0 mt-1 transition-colors" />
                 </div>
                 <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
                     {fund.extraction_count || 0} month{fund.extraction_count !== 1 ? 's' : ''}
                   </span>
-                  <span className="bg-blue-50 text-blue-600 border border-blue-100 rounded-full px-2 py-0.5 font-medium">
+                  <span className="bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-full px-2 py-0.5 font-medium">
                     {fmtMonth(fund.last_month)}
                   </span>
                 </div>

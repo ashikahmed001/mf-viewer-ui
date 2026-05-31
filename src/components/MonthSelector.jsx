@@ -14,7 +14,7 @@ export default function MonthSelector({ extractions, value, onChange, label = 'S
         onChange={e => onChange(e.target.value)}
         className="w-full appearance-none bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 pr-10
                    text-slate-800 dark:text-slate-200 font-medium shadow-sm
-                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                   focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                    cursor-pointer"
       >
         <option value="">{label}</option>

@@ -51,7 +51,7 @@ function MonthRangeSlider({ extractions, month1, month2, onMonth1Change, onMonth
             style={{ left: `${pct}%` }}
           >
             <span className={`inline-block text-[11px] font-semibold px-2 py-0.5 rounded-md whitespace-nowrap
-              ${color === 'blue' ? 'bg-blue-600 text-white' : 'bg-violet-600 text-white'}`}>
+              ${color === 'blue' ? 'bg-indigo-600 text-white' : 'bg-violet-600 text-white'}`}>
               {fmtMonth(ext?.report_month)}
             </span>
           </div>
@@ -64,7 +64,7 @@ function MonthRangeSlider({ extractions, month1, month2, onMonth1Change, onMonth
         <div className="absolute w-full h-1.5 bg-slate-200 rounded-full" />
         {/* Filled range */}
         <div
-          className="absolute h-1.5 bg-gradient-to-r from-blue-500 to-violet-500 rounded-full pointer-events-none"
+          className="absolute h-1.5 bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full pointer-events-none"
           style={{ left: `${pct1}%`, width: `${pct2 - pct1}%` }}
         />
         {/* Lower thumb input */}
@@ -200,7 +200,7 @@ function ExtractionCalendar({ extractions, month1, month2, onMonth1Change, onMon
 
               let cellCls, textCls;
               if (isSel1) {
-                cellCls = 'bg-blue-600 border-blue-600 shadow-sm';
+                cellCls = 'bg-indigo-600 border-indigo-600 shadow-sm';
                 textCls = 'text-white font-bold';
               } else if (isSel2) {
                 cellCls = 'bg-violet-600 border-violet-600 shadow-sm';
@@ -212,7 +212,7 @@ function ExtractionCalendar({ extractions, month1, month2, onMonth1Change, onMon
                 cellCls = 'bg-slate-50 border-slate-200';
                 textCls = 'text-slate-300';
               } else if (hasData) {
-                cellCls = 'bg-white border-slate-200 hover:bg-blue-50 hover:border-blue-300 cursor-pointer';
+                cellCls = 'bg-white border-slate-200 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer';
                 textCls = 'text-slate-700';
               } else {
                 cellCls = 'bg-transparent border-transparent';
@@ -244,7 +244,7 @@ function ExtractionCalendar({ extractions, month1, month2, onMonth1Change, onMon
 
       {/* Legend */}
       <div className="flex items-center gap-4 pt-2 text-xs text-slate-400 ml-10">
-        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-blue-600 inline-block" />Earlier</span>
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-indigo-600 inline-block" />Earlier</span>
         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-violet-600 inline-block" />Later</span>
         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-slate-100 border border-slate-300 inline-block" />In range</span>
         <span className="flex items-center gap-1.5 ml-auto">Number = holdings count</span>
@@ -276,7 +276,7 @@ function TransitionCard({ transition, scale, defaultOpen }) {
       >
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 font-semibold text-slate-800 text-sm">
-            <span className="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold">
+            <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold">
               {fmtMonth(transition.fromMonth)}
             </span>
             <span className="text-slate-400">→</span>
@@ -298,7 +298,7 @@ function TransitionCard({ transition, scale, defaultOpen }) {
               </span>
             )}
             {transition.weightChanges.length > 0 && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
                 {transition.weightChanges.length} changed
               </span>
             )}
@@ -363,11 +363,11 @@ function TransitionCard({ transition, scale, defaultOpen }) {
 
             {/* Weight changes */}
             <div>
-              <div className="px-4 py-2 bg-blue-50 border-b border-blue-100">
-                <span className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">
+              <div className="px-4 py-2 bg-indigo-50 border-b border-indigo-100">
+                <span className="text-xs font-semibold text-indigo-700 flex items-center gap-1.5">
                   <Minus className="w-3.5 h-3.5" />
                   Weight Changes
-                  <span className="ml-auto bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-bold">{transition.weightChanges.length}</span>
+                  <span className="ml-auto bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full font-bold">{transition.weightChanges.length}</span>
                 </span>
               </div>
               <div className="divide-y divide-slate-50 max-h-60 overflow-y-auto">
@@ -480,7 +480,7 @@ function MultiMonthTimeline({ data, scale }) {
         <div className="flex items-center gap-2 ml-auto flex-wrap">
           {totalNew     > 0 && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">+{totalNew} total entries</span>}
           {totalExited  > 0 && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">−{totalExited} total exits</span>}
-          {totalChanged > 0 && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">{totalChanged} weight changes</span>}
+          {totalChanged > 0 && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">{totalChanged} weight changes</span>}
           {totalDrifted > 0 && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">{totalDrifted} NAV drifts</span>}
         </div>
       </div>
@@ -608,7 +608,7 @@ export default function Compare() {
 
       <div className="mb-6">
         <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-          <GitCompare className="w-5 h-5 text-blue-600" />
+          <GitCompare className="w-5 h-5 text-indigo-600" />
           Month Comparison
         </h1>
         {fund && <p className="text-slate-500 text-sm mt-0.5">{fund.name}</p>}
@@ -657,8 +657,8 @@ export default function Compare() {
         <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 text-sm flex-wrap">
             {month1 ? (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg font-medium">
-                <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" />
+              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-lg font-medium">
+                <span className="w-2 h-2 rounded-full bg-indigo-600 inline-block" />
                 {extractions.find(e => String(e.id) === month1) && fmtMonth(extractions.find(e => String(e.id) === month1).report_month)}
               </span>
             ) : (
@@ -686,7 +686,7 @@ export default function Compare() {
               disabled:opacity-40 disabled:cursor-not-allowed
               ${isMultiMonth
                 ? 'bg-violet-600 hover:bg-violet-700'
-                : 'bg-blue-600 hover:bg-blue-700'
+                : 'bg-indigo-600 hover:bg-indigo-700'
               }`}
           >
             {loading
@@ -808,7 +808,7 @@ function CompareColumn({ title, subtitle, count, color, icon, children, empty })
   const colorMap = {
     green: { header: 'bg-green-50 border-green-200',   badge: 'bg-green-100 text-green-700',   title: 'text-green-800' },
     red:   { header: 'bg-red-50 border-red-200',       badge: 'bg-red-100 text-red-700',       title: 'text-red-800' },
-    blue:  { header: 'bg-blue-50 border-blue-200',     badge: 'bg-blue-100 text-blue-700',     title: 'text-blue-800' },
+    blue:  { header: 'bg-indigo-50 border-indigo-200',     badge: 'bg-indigo-100 text-indigo-700',     title: 'text-indigo-800' },
     amber: { header: 'bg-amber-50 border-amber-200',   badge: 'bg-amber-100 text-amber-700',   title: 'text-amber-800' },
   };
   const c = colorMap[color];
