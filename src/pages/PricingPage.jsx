@@ -55,7 +55,7 @@ export default function PricingPage() {
       const options = {
         key:             checkout.razorpay_key,
         subscription_id: checkout.subscription_id,
-        name:            'MF Portfolio Viewer',
+        name:            'FundSight',
         description:     `Pro – ${cycle === 'annual' ? 'Annual' : 'Monthly'} plan`,
         handler: async (response) => {
           try {

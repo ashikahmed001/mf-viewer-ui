@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { TrendingUp, Home, Layers, Flame, Newspaper, Settings, Zap, Sun, Moon, Clock, X } from 'lucide-react';
+import { Home, Layers, Flame, Newspaper, Settings, Zap, Sun, Moon, Clock, X } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
 import { useState, useRef, useEffect } from 'react';
 import { useSubscription } from '../context/SubscriptionContext.jsx';
@@ -112,6 +112,32 @@ function PreferencesPanel({ onClose }) {
   );
 }
 
+// ─── FundSight logo ───────────────────────────────────────────────────────────
+
+function FundSightLogo() {
+  return (
+    <span className="flex items-center gap-2.5">
+      {/* Icon badge */}
+      <svg width="32" height="32" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="48" height="48" rx="11" fill="#4f46e5"/>
+        <line x1="11" y1="7"  x2="11" y2="34" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.5"/>
+        <line x1="24" y1="9"  x2="24" y2="34" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.65"/>
+        <line x1="37" y1="5"  x2="37" y2="34" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.85"/>
+        <rect x="7.5"  y="12" width="7" height="16" rx="2" fill="white" opacity="0.55"/>
+        <rect x="20.5" y="15" width="7" height="13" rx="2" fill="white" opacity="0.7"/>
+        <rect x="33.5" y="9"  width="7" height="18" rx="2" fill="white"/>
+        <circle cx="37" cy="36" r="9" fill="none" stroke="white" strokeWidth="2.2"/>
+        <circle cx="37" cy="36" r="9" fill="white" opacity="0.08"/>
+        <line x1="43.5" y1="42.5" x2="47" y2="46" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+      </svg>
+      {/* Wordmark */}
+      <span className="text-lg font-bold tracking-tight text-white">
+        Fund<span className="text-violet-300">Sight</span>
+      </span>
+    </span>
+  );
+}
+
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
 export default function Layout({ children }) {
@@ -140,9 +166,8 @@ export default function Layout({ children }) {
       <header className="bg-slate-900 text-white shadow-lg no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-2 font-bold text-lg tracking-tight hover:text-blue-300 transition-colors">
-              <TrendingUp className="w-6 h-6 text-blue-400" />
-              <span>MF Portfolio Viewer</span>
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <FundSightLogo />
             </Link>
             <nav className="flex items-center gap-4 text-sm font-medium">
               <NavLink to="/"         icon={<Newspaper className="w-4 h-4" />} label="Feed"     active={location.pathname === '/'} />
@@ -187,7 +212,7 @@ export default function Layout({ children }) {
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 text-xs text-center py-4 no-print">
-        MF Portfolio Viewer — read-only analytics dashboard
+        FundSight — read-only mutual fund analytics
       </footer>
     </div>
   );

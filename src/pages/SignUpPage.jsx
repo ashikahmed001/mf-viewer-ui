@@ -7,7 +7,7 @@ export default function SignUpPage() {
       {/* Brand */}
       <div className="flex items-center gap-3 text-white">
         <TrendingUp className="w-8 h-8 text-blue-400" />
-        <span className="text-2xl font-bold tracking-tight">MF Portfolio Viewer</span>
+        <span className="text-2xl font-bold tracking-tight">FundSight</span>
       </div>
 
       <p className="text-slate-400 text-sm -mt-4">
