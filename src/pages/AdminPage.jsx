@@ -11,7 +11,7 @@ import {
   adminBulkDeleteFunds, adminBulkDeleteExtractions,
   adminGetFundGaps,
   adminGetCacheStats, adminClearCache, adminSetCacheEnabled,
-  getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes,
+  getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping,
 } from '../api/client.js';
 import api from '../api/client.js';
 import { AlertTriangle, CheckCircle, RefreshCw, ChevronDown, ChevronRight, Settings, X, Search, Activity, TrendingUp, Lock, Unlock } from 'lucide-react';
@@ -1472,6 +1472,17 @@ function NavTab() {
     }
   }
 
+  async function removeMapping(fundId, fundName) {
+    if (!window.confirm(`Remove NAV mapping for "${fundName}"? The NAV history data will be kept.`)) return;
+    try {
+      await removeNavMapping(fundId);
+      show('Mapping removed');
+      await load();
+    } catch (e) {
+      show(e.response?.data?.error || e.message, false);
+    }
+  }
+
   const filtered = mappings.filter(m =>
     !search || m.name.toLowerCase().includes(search.toLowerCase()) ||
     (m.scheme_name || '').toLowerCase().includes(search.toLowerCase())
@@ -1626,14 +1637,22 @@ function NavTab() {
                               {m.scheme_code ? 'Edit' : 'Map'}
                             </button>
                             {m.scheme_code && (
-                              <button
-                                onClick={() => syncFund(m.id)}
-                                disabled={syncingId === m.id}
-                                className="flex items-center gap-1 text-xs px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg transition-colors font-medium disabled:opacity-50"
-                              >
-                                {syncingId === m.id ? <Spinner /> : <RefreshCw className="w-3 h-3" />}
-                                Sync
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => syncFund(m.id)}
+                                  disabled={syncingId === m.id}
+                                  className="flex items-center gap-1 text-xs px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg transition-colors font-medium disabled:opacity-50"
+                                >
+                                  {syncingId === m.id ? <Spinner /> : <RefreshCw className="w-3 h-3" />}
+                                  Sync
+                                </button>
+                                <button
+                                  onClick={() => removeMapping(m.id, m.name)}
+                                  className="text-xs px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg transition-colors font-medium"
+                                >
+                                  Remove
+                                </button>
+                              </>
                             )}
                           </>
                         )}
