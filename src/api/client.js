@@ -14,6 +14,17 @@ export function setupAuthInterceptor(getToken) {
   _getToken = getToken;
 }
 
+// Exposed so raw fetch() calls (e.g. SSE streams) can attach the same token
+export async function getAuthHeader() {
+  if (!_getToken) return {};
+  try {
+    const token = await _getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
+}
+
 // ─── Request interceptor ─────────────────────────────────────────────────────
 api.interceptors.request.use(async (config) => {
   config._t0 = performance.now();
@@ -198,14 +209,14 @@ export const uploadSingleFile = async (file) => {
 export const uploadBatchStream = (files, { onStart, onProgress, onResult, onDone, onError } = {}) => {
   const form = new FormData();
   for (const f of files) form.append('files', f);
-  const token = api.defaults.headers.common?.Authorization;
   let closed = false;
   const abort = new AbortController();
   (async () => {
     try {
+      const authHeader = await getAuthHeader();
       const res = await fetch(
         (api.defaults.baseURL || '') + '/admin/upload/batch',
-        { method: 'POST', body: form, signal: abort.signal, headers: token ? { Authorization: token } : {} }
+        { method: 'POST', body: form, signal: abort.signal, headers: authHeader }
       );
       if (!res.ok) { onError?.({ error: `Server ${res.status}` }); return; }
       const reader  = res.body.getReader();
