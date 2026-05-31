@@ -41,9 +41,9 @@ export default function HoldingsTable({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 p-4 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row gap-3 p-4 border-b border-slate-100 dark:border-slate-700">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -51,7 +51,7 @@ export default function HoldingsTable({
             placeholder="Search by stock name or ISIN…"
             value={search || ''}
             onChange={e => onSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm
+            className="w-full pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500
                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           {search && (
@@ -65,7 +65,7 @@ export default function HoldingsTable({
           <select
             value={industry || ''}
             onChange={e => onIndustry(e.target.value)}
-            className="pl-9 pr-8 py-2 border border-slate-200 rounded-xl text-sm appearance-none
+            className="pl-9 pr-8 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-sm appearance-none bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200
                        focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[180px]"
           >
             <option value="">All Industries</option>
@@ -74,7 +74,7 @@ export default function HoldingsTable({
             ))}
           </select>
         </div>
-        <div className="text-sm text-slate-500 self-center whitespace-nowrap">
+        <div className="text-sm text-slate-500 dark:text-slate-400 self-center whitespace-nowrap">
           {holdings.length} holding{holdings.length !== 1 ? 's' : ''}
         </div>
       </div>
@@ -98,13 +98,13 @@ export default function HoldingsTable({
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
+              <tr className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
                 {COLUMNS.map(col => (
                   <th
                     key={col.key}
-                    className={`px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide
+                    className={`px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide
                                 ${col.align === 'right' ? 'text-right' : 'text-left'}
-                                ${col.sortable ? 'cursor-pointer hover:text-slate-700 select-none' : ''}`}
+                                ${col.sortable ? 'cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 select-none' : ''}`}
                     onClick={col.sortable ? () => handleSort(col.key) : undefined}
                   >
                     <span className="flex items-center gap-1 justify-start"
@@ -116,13 +116,13 @@ export default function HoldingsTable({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
               {holdings.map((h, idx) => (
-                <tr key={h.id || idx} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-slate-800 max-w-[220px] truncate" title={h.stock_name}>
+                <tr key={h.id || idx} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200 max-w-[220px] truncate" title={h.stock_name}>
                     {h.stock_name}
                   </td>
-                  <td className="px-4 py-3 text-slate-500 font-mono text-xs">{h.isin}</td>
+                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">{h.isin}</td>
                   <td className="px-4 py-3">
                     {h.industry ? (
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${industryBadgeClass(h.industry)}`}>
@@ -137,8 +137,8 @@ export default function HoldingsTable({
                       </span>
                     ) : <span className="text-slate-400">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-right text-slate-700 tabular-nums">{fmt(h.quantity, 0)}</td>
-                  <td className="px-4 py-3 text-right text-slate-700 tabular-nums">{fmt(h.market_value)}</td>
+                  <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300 tabular-nums">{fmt(h.quantity, 0)}</td>
+                  <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300 tabular-nums">{fmt(h.market_value)}</td>
                   <td className="px-4 py-3 text-right font-semibold tabular-nums">
                     {(() => {
                       const pct = (h.pct_nav || 0) * scale;

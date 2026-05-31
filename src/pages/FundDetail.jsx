@@ -125,7 +125,7 @@ export default function FundDetail() {
   return (
     <div>
       {/* Back */}
-      <Link to="/funds" className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 mb-6 transition-colors">
+      <Link to="/funds" className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> All Funds
       </Link>
 
@@ -135,7 +135,7 @@ export default function FundDetail() {
           {fund ? (
             <>
               <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">{fund.name}</h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">{fund.extraction_count} available month{fund.extraction_count !== 1 ? 's' : ''}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{fund.extraction_count} available month{fund.extraction_count !== 1 ? 's' : ''}</p>
             </>
           ) : (
             <div className="space-y-2">
@@ -148,14 +148,14 @@ export default function FundDetail() {
           <Link
             to={`/funds/${id}/compare`}
             className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600
-                       bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors shadow-sm"
+                       bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
           >
             <GitCompare className="w-4 h-4" /> Compare Months
           </Link>
           <button
             onClick={() => window.print()}
             className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600
-                       bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors shadow-sm"
+                       bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
           >
             <Printer className="w-4 h-4" /> Print
           </button>
@@ -165,7 +165,7 @@ export default function FundDetail() {
       {/* ── NAV History — fund-level, always shown ───────────────────────── */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-3">
-          <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">NAV History</h2>
+          <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">NAV History</h2>
           <span className="h-px flex-1 bg-slate-200" />
           {!canNav && <span className="text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Pro</span>}
         </div>
@@ -177,7 +177,7 @@ export default function FundDetail() {
 
       {/* ── Per-extraction data ───────────────────────────────────────────── */}
       <div className="flex items-center gap-2 mb-5">
-        <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Monthly Portfolio</h2>
+        <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Monthly Portfolio</h2>
         <span className="h-px flex-1 bg-slate-200" />
       </div>
 
@@ -190,7 +190,7 @@ export default function FundDetail() {
       {!loading && extractions.length === 0 && (
         <div className="text-center py-16 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
           <RefreshCw className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p className="font-medium text-slate-500 dark:text-slate-400 dark:text-slate-500">No data available</p>
+          <p className="font-medium text-slate-500 dark:text-slate-400">No data available</p>
           <p className="text-sm mt-1">No monthly extractions have been processed for this fund</p>
         </div>
       )}
@@ -230,7 +230,7 @@ export default function FundDetail() {
                 <button
                   onClick={exportCSV}
                   className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600
-                             bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors shadow-sm"
+                             bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
                 >
                   <FileDown className="w-4 h-4" /> Export CSV
                 </button>
@@ -325,7 +325,7 @@ function NavHistoryPanel({ navData }) {
   if (!navData.mapped || !navData.history?.length) {
     return (
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-10 text-center text-slate-400 dark:text-slate-500">
-        <p className="font-medium text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-1">No NAV data available</p>
+        <p className="font-medium text-slate-500 dark:text-slate-400 mb-1">No NAV data available</p>
         <p className="text-sm">This fund hasn't been mapped or synced yet. Go to Admin → NAV Mapping to set it up.</p>
       </div>
     );
@@ -439,7 +439,7 @@ function NavHistoryPanel({ navData }) {
                     range === r.key
                       ? 'bg-violet-600 text-white shadow-sm'
                       : hasData
-                      ? 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 hover:bg-white dark:bg-slate-800'
+                      ? 'text-slate-400 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-white dark:hover:bg-slate-600'
                       : 'text-slate-300 cursor-not-allowed'
                   }`}
                 >
@@ -500,7 +500,7 @@ function TabBtn({ active, onClick, children }) {
     <button
       onClick={onClick}
       className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-        active ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-sm' : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'
+        active ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
       }`}
     >
       {children}
@@ -520,7 +520,7 @@ function ChartCard({ title, children, className = '' }) {
 function SummaryCard({ label, value }) {
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
-      <div className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-1">{label}</div>
+      <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">{label}</div>
       <div className="font-bold text-slate-800 dark:text-slate-200 text-lg">{value}</div>
     </div>
   );

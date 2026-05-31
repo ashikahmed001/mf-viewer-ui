@@ -25,7 +25,7 @@ export default function ExtractionMetaBar({ extraction }) {
     <div className="space-y-3">
       {/* Low confidence warning */}
       {label === 'Low' && (
-        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+        <div className="flex items-start gap-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl p-4">
           <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold text-red-800">Low Confidence Extraction</p>
@@ -57,8 +57,8 @@ export default function ExtractionMetaBar({ extraction }) {
 
       {/* Notes (non-low) */}
       {label !== 'Low' && extraction.notes && (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 flex items-start gap-2">
-          <Info className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 flex items-start gap-2">
+          <Info className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0 mt-0.5" />
           <span>{extraction.notes}</span>
         </div>
       )}
@@ -68,12 +68,12 @@ export default function ExtractionMetaBar({ extraction }) {
 
 function MetaCard({ icon, label, value, truncate }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-3">
-      <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3">
+      <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
         {icon}
         {label}
       </div>
-      <div className={`font-semibold text-sm text-slate-800 ${truncate ? 'truncate' : ''}`} title={value}>
+      <div className={`font-semibold text-sm text-slate-800 dark:text-slate-200 ${truncate ? 'truncate' : ''}`} title={value}>
         {value || '—'}
       </div>
     </div>
