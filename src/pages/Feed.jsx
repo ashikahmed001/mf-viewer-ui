@@ -375,7 +375,15 @@ export default function Feed() {
         new_entries    = new_entries.filter(e => activeFundIds.has(e.fund_id));
         exits          = exits.filter(e => activeFundIds.has(e.fund_id));
         weight_changes = weight_changes.filter(e => activeFundIds.has(e.fund_id));
-        convergence    = convergence.filter(c => c.fund_ids?.some(id => activeFundIds.has(id)));
+        // Only keep convergence where ≥2 of YOUR selected funds moved together
+        convergence = convergence
+          .map(c => ({
+            ...c,
+            fund_ids:   c.fund_ids?.filter(id => activeFundIds.has(id)) ?? [],
+            fund_names: c.fund_names?.filter((_, i) => activeFundIds.has(c.fund_ids?.[i])) ?? [],
+          }))
+          .filter(c => c.fund_ids.length >= 2)
+          .map(c => ({ ...c, fund_count: c.fund_ids.length }));
       }
 
       // Signal filter
