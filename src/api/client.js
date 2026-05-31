@@ -160,8 +160,10 @@ export const adminDeleteExtraction    = (id)                         => api.dele
 export const adminBulkDeleteFunds     = (ids)                        => api.delete('/admin/funds/bulk', { data: { ids } }).then(r => r.data);
 export const adminBulkDeleteExtractions = (ids)                      => api.delete('/admin/extractions/bulk', { data: { ids } }).then(r => r.data);
 export const adminGetFundGaps      = ()                              => api.get('/admin/fund-gaps').then(r => r.data);
-export const adminGetCacheStats    = ()                              => api.get('/admin/cache').then(r => r.data);
-export const adminClearCache       = ()                              => api.delete('/admin/cache').then(r => r.data);
+export const adminGetCacheStats    = ()              => api.get('/admin/cache').then(r => r.data);
+export const adminClearCache       = ()              => api.delete('/admin/cache').then(r => r.data);
+export const adminGetCacheEnabled  = ()              => api.get('/admin/cache/enabled').then(r => r.data);
+export const adminSetCacheEnabled  = (enabled)       => api.patch('/admin/cache/enabled', { enabled }).then(r => r.data);
 
 // ─── BILLING ─────────────────────────────────────────────────────────────────
 export const togglePayments        = (enabled)       => api.patch('/features/payments', { enabled }).then(r => r.data);

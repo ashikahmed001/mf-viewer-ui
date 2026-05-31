@@ -9,7 +9,7 @@ import {
   adminGetFundExtractions, adminDeleteExtraction,
   adminBulkDeleteFunds, adminBulkDeleteExtractions,
   adminGetFundGaps,
-  adminGetCacheStats, adminClearCache,
+  adminGetCacheStats, adminClearCache, adminSetCacheEnabled,
   getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes,
 } from '../api/client.js';
 import api from '../api/client.js';
@@ -1875,11 +1875,19 @@ function FeatureFlagsTab() {
 }
 
 // ─── Tab: Cache ───────────────────────────────────────────────────────────────
+function fmtMs(ms) {
+  if (ms < 60_000)   return `${Math.round(ms / 1000)}s`;
+  if (ms < 3600_000) return `${Math.round(ms / 60_000)}m`;
+  return `${(ms / 3600_000).toFixed(1)}h`;
+}
+
 function CacheTab() {
-  const [stats, setStats]     = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [stats,    setStats]    = useState(null);
+  const [loading,  setLoading]  = useState(false);
   const [clearing, setClearing] = useState(false);
-  const { toast, show, hide } = useToast();
+  const [toggling, setToggling] = useState(false);
+  const [showKeys, setShowKeys] = useState(false);
+  const { toast, show, hide }   = useToast();
 
   async function loadStats() {
     setLoading(true);
@@ -1893,13 +1901,27 @@ function CacheTab() {
     try {
       await adminClearCache();
       show('Cache cleared — all entries invalidated');
-      setStats({ total: 0, alive: 0, expired: 0 });
+      setStats(s => ({ ...s, total: 0, alive: 0, expired: 0, keys: [] }));
     } catch (e) {
       show(e.response?.data?.error || e.message, false);
     } finally { setClearing(false); }
   }
 
+  async function toggleCache() {
+    if (!stats) return;
+    setToggling(true);
+    try {
+      const { enabled } = await adminSetCacheEnabled(!stats.enabled);
+      setStats(s => ({ ...s, enabled, ...(enabled ? {} : { total: 0, alive: 0, expired: 0, keys: [] }) }));
+      show(enabled ? 'Cache enabled' : 'Cache disabled — all entries cleared');
+    } catch (e) {
+      show(e.response?.data?.error || e.message, false);
+    } finally { setToggling(false); }
+  }
+
   useEffect(() => { loadStats(); }, []);
+
+  const keys = stats?.keys ?? [];
 
   return (
     <div className="space-y-4">
@@ -1910,8 +1932,7 @@ function CacheTab() {
           <div>
             <h3 className="text-sm font-semibold text-slate-900">In-memory response cache</h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Heavy analytics routes (cross-fund, overlap, rising conviction, etc.) are cached for 1 hour.
-              Cache resets automatically when funds or extractions are deleted, or on server restart.
+              Heavy analytics routes are cached for 24 hours. Cache resets on writes or server restart.
             </p>
           </div>
           <button onClick={loadStats} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white transition-colors">
@@ -1923,12 +1944,32 @@ function CacheTab() {
           <div className="flex justify-center py-8"><Spinner /></div>
         ) : stats ? (
           <div className="space-y-4">
+
+            {/* Enable / disable toggle */}
+            <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 bg-slate-50">
+              <div>
+                <p className="text-sm font-medium text-slate-800">Cache enabled</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  When disabled, every request hits the database directly. Disabling also clears all entries.
+                </p>
+              </div>
+              <button
+                onClick={toggleCache}
+                disabled={toggling}
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none
+                  ${stats.enabled ? 'bg-emerald-500' : 'bg-slate-300'} ${toggling ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              >
+                <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform
+                  ${stats.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+            </div>
+
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Total entries', value: stats.total, color: 'text-slate-700', bg: 'bg-slate-50 border-slate-200' },
-                { label: 'Alive (fresh)', value: stats.alive, color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
-                { label: 'Expired', value: stats.expired, color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200' },
+                { label: 'Total entries', value: stats.total,   color: 'text-slate-700',  bg: 'bg-slate-50 border-slate-200' },
+                { label: 'Alive (fresh)', value: stats.alive,   color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
+                { label: 'Expired',       value: stats.expired, color: 'text-amber-700',  bg: 'bg-amber-50 border-amber-200' },
               ].map(({ label, value, color, bg }) => (
                 <div key={label} className={`border rounded-xl px-4 py-3 ${bg}`}>
                   <p className={`text-2xl font-bold ${color}`}>{value}</p>
@@ -1937,11 +1978,14 @@ function CacheTab() {
               ))}
             </div>
 
-            {/* Clear button */}
+            {/* Clear + show keys */}
             <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-              <p className="text-xs text-slate-400">
-                Clearing forces the next request to re-query the database for all cached routes.
-              </p>
+              <button
+                onClick={() => setShowKeys(v => !v)}
+                className="text-xs text-blue-600 hover:underline"
+              >
+                {showKeys ? 'Hide' : 'Show'} live keys ({keys.length})
+              </button>
               <button
                 onClick={clearCache}
                 disabled={clearing || stats.alive === 0}
@@ -1951,6 +1995,25 @@ function CacheTab() {
                 {stats.alive === 0 ? 'Cache is empty' : `Clear ${stats.alive} live entries`}
               </button>
             </div>
+
+            {/* Live key list */}
+            {showKeys && keys.length > 0 && (
+              <div className="rounded-xl border border-slate-200 overflow-hidden">
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+                  {keys.map(({ key, expiresIn }) => (
+                    <div key={key} className="flex items-center justify-between px-4 py-2 hover:bg-slate-50">
+                      <p className="font-mono text-xs text-slate-700 truncate mr-4">{key}</p>
+                      <span className="shrink-0 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                        {fmtMs(expiresIn)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {showKeys && keys.length === 0 && (
+              <p className="text-xs text-slate-400 text-center py-2">No live keys in cache.</p>
+            )}
           </div>
         ) : null}
       </SectionCard>
@@ -1959,32 +2022,32 @@ function CacheTab() {
         <h3 className="text-sm font-semibold text-slate-900 mb-3">What gets cached</h3>
         <div className="divide-y divide-slate-100 text-sm">
           {[
-            { route: '/api/holdings/cross-fund',          ttl: '24 hours', desc: 'Cross-fund stock analysis' },
-            { route: '/api/holdings/overlap-matrix',      ttl: '24 hours', desc: 'Pairwise fund overlap' },
-            { route: '/api/holdings/overlap-trend',       ttl: '24 hours', desc: 'Overlap trend per fund pair' },
-            { route: '/api/holdings/rising-conviction',   ttl: '24 hours', desc: 'Rising / losing conviction' },
-            { route: '/api/holdings/hidden-gems',         ttl: '24 hours', desc: 'Hidden gems' },
-            { route: '/api/holdings/entry-exit/:fundId',  ttl: '24 hours', desc: 'Entry & exit timeline' },
-            { route: '/api/holdings/sector-drift/:id',    ttl: '24 hours', desc: 'Sector drift per fund' },
-            { route: '/api/holdings/stock-tracker/:isin', ttl: '24 hours', desc: 'Stock tracker' },
-            { route: '/api/holdings/churn-rates',         ttl: '24 hours', desc: 'Fund churn rates' },
-            { route: '/api/holdings/sector-rotation',     ttl: '24 hours', desc: 'Sector rotation calendar' },
-            { route: '/api/holdings/discovery-chain',     ttl: '24 hours', desc: 'Stock discovery chain' },
-            { route: '/api/holdings/concentration',       ttl: '24 hours', desc: 'Concentration scores' },
-            { route: '/api/extractions/:id/holdings/summary', ttl: '24 hours', desc: 'Holdings summary (immutable)' },
-            { route: '/api/extractions/trend/:id/:isin',  ttl: '24 hours', desc: 'Stock % NAV trend' },
-            { route: '/api/feed',                          ttl: '24 hours', desc: 'Activity feed' },
-            { route: '/api/funds',                         ttl: '24 hours',    desc: 'Fund list' },
-            { route: '/api/funds/:id',                     ttl: '24 hours',    desc: 'Fund detail' },
-            { route: '/api/funds/:id/extractions',         ttl: '24 hours',    desc: 'Extractions list per fund' },
-            { route: '/api/funds/:id/compare',             ttl: '24 hours', desc: 'Month comparison (immutable data)' },
-          ].map(({ route, ttl, desc }) => (
+            { route: '/api/holdings/cross-fund',              desc: 'Cross-fund stock analysis' },
+            { route: '/api/holdings/overlap-matrix',          desc: 'Pairwise fund overlap' },
+            { route: '/api/holdings/overlap-trend',           desc: 'Overlap trend per fund pair' },
+            { route: '/api/holdings/rising-conviction',       desc: 'Rising / losing conviction' },
+            { route: '/api/holdings/hidden-gems',             desc: 'Hidden gems' },
+            { route: '/api/holdings/entry-exit/:fundId',      desc: 'Entry & exit timeline' },
+            { route: '/api/holdings/sector-drift/:id',        desc: 'Sector drift per fund' },
+            { route: '/api/holdings/stock-tracker/:isin',     desc: 'Stock tracker' },
+            { route: '/api/holdings/churn-rates',             desc: 'Fund churn rates' },
+            { route: '/api/holdings/sector-rotation',         desc: 'Sector rotation calendar' },
+            { route: '/api/holdings/discovery-chain',         desc: 'Stock discovery chain' },
+            { route: '/api/holdings/concentration',           desc: 'Concentration scores' },
+            { route: '/api/extractions/:id/holdings/summary', desc: 'Holdings summary (immutable)' },
+            { route: '/api/extractions/trend/:id/:isin',      desc: 'Stock % NAV trend' },
+            { route: '/api/feed',                             desc: 'Activity feed' },
+            { route: '/api/funds',                            desc: 'Fund list' },
+            { route: '/api/funds/:id',                        desc: 'Fund detail' },
+            { route: '/api/funds/:id/extractions',            desc: 'Extractions list per fund' },
+            { route: '/api/funds/:id/compare',                desc: 'Month comparison (immutable data)' },
+          ].map(({ route, desc }) => (
             <div key={route} className="flex items-center justify-between py-2.5">
               <div>
                 <p className="font-mono text-xs text-blue-700">{route}</p>
                 <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
               </div>
-              <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full shrink-0 ml-4">{ttl}</span>
+              <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full shrink-0 ml-4">24 h</span>
             </div>
           ))}
         </div>
