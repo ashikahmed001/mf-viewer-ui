@@ -2059,7 +2059,7 @@ function CacheTab() {
 
 // ─── Main AdminPage ───────────────────────────────────────────────────────────
 const TABS = [
-  { id: 'upload',      label: '⬆ Upload' },
+  { id: 'upload',      label: 'Upload' },
   { id: 'isin',        label: 'ISIN Remap' },
   { id: 'names',       label: 'Name Normalisation' },
   { id: 'scanner',     label: 'Duplicate Scanner' },
