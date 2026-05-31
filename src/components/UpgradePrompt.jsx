@@ -19,40 +19,31 @@ function RocketDoodle() {
       style={{ overflow: 'visible' }}
     >
       <style>{`
-        @media (prefers-color-scheme: light) {
-          .up-orbit  { stroke: #e0e7ff; }
-          .up-star1  { fill: #a5b4fc; }
-          .up-star2  { fill: #fbbf24; }
-          .up-rb     { fill: #e0e7ff; stroke: #818cf8; }
-          .up-fin    { fill: #c7d2fe; stroke: #818cf8; }
-          .up-win    { fill: #818cf8; }
-          .up-winc   { fill: #e0e7ff; }
-          .up-fl-o   { fill: #f97316; }
-          .up-fl-i   { fill: #fbbf24; }
-          .up-badge  { fill: #4f46e5; }
-          .up-lk-bg  { fill: #eef2ff; stroke: #e0e7ff; }
-          .up-lk     { stroke: #818cf8; }
-          .up-lk-dot { fill: #818cf8; }
-          .up-spark  { stroke: #fbbf24; }
-          .up-dot    { fill: #c7d2fe; }
-        }
-        @media (prefers-color-scheme: dark) {
-          .up-orbit  { stroke: #1e1b4b; }
-          .up-star1  { fill: #818cf8; }
-          .up-star2  { fill: #fbbf24; }
-          .up-rb     { fill: #1e1b4b; stroke: #818cf8; }
-          .up-fin    { fill: #1e1b4b; stroke: #818cf8; }
-          .up-win    { fill: #4338ca; }
-          .up-winc   { fill: #1e1b4b; }
-          .up-fl-o   { fill: #f97316; }
-          .up-fl-i   { fill: #fbbf24; }
-          .up-badge  { fill: #4f46e5; }
-          .up-lk-bg  { fill: #1e1b4b; stroke: #312e81; }
-          .up-lk     { stroke: #818cf8; }
-          .up-lk-dot { fill: #818cf8; }
-          .up-spark  { stroke: #fbbf24; }
-          .up-dot    { fill: #312e81; }
-        }
+        /* Light (default) */
+        .up-orbit  { stroke: #e0e7ff; }
+        .up-star1  { fill: #a5b4fc; }
+        .up-star2  { fill: #fbbf24; }
+        .up-rb     { fill: #e0e7ff; stroke: #818cf8; }
+        .up-fin    { fill: #c7d2fe; stroke: #818cf8; }
+        .up-win    { fill: #818cf8; }
+        .up-winc   { fill: #e0e7ff; }
+        .up-fl-o   { fill: #f97316; }
+        .up-fl-i   { fill: #fbbf24; }
+        .up-badge  { fill: #4f46e5; }
+        .up-lk-bg  { fill: #eef2ff; stroke: #e0e7ff; }
+        .up-lk     { stroke: #818cf8; }
+        .up-lk-dot { fill: #818cf8; }
+        .up-spark  { stroke: #fbbf24; }
+        .up-dot    { fill: #c7d2fe; }
+        /* Dark — triggered by .dark class on <html> */
+        .dark .up-orbit  { stroke: #1e1b4b; }
+        .dark .up-star1  { fill: #818cf8; }
+        .dark .up-rb     { fill: #1e1b4b; stroke: #818cf8; }
+        .dark .up-fin    { fill: #1e1b4b; stroke: #818cf8; }
+        .dark .up-win    { fill: #4338ca; }
+        .dark .up-winc   { fill: #1e1b4b; }
+        .dark .up-lk-bg  { fill: #1e1b4b; stroke: #312e81; }
+        .dark .up-dot    { fill: #312e81; }
         .up-sk { fill: none; stroke-linecap: round; stroke-linejoin: round; }
       `}</style>
 

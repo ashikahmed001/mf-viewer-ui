@@ -87,14 +87,14 @@ export default function PricingPage() {
     <div className="max-w-4xl mx-auto px-4 py-12">
       {/* Header */}
       <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Simple, transparent pricing</h1>
-        <p className="text-slate-500 text-lg">Unlock the full power of your portfolio analytics</p>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Simple, transparent pricing</h1>
+        <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-lg">Unlock the full power of your portfolio analytics</p>
       </div>
 
       {/* Billing toggle */}
       <div className="flex flex-col items-center gap-3 mb-10">
         <div className="flex items-center gap-4">
-          <span className={`text-sm font-medium ${cycle === 'monthly' ? 'text-slate-900' : 'text-slate-400'}`}>Monthly</span>
+          <span className={`text-sm font-medium ${cycle === 'monthly' ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'}`}>Monthly</span>
           {/* Track: 48px wide, 26px tall. Thumb: 20px. Gap: 3px each side. Travel: 48-20-6=22px */}
           <button
             onClick={() => setCycle(c => c === 'monthly' ? 'annual' : 'monthly')}
@@ -116,7 +116,7 @@ export default function PricingPage() {
               }}
             />
           </button>
-          <span className={`text-sm font-medium ${cycle === 'annual' ? 'text-slate-900' : 'text-slate-400'}`}>Annual</span>
+          <span className={`text-sm font-medium ${cycle === 'annual' ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'}`}>Annual</span>
         </div>
         <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
           Save 44% with annual
@@ -126,21 +126,21 @@ export default function PricingPage() {
       {/* Cards */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Free */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-7 shadow-sm">
           <div className="mb-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-1">Free</h2>
-            <div className="text-3xl font-bold text-slate-900">₹0</div>
-            <p className="text-slate-400 text-sm mt-1">Forever free</p>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">Free</h2>
+            <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">₹0</div>
+            <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Forever free</p>
           </div>
           <ul className="space-y-3 mb-8">
             {FREE_FEATURES.map(f => (
-              <li key={f} className="flex items-center gap-2.5 text-sm text-slate-600">
-                <Check className="w-4 h-4 text-slate-400 shrink-0" />
+              <li key={f} className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-400 dark:text-slate-500">
+                <Check className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
                 {f}
               </li>
             ))}
           </ul>
-          <div className="text-center text-sm text-slate-400 font-medium py-2 border border-slate-200 rounded-xl">
+          <div className="text-center text-sm text-slate-400 dark:text-slate-500 font-medium py-2 border border-slate-200 dark:border-slate-700 rounded-xl">
             {plan === 'free' ? 'Your current plan' : 'Free tier'}
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function PricingPage() {
             <button
               onClick={handleUpgrade}
               disabled={loading}
-              className="w-full py-3 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors disabled:opacity-60 text-sm"
+              className="w-full py-3 bg-white dark:bg-slate-800 text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors disabled:opacity-60 text-sm"
             >
               {loading ? 'Opening checkout…' : `Upgrade to Pro – ${PRICES[cycle].label}`}
             </button>
@@ -195,7 +195,7 @@ export default function PricingPage() {
       </div>
 
       {/* Footer note */}
-      <p className="text-center text-slate-400 text-xs mt-8">
+      <p className="text-center text-slate-400 dark:text-slate-500 text-xs mt-8">
         Payments are processed securely by Razorpay. Cancel anytime — no questions asked.
       </p>
     </div>

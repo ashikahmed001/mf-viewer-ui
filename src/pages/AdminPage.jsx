@@ -48,7 +48,7 @@ function Spinner() {
 
 function SectionCard({ children, className = '' }) {
   return (
-    <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm ${className}`}>
+    <div className={`bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm ${className}`}>
       {children}
     </div>
   );
@@ -111,10 +111,10 @@ function FundSelect({ funds, value, onChange, placeholder = 'Search fund…', ex
       {/* Trigger */}
       <div
         onClick={handleInputClick}
-        className={`flex items-center gap-2 bg-white border rounded-lg px-3 py-2 cursor-text transition-colors
-          ${open ? 'border-blue-400 ring-1 ring-blue-200' : 'border-slate-200 hover:border-slate-300'}`}
+        className={`flex items-center gap-2 bg-white dark:bg-slate-800 border rounded-lg px-3 py-2 cursor-text transition-colors
+          ${open ? 'border-blue-400 ring-1 ring-blue-200' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'}`}
       >
-        <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+        <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
         {open ? (
           <input
             ref={inputRef}
@@ -122,31 +122,31 @@ function FundSelect({ funds, value, onChange, placeholder = 'Search fund…', ex
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={selected ? selected.name : placeholder}
-            className="flex-1 text-sm outline-none bg-transparent text-slate-900 placeholder-slate-400 min-w-0"
+            className="flex-1 text-sm outline-none bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 min-w-0"
           />
         ) : (
-          <span className={`flex-1 text-sm truncate ${selected ? 'text-slate-900' : 'text-slate-400'}`}>
+          <span className={`flex-1 text-sm truncate ${selected ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'}`}>
             {selected ? selected.name : placeholder}
           </span>
         )}
         {selected
-          ? <button onClick={clear} className="shrink-0 text-slate-400 hover:text-slate-600"><X className="w-3.5 h-3.5" /></button>
-          : <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          ? <button onClick={clear} className="shrink-0 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:text-slate-500"><X className="w-3.5 h-3.5" /></button>
+          : <ChevronDown className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
         }
       </div>
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute z-30 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg max-h-64 overflow-y-auto">
+        <div className="absolute z-30 mt-1 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg max-h-64 overflow-y-auto">
           {filtered.length === 0 ? (
-            <div className="px-4 py-3 text-sm text-slate-400">No funds match "{query}"</div>
+            <div className="px-4 py-3 text-sm text-slate-400 dark:text-slate-500">No funds match "{query}"</div>
           ) : (
             filtered.map(f => (
               <button
                 key={f.id}
                 onMouseDown={e => { e.preventDefault(); select(f); }}
-                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors
-                  ${String(f.id) === String(value) ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-800'}`}
+                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors
+                  ${String(f.id) === String(value) ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-800 dark:text-slate-200'}`}
               >
                 {f.name}
               </button>
@@ -193,10 +193,10 @@ function IsinRemapTab() {
     <div>
       {toast && <Toast {...toast} onClose={hide} />}
       <div className="flex items-center justify-between mb-4">
-        <p className="text-slate-500 text-sm">
+        <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm">
           Equity ISINs sharing the same company code (face-value splits). Expand a company and apply the old → new merge.
         </p>
-        <button onClick={load} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white transition-colors">
+        <button onClick={load} className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 transition-colors">
           <RefreshCw className="w-3 h-3" /> Refresh
         </button>
       </div>
@@ -204,7 +204,7 @@ function IsinRemapTab() {
       {loading ? (
         <div className="flex justify-center py-16"><Spinner /></div>
       ) : issues.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
+        <div className="text-center py-16 text-slate-400 dark:text-slate-500">
           <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
           No ISIN conflicts found
         </div>
@@ -216,34 +216,34 @@ function IsinRemapTab() {
               <SectionCard key={company_code}>
                 <button
                   onClick={() => setExpanded(e => ({ ...e, [company_code]: !open }))}
-                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 rounded-2xl transition-colors text-left"
+                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 rounded-2xl transition-colors text-left"
                 >
                   <div className="flex items-center gap-3">
                     {open
-                      ? <ChevronDown className="w-4 h-4 text-slate-400" />
-                      : <ChevronRight className="w-4 h-4 text-slate-400" />}
-                    <span className="font-mono text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{company_code}</span>
-                    <span className="font-semibold text-slate-900">{isins[0].stock_name}</span>
+                      ? <ChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                      : <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
+                    <span className="font-mono text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">{company_code}</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{isins[0].stock_name}</span>
                     <Badge color="amber">{isins.length} ISINs</Badge>
                   </div>
                 </button>
 
                 {open && (
-                  <div className="border-t border-slate-100">
+                  <div className="border-t border-slate-100 dark:border-slate-800">
                     {/* ISIN detail rows */}
-                    <div className="divide-y divide-slate-100">
+                    <div className="divide-y divide-slate-100 dark:divide-slate-700">
                       {isins.map(isin => (
                         <div key={isin.isin} className="px-5 py-3 flex items-center gap-4">
                           <span className="font-mono text-sm text-blue-600 w-36 shrink-0">{isin.isin}</span>
-                          <span className="text-slate-500 text-xs w-36 shrink-0">{fmtMonth(isin.first_month)} → {fmtMonth(isin.last_month)}</span>
-                          <span className="text-slate-400 text-xs w-20 shrink-0">{isin.row_count} rows</span>
-                          <span className="text-slate-700 text-sm flex-1">{isin.stock_name}</span>
+                          <span className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-xs w-36 shrink-0">{fmtMonth(isin.first_month)} → {fmtMonth(isin.last_month)}</span>
+                          <span className="text-slate-400 dark:text-slate-500 text-xs w-20 shrink-0">{isin.row_count} rows</span>
+                          <span className="text-slate-700 dark:text-slate-300 text-sm flex-1">{isin.stock_name}</span>
                         </div>
                       ))}
                     </div>
                     {/* Remap buttons */}
-                    <div className="px-5 py-3 bg-slate-50 rounded-b-2xl flex flex-wrap gap-2 items-center">
-                      <span className="text-xs text-slate-400 mr-1">Apply remap:</span>
+                    <div className="px-5 py-3 bg-slate-50 dark:bg-slate-900 rounded-b-2xl flex flex-wrap gap-2 items-center">
+                      <span className="text-xs text-slate-400 dark:text-slate-500 mr-1">Apply remap:</span>
                       {isins.flatMap((old_r, i) =>
                         isins.slice(i + 1).map(new_r => {
                           const key = `${old_r.isin}→${new_r.isin}`;
@@ -309,10 +309,10 @@ function NameNormTab() {
     <div>
       {toast && <Toast {...toast} onClose={hide} />}
       <div className="flex items-center justify-between mb-4">
-        <p className="text-slate-500 text-sm">
+        <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm">
           ISINs appearing under multiple name variants. Click "Use this name" to normalise all rows to that name.
         </p>
-        <button onClick={load} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white transition-colors">
+        <button onClick={load} className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 transition-colors">
           <RefreshCw className="w-3 h-3" /> Refresh
         </button>
       </div>
@@ -320,7 +320,7 @@ function NameNormTab() {
       {loading ? (
         <div className="flex justify-center py-16"><Spinner /></div>
       ) : issues.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
+        <div className="text-center py-16 text-slate-400 dark:text-slate-500">
           <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
           No name conflicts found
         </div>
@@ -333,25 +333,25 @@ function NameNormTab() {
               <SectionCard key={isin}>
                 <button
                   onClick={() => setExpanded(e => ({ ...e, [isin]: !open }))}
-                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 rounded-2xl transition-colors text-left"
+                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 rounded-2xl transition-colors text-left"
                 >
                   <div className="flex items-center gap-3">
                     {open
-                      ? <ChevronDown className="w-4 h-4 text-slate-400" />
-                      : <ChevronRight className="w-4 h-4 text-slate-400" />}
-                    <span className="font-mono text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{isin}</span>
-                    <span className="font-semibold text-slate-900">{suggested}</span>
+                      ? <ChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                      : <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
+                    <span className="font-mono text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">{isin}</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{suggested}</span>
                     <Badge color="amber">{names.length} variants</Badge>
                   </div>
                 </button>
 
                 {open && (
-                  <div className="border-t border-slate-100 divide-y divide-slate-100">
+                  <div className="border-t border-slate-100 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
                     {names.map(n => (
                       <div key={n.stock_name} className="px-5 py-3 flex items-center gap-4">
-                        <span className="text-slate-800 text-sm flex-1">{n.stock_name}</span>
-                        <span className="text-slate-400 text-xs w-36 shrink-0 text-right">{fmtMonth(n.first_month)} → {fmtMonth(n.last_month)}</span>
-                        <span className="text-slate-400 text-xs w-16 shrink-0 text-right">{n.row_count} rows</span>
+                        <span className="text-slate-800 dark:text-slate-200 text-sm flex-1">{n.stock_name}</span>
+                        <span className="text-slate-400 dark:text-slate-500 text-xs w-36 shrink-0 text-right">{fmtMonth(n.first_month)} → {fmtMonth(n.last_month)}</span>
+                        <span className="text-slate-400 dark:text-slate-500 text-xs w-16 shrink-0 text-right">{n.row_count} rows</span>
                         <button
                           disabled={!!pending[`${isin}:${n.stock_name}`]}
                           onClick={() => applyFix(isin, n.stock_name)}
@@ -410,7 +410,7 @@ function ScannerTab() {
     <div>
       {toast && <Toast {...toast} onClose={hide} />}
       <div className="flex items-center justify-between mb-4">
-        <p className="text-slate-500 text-sm">
+        <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm">
           Scan for all ISIN pairs sharing the same company code — catches face-value splits the automated importer missed.
         </p>
         <button
@@ -424,11 +424,11 @@ function ScannerTab() {
       </div>
 
       {!scanned && !loading && (
-        <div className="text-center py-16 text-slate-400">Click "Run Scan" to find candidates.</div>
+        <div className="text-center py-16 text-slate-400 dark:text-slate-500">Click "Run Scan" to find candidates.</div>
       )}
 
       {scanned && candidates.length === 0 && (
-        <div className="text-center py-16 text-slate-400">
+        <div className="text-center py-16 text-slate-400 dark:text-slate-500">
           <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
           No candidates found
         </div>
@@ -440,7 +440,7 @@ function ScannerTab() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="w-4 h-4 text-amber-500" />
-                <h3 className="text-sm font-semibold text-slate-700">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Overlapping transitions — {overlapping.length} candidates
                 </h3>
                 <Badge color="amber">old + new coexist</Badge>
@@ -450,7 +450,7 @@ function ScannerTab() {
           )}
           {sequential.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-700 mb-2">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Sequential transitions — {sequential.length} candidates
               </h3>
               <CandidateTable rows={sequential} pending={pending} onRemap={applyRemap} />
@@ -467,7 +467,7 @@ function CandidateTable({ rows, pending, onRemap }) {
     <SectionCard>
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-xs text-slate-500 border-b border-slate-100 bg-slate-50 rounded-t-2xl">
+          <tr className="text-left text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-t-2xl">
             <th className="px-4 py-3 font-medium">Company</th>
             <th className="px-4 py-3 font-medium">Old ISIN</th>
             <th className="px-4 py-3 font-medium">New ISIN</th>
@@ -476,16 +476,16 @@ function CandidateTable({ rows, pending, onRemap }) {
             <th className="px-4 py-3"></th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
           {rows.map(c => {
             const key = `${c.old_isin}→${c.new_isin}`;
             return (
-              <tr key={key} className="hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-slate-900">{c.stock_name}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-600">{c.old_isin}</td>
+              <tr key={key} className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{c.stock_name}</td>
+                <td className="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-400 dark:text-slate-500">{c.old_isin}</td>
                 <td className="px-4 py-3 font-mono text-xs text-blue-600">{c.new_isin}</td>
-                <td className="px-4 py-3 text-xs text-slate-500">{fmtMonth(c.old_first)}→{fmtMonth(c.old_last)} <span className="text-slate-400">({c.old_months}mo)</span></td>
-                <td className="px-4 py-3 text-xs text-slate-500">{fmtMonth(c.new_first)}→{fmtMonth(c.new_last)} <span className="text-slate-400">({c.new_months}mo)</span></td>
+                <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">{fmtMonth(c.old_first)}→{fmtMonth(c.old_last)} <span className="text-slate-400 dark:text-slate-500">({c.old_months}mo)</span></td>
+                <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">{fmtMonth(c.new_first)}→{fmtMonth(c.new_last)} <span className="text-slate-400 dark:text-slate-500">({c.new_months}mo)</span></td>
                 <td className="px-4 py-3">
                   <button
                     disabled={!!pending[key]}
@@ -518,59 +518,59 @@ function ConfirmMergeModal({ source, target, sourceMonths, targetMonths, onConfi
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onCancel} />
 
       {/* Dialog */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md border border-slate-200">
+      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700">
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center shrink-0">
               <AlertTriangle className="w-5 h-5 text-red-600" />
             </div>
-            <h2 className="text-base font-semibold text-slate-900">Confirm fund merge</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Confirm fund merge</h2>
           </div>
-          <p className="text-sm text-slate-500 ml-12">This action is permanent and cannot be undone.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 ml-12">This action is permanent and cannot be undone.</p>
         </div>
 
         {/* Fund flow */}
-        <div className="mx-6 mb-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
+        <div className="mx-6 mb-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-4">
           <div className="flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-semibold text-red-500 uppercase tracking-wide mb-0.5">Source — will be deleted</p>
-              <p className="text-sm font-medium text-slate-900 truncate">{source?.name}</p>
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{source?.name}</p>
             </div>
             <span className="text-slate-300 text-base shrink-0">→</span>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wide mb-0.5">Target — will be kept</p>
-              <p className="text-sm font-medium text-slate-900 truncate">{target?.name}</p>
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{target?.name}</p>
             </div>
           </div>
         </div>
 
         {/* What will happen */}
         <div className="mx-6 mb-5 space-y-2">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">What will happen</p>
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">What will happen</p>
           <div className="space-y-1.5 text-sm">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-              <span className="text-slate-700">
+              <span className="text-slate-700 dark:text-slate-300">
                 <span className="font-semibold text-blue-600">{moving.length} month{moving.length !== 1 ? 's' : ''}</span> will move from source to target
               </span>
             </div>
             {conflicts.length > 0 ? (
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
-                <span className="text-slate-700">
+                <span className="text-slate-700 dark:text-slate-300">
                   <span className="font-semibold text-red-600">{conflicts.length} conflicting month{conflicts.length !== 1 ? 's' : ''}</span> will be dropped (already in target)
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                <span className="text-slate-700 text-emerald-700 font-medium">No conflicts — clean merge</span>
+                <span className="text-slate-700 dark:text-slate-300 text-emerald-700 font-medium">No conflicts — clean merge</span>
               </div>
             )}
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
-              <span className="text-slate-700">
+              <span className="text-slate-700 dark:text-slate-300">
                 Fund record <span className="font-semibold">"{source?.name}"</span> will be permanently deleted
               </span>
             </div>
@@ -578,11 +578,11 @@ function ConfirmMergeModal({ source, target, sourceMonths, targetMonths, onConfi
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-100">
+        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-100 dark:border-slate-800">
           <button
             onClick={onCancel}
             disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -635,7 +635,7 @@ function MergeCalendar({ sourceMonths, targetMonths }) {
         const monthNums = months.map(m => parseInt(m.slice(5, 7)) - 1); // 0-indexed
         return (
           <div key={year} className="flex items-center gap-3">
-            <span className="text-xs font-semibold text-slate-400 w-8 shrink-0">{year}</span>
+            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 w-8 shrink-0">{year}</span>
             <div className="grid grid-cols-12 gap-1 flex-1">
               {MONTH_LABELS.map((lbl, idx) => {
                 const isoMonth = `${year}-${String(idx + 1).padStart(2, '0')}-01`;
@@ -650,7 +650,7 @@ function MergeCalendar({ sourceMonths, targetMonths }) {
                 if (conflict)   { bg = 'bg-red-100 border-red-300';       text = 'text-red-700'; }
                 else if (srcOnly) { bg = 'bg-blue-100 border-blue-300';   text = 'text-blue-700'; }
                 else if (tgtOnly) { bg = 'bg-emerald-100 border-emerald-300'; text = 'text-emerald-700'; }
-                else              { bg = 'bg-slate-50 border-slate-200';  text = 'text-slate-300'; }
+                else              { bg = 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700';  text = 'text-slate-300'; }
 
                 return (
                   <div
@@ -862,26 +862,26 @@ function FundMgmtTab() {
         const fund = funds.find(f => f.id === deleteId);
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
               <div className="flex items-start gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
                   <AlertTriangle className="w-5 h-5 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base">Delete fund permanently?</h3>
-                  <p className="text-sm text-slate-500 mt-0.5">This cannot be undone.</p>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Delete fund permanently?</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">This cannot be undone.</p>
                 </div>
               </div>
               <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-5 text-sm">
-                <p className="font-semibold text-slate-800">{fund?.name}</p>
-                <p className="text-slate-500 mt-0.5">
+                <p className="font-semibold text-slate-800 dark:text-slate-200">{fund?.name}</p>
+                <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
                   {fund?.extraction_count} months · {(fund?.total_holdings || 0).toLocaleString()} holdings — all will be deleted.
                 </p>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteId(null)}
-                  className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
                 >
                   Cancel
                 </button>
@@ -904,26 +904,26 @@ function FundMgmtTab() {
         const fund = funds.find(f => f.id === expandedFund);
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
               <div className="flex items-start gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
                   <AlertTriangle className="w-5 h-5 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base">Delete extraction?</h3>
-                  <p className="text-sm text-slate-500 mt-0.5">This cannot be undone.</p>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Delete extraction?</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">This cannot be undone.</p>
                 </div>
               </div>
               <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-5 text-sm">
-                <p className="font-semibold text-slate-800">{fund?.name}</p>
-                <p className="text-slate-500 mt-0.5">
+                <p className="font-semibold text-slate-800 dark:text-slate-200">{fund?.name}</p>
+                <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
                   {fmtMonth(ext?.report_month)} · {Number(ext?.holding_count || 0).toLocaleString()} holdings will be deleted.
                 </p>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteExtId(null)}
-                  className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
                 >
                   Cancel
                 </button>
@@ -943,52 +943,52 @@ function FundMgmtTab() {
       {/* Bulk delete confirmation modal */}
       {bulkConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 text-base">
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">
                   {bulkConfirm === 'funds'
                     ? `Delete ${selectedFunds.size} fund${selectedFunds.size !== 1 ? 's' : ''} permanently?`
                     : `Delete ${selectedExts.size} extraction${selectedExts.size !== 1 ? 's' : ''} permanently?`}
                 </h3>
-                <p className="text-sm text-slate-500 mt-0.5">This cannot be undone.</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">This cannot be undone.</p>
               </div>
             </div>
             <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-5 text-sm">
               {bulkConfirm === 'funds' ? (
                 <>
-                  <p className="font-semibold text-slate-800 mb-1">Funds to be deleted:</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Funds to be deleted:</p>
                   <ul className="space-y-0.5 max-h-40 overflow-y-auto">
                     {[...selectedFunds].map(id => {
                       const f = funds.find(x => x.id === id);
                       return f ? (
-                        <li key={id} className="text-slate-600 text-xs flex justify-between">
+                        <li key={id} className="text-slate-600 dark:text-slate-400 dark:text-slate-500 text-xs flex justify-between">
                           <span>{f.name}</span>
-                          <span className="text-slate-400">{f.extraction_count} months</span>
+                          <span className="text-slate-400 dark:text-slate-500">{f.extraction_count} months</span>
                         </li>
                       ) : null;
                     })}
                   </ul>
-                  <p className="text-slate-500 text-xs mt-2">All extractions and holdings will be permanently removed.</p>
+                  <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-xs mt-2">All extractions and holdings will be permanently removed.</p>
                 </>
               ) : (
                 <>
-                  <p className="font-semibold text-slate-800 mb-1">Extractions to be deleted:</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Extractions to be deleted:</p>
                   <ul className="space-y-0.5 max-h-40 overflow-y-auto">
                     {[...selectedExts].map(id => {
                       const ext = extractions.find(x => x.id === id);
                       return ext ? (
-                        <li key={id} className="text-slate-600 text-xs flex justify-between">
+                        <li key={id} className="text-slate-600 dark:text-slate-400 dark:text-slate-500 text-xs flex justify-between">
                           <span>{fmtMonth(ext.report_month)}</span>
-                          <span className="text-slate-400">{Number(ext.holding_count).toLocaleString()} holdings</span>
+                          <span className="text-slate-400 dark:text-slate-500">{Number(ext.holding_count).toLocaleString()} holdings</span>
                         </li>
                       ) : null;
                     })}
                   </ul>
-                  <p className="text-slate-500 text-xs mt-2">All holdings in these extractions will be permanently removed.</p>
+                  <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-xs mt-2">All holdings in these extractions will be permanently removed.</p>
                 </>
               )}
             </div>
@@ -996,7 +996,7 @@ function FundMgmtTab() {
               <button
                 onClick={() => setBulkConfirm(null)}
                 disabled={bulkDeleting}
-                className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium transition-colors"
+                className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -1028,14 +1028,14 @@ function FundMgmtTab() {
 
       {/* Merge panel */}
       <SectionCard className="p-5">
-        <h3 className="text-sm font-semibold text-slate-900 mb-1">Merge two funds</h3>
-        <p className="text-xs text-slate-500 mb-4">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">Merge two funds</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-4">
           The source fund's history is moved into the target fund. Conflicting months are dropped. The source fund record is deleted.
         </p>
 
         <div className="flex items-end gap-3 flex-wrap">
           <div className="flex-1 min-w-52">
-            <label className="block text-xs font-medium text-slate-600 mb-1">Source (will be deleted)</label>
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500 mb-1">Source (will be deleted)</label>
             <FundSelect
               funds={funds}
               value={mergeSource}
@@ -1044,9 +1044,9 @@ function FundMgmtTab() {
               exclude={mergeTarget ? [mergeTarget] : []}
             />
           </div>
-          <div className="text-slate-400 pb-2 text-lg">→</div>
+          <div className="text-slate-400 dark:text-slate-500 pb-2 text-lg">→</div>
           <div className="flex-1 min-w-52">
-            <label className="block text-xs font-medium text-slate-600 mb-1">Target (kept)</label>
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500 mb-1">Target (kept)</label>
             <FundSelect
               funds={funds}
               value={mergeTarget}
@@ -1067,7 +1067,7 @@ function FundMgmtTab() {
 
         {/* Calendar */}
         {calLoading && (
-          <div className="flex items-center gap-2 mt-5 text-sm text-slate-400">
+          <div className="flex items-center gap-2 mt-5 text-sm text-slate-400 dark:text-slate-500">
             <Spinner /> Loading months…
           </div>
         )}
@@ -1079,12 +1079,12 @@ function FundMgmtTab() {
       {/* Fund list */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-slate-900">All funds <span className="text-slate-400 font-normal">({funds.length})</span></h3>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">All funds <span className="text-slate-400 dark:text-slate-500 font-normal">({funds.length})</span></h3>
           <input
             value={filter}
             onChange={e => setFilter(e.target.value)}
             placeholder="Filter funds…"
-            className="bg-white border border-slate-200 text-slate-900 text-sm rounded-lg px-3 py-1.5 w-56 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-sm rounded-lg px-3 py-1.5 w-56 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
           />
         </div>
 
@@ -1126,7 +1126,7 @@ function FundMgmtTab() {
           <SectionCard>
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-slate-500 border-b border-slate-100 bg-slate-50 rounded-t-2xl">
+                <tr className="text-left text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-t-2xl">
                   <th className="pl-4 pr-2 py-3 w-8">
                     <input type="checkbox"
                       checked={filtered.length > 0 && selectedFunds.size === filtered.length}
@@ -1149,8 +1149,8 @@ function FundMgmtTab() {
                   return (
                     <Fragment key={f.id}>
                       {/* Fund row */}
-                      <tr className={`border-t border-slate-100 transition-colors
-                        ${isSelected ? 'bg-blue-50' : isExpanded ? 'bg-slate-50' : 'hover:bg-slate-50'}`}
+                      <tr className={`border-t border-slate-100 dark:border-slate-800 transition-colors
+                        ${isSelected ? 'bg-blue-50' : isExpanded ? 'bg-slate-50 dark:bg-slate-900' : 'hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900'}`}
                       >
                         {/* Checkbox — with left accent when selected */}
                         <td className={`pl-0 pr-2 py-3 w-10 relative ${isSelected ? 'border-l-[3px] border-blue-500' : 'border-l-[3px] border-transparent'}`}>
@@ -1172,14 +1172,14 @@ function FundMgmtTab() {
                                 value={renameName}
                                 onChange={e => setRenameName(e.target.value)}
                                 onKeyDown={e => { if (e.key === 'Enter') saveRename(); if (e.key === 'Escape') setRenameId(null); }}
-                                className="border border-blue-400 ring-1 ring-blue-200 text-slate-900 text-sm rounded-lg px-2 py-1 w-80 focus:outline-none"
+                                className="border border-blue-400 ring-1 ring-blue-200 text-slate-900 dark:text-slate-100 text-sm rounded-lg px-2 py-1 w-80 focus:outline-none"
                               />
                               <button onClick={saveRename} disabled={saving}
                                 className="text-xs px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium">
                                 {saving ? <Spinner /> : 'Save'}
                               </button>
                               <button onClick={() => setRenameId(null)}
-                                className="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg">
+                                className="text-xs px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-400 dark:text-slate-500 rounded-lg">
                                 Cancel
                               </button>
                             </div>
@@ -1188,21 +1188,21 @@ function FundMgmtTab() {
                               onClick={() => toggleExpand(f.id)}
                               className="flex items-center gap-2 text-left w-full group"
                             >
-                              <ChevronRight className={`w-3.5 h-3.5 text-slate-400 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-90' : ''}`} />
-                              <span className={`font-medium transition-colors ${isSelected ? 'text-blue-700' : 'text-slate-900 group-hover:text-blue-700'}`}>{f.name}</span>
+                              <ChevronRight className={`w-3.5 h-3.5 text-slate-400 dark:text-slate-500 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-90' : ''}`} />
+                              <span className={`font-medium transition-colors ${isSelected ? 'text-blue-700' : 'text-slate-900 dark:text-slate-100 group-hover:text-blue-700'}`}>{f.name}</span>
                             </button>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-500">{f.extraction_count}</td>
-                        <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{fmtMonth(f.first_month)} → {fmtMonth(f.last_month)}</td>
-                        <td className="px-4 py-3 text-right text-slate-500">{(f.total_holdings || 0).toLocaleString()}</td>
+                        <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400 dark:text-slate-500">{f.extraction_count}</td>
+                        <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 whitespace-nowrap">{fmtMonth(f.first_month)} → {fmtMonth(f.last_month)}</td>
+                        <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400 dark:text-slate-500">{(f.total_holdings || 0).toLocaleString()}</td>
                         <td className="px-4 py-3">
                           {/* Hide per-row actions while in bulk-select mode */}
                           {renameId !== f.id && !inBulkMode && (
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => { setRenameId(f.id); setRenameName(f.name); }}
-                                className="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors font-medium"
+                                className="text-xs px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-400 dark:text-slate-500 rounded-lg transition-colors font-medium"
                               >
                                 Rename
                               </button>
@@ -1219,21 +1219,21 @@ function FundMgmtTab() {
 
                       {/* Extractions drawer */}
                       {isExpanded && (
-                        <tr className="border-t border-slate-100">
-                          <td colSpan={6} className="px-0 py-0 bg-slate-50">
-                            <div className="mx-6 my-3 bg-white border border-slate-200 rounded-xl overflow-hidden">
-                              <div className="flex items-center justify-between px-4 py-2.5 bg-slate-100 border-b border-slate-200">
-                                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Extractions — {f.name}</p>
+                        <tr className="border-t border-slate-100 dark:border-slate-800">
+                          <td colSpan={6} className="px-0 py-0 bg-slate-50 dark:bg-slate-900">
+                            <div className="mx-6 my-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                              <div className="flex items-center justify-between px-4 py-2.5 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-700">
+                                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Extractions — {f.name}</p>
                                 <div className="flex items-center gap-2">
                                   {extLoading && <Spinner />}
                                 </div>
                               </div>
                               {extractions.length === 0 && !extLoading ? (
-                                <p className="px-4 py-4 text-xs text-slate-400">No extractions found.</p>
+                                <p className="px-4 py-4 text-xs text-slate-400 dark:text-slate-500">No extractions found.</p>
                               ) : (
                                 <table className="w-full text-sm">
                                   <thead>
-                                    <tr className="border-b border-slate-100">
+                                    <tr className="border-b border-slate-100 dark:border-slate-800">
                                       <th className="pl-4 pr-2 py-2 w-8">
                                         <input type="checkbox"
                                           checked={extractions.length > 0 && selectedExts.size === extractions.length}
@@ -1241,9 +1241,9 @@ function FundMgmtTab() {
                                           className="rounded border-slate-300 text-blue-600 cursor-pointer"
                                         />
                                       </th>
-                                      <th className="px-4 py-2 text-left text-xs font-semibold text-slate-400 uppercase">Month</th>
-                                      <th className="px-4 py-2 text-right text-xs font-semibold text-slate-400 uppercase">Holdings</th>
-                                      <th className="px-4 py-2 text-right text-xs font-semibold text-slate-400 uppercase">ID</th>
+                                      <th className="px-4 py-2 text-left text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Month</th>
+                                      <th className="px-4 py-2 text-right text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Holdings</th>
+                                      <th className="px-4 py-2 text-right text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">ID</th>
                                       <th className="px-4 py-2" />
                                     </tr>
                                   </thead>
@@ -1252,7 +1252,7 @@ function FundMgmtTab() {
                                       const extSelected = selectedExts.has(ext.id);
                                       const extBulkMode = selectedExts.size > 0;
                                       return (
-                                        <tr key={ext.id} className={`transition-colors ${extSelected ? 'bg-blue-50' : 'hover:bg-slate-50'}`}>
+                                        <tr key={ext.id} className={`transition-colors ${extSelected ? 'bg-blue-50' : 'hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900'}`}>
                                           <td className={`pl-0 pr-2 py-2 w-10 ${extSelected ? 'border-l-[3px] border-blue-400' : 'border-l-[3px] border-transparent'}`}>
                                             <div className="pl-3">
                                               <input type="checkbox"
@@ -1262,9 +1262,9 @@ function FundMgmtTab() {
                                               />
                                             </div>
                                           </td>
-                                          <td className={`px-4 py-2 font-medium ${extSelected ? 'text-blue-700' : 'text-slate-700'}`}>{fmtMonth(ext.report_month)}</td>
-                                          <td className="px-4 py-2 text-right text-slate-500">{Number(ext.holding_count).toLocaleString()}</td>
-                                          <td className="px-4 py-2 text-right text-slate-400 font-mono text-xs">{ext.id}</td>
+                                          <td className={`px-4 py-2 font-medium ${extSelected ? 'text-blue-700' : 'text-slate-700 dark:text-slate-300'}`}>{fmtMonth(ext.report_month)}</td>
+                                          <td className="px-4 py-2 text-right text-slate-500 dark:text-slate-400 dark:text-slate-500">{Number(ext.holding_count).toLocaleString()}</td>
+                                          <td className="px-4 py-2 text-right text-slate-400 dark:text-slate-500 font-mono text-xs">{ext.id}</td>
                                           <td className="px-4 py-2 text-right">
                                             {!extBulkMode && (
                                               <button
@@ -1357,26 +1357,26 @@ function SchemeSearchDropdown({ fundName, value, onChange }) {
 
   return (
     <div ref={containerRef} className="relative w-full">
-      <div className={`flex items-center gap-1.5 border rounded-lg px-2 py-1.5 bg-white transition-colors ${open ? 'border-blue-400 ring-1 ring-blue-200' : 'border-slate-200'}`}>
-        <Search className="w-3 h-3 text-slate-400 shrink-0" />
+      <div className={`flex items-center gap-1.5 border rounded-lg px-2 py-1.5 bg-white dark:bg-slate-800 transition-colors ${open ? 'border-blue-400 ring-1 ring-blue-200' : 'border-slate-200 dark:border-slate-700'}`}>
+        <Search className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
         <input
           value={query}
           onChange={handleInput}
           onFocus={() => { if (results.length) setOpen(true); }}
           placeholder="Search scheme name…"
-          className="flex-1 text-xs outline-none bg-transparent text-slate-900 placeholder-slate-400"
+          className="flex-1 text-xs outline-none bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400"
         />
         {loading && <span className="w-3 h-3 border border-slate-300 border-t-blue-500 rounded-full animate-spin shrink-0" />}
       </div>
 
       {/* Selected scheme code pill */}
       {value?.scheme_code && (
-        <p className="text-[10px] font-mono text-slate-400 mt-0.5 pl-1">{value.scheme_code}</p>
+        <p className="text-[10px] font-mono text-slate-400 dark:text-slate-500 mt-0.5 pl-1">{value.scheme_code}</p>
       )}
 
       {/* Dropdown */}
       {open && results.length > 0 && (
-        <div className="absolute z-40 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-xl max-h-64 overflow-y-auto">
+        <div className="absolute z-40 mt-1 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-64 overflow-y-auto">
           {results.map(r => {
             const badge = planBadge(r.scheme_name);
             const isSelected = value?.scheme_code === r.scheme_code;
@@ -1384,17 +1384,17 @@ function SchemeSearchDropdown({ fundName, value, onChange }) {
               <button
                 key={r.scheme_code}
                 onMouseDown={e => { e.preventDefault(); select(r); }}
-                className={`w-full text-left px-3 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 ${isSelected ? 'bg-blue-50' : ''}`}
+                className={`w-full text-left px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors border-b border-slate-50 last:border-0 ${isSelected ? 'bg-blue-50' : ''}`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <span className="text-xs text-slate-800 leading-snug flex-1">{r.scheme_name}</span>
+                  <span className="text-xs text-slate-800 dark:text-slate-200 leading-snug flex-1">{r.scheme_name}</span>
                   {badge && (
                     <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 ${badge.cls}`}>
                       {badge.label}
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] font-mono text-slate-400">{r.scheme_code}</span>
+                <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">{r.scheme_code}</span>
               </button>
             );
           })}
@@ -1488,11 +1488,11 @@ function NavTab() {
       <SectionCard className="p-5">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+            <h2 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-blue-500" />
               NAV Mapping
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
               Map funds to AMFI scheme codes and sync NAV history from mfapi.in
             </p>
           </div>
@@ -1517,8 +1517,8 @@ function NavTab() {
         </div>
 
         {/* Summary pills */}
-        <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t border-slate-100">
-          <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-slate-100 text-slate-600 border-slate-200">
+        <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700">
             {mappings.length} funds
           </span>
           <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -1537,12 +1537,12 @@ function NavTab() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search fund or scheme name…"
-          className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-xl bg-white
+          className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white
                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
@@ -1554,7 +1554,7 @@ function NavTab() {
         <SectionCard>
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs text-slate-500 border-b border-slate-100 bg-slate-50">
+              <tr className="text-left text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
                 <th className="px-4 py-3 font-medium">Fund</th>
                 <th className="px-4 py-3 font-medium">Scheme mapped</th>
                 <th className="px-4 py-3 font-medium text-center">Status</th>
@@ -1563,12 +1563,12 @@ function NavTab() {
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
               {filtered.map(m => {
                 const isEditing = editRow?.fund_id === m.id;
                 return (
-                  <tr key={m.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-900 max-w-[220px]">
+                  <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100 max-w-[220px]">
                       <span className="line-clamp-2 leading-snug">{m.name}</span>
                     </td>
                     <td className="px-4 py-3 max-w-[300px]">
@@ -1580,8 +1580,8 @@ function NavTab() {
                         />
                       ) : m.scheme_name ? (
                         <div>
-                          <p className="text-slate-800 text-xs leading-snug line-clamp-2">{m.scheme_name}</p>
-                          <p className="text-slate-400 text-[10px] font-mono mt-0.5">{m.scheme_code}</p>
+                          <p className="text-slate-800 dark:text-slate-200 text-xs leading-snug line-clamp-2">{m.scheme_name}</p>
+                          <p className="text-slate-400 dark:text-slate-500 text-[10px] font-mono mt-0.5">{m.scheme_code}</p>
                         </div>
                       ) : (
                         <span className="text-slate-300 text-xs italic">Not mapped</span>
@@ -1592,13 +1592,13 @@ function NavTab() {
                         ? <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">Confirmed</span>
                         : m.scheme_code
                         ? <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200">Unconfirmed</span>
-                        : <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-slate-100 text-slate-400 border-slate-200">Unmapped</span>
+                        : <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700">Unmapped</span>
                       }
                     </td>
-                    <td className="px-4 py-3 text-right text-slate-500 tabular-nums">
+                    <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400 dark:text-slate-500 tabular-nums">
                       {m.nav_rows > 0 ? m.nav_rows.toLocaleString() : '—'}
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-400">
+                    <td className="px-4 py-3 text-xs text-slate-400 dark:text-slate-500">
                       {m.synced_at
                         ? new Date(m.synced_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })
                         : '—'}
@@ -1612,7 +1612,7 @@ function NavTab() {
                               Save
                             </button>
                             <button onClick={() => setEditRow(null)}
-                              className="text-xs px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg">
+                              className="text-xs px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-400 dark:text-slate-500 rounded-lg">
                               Cancel
                             </button>
                           </>
@@ -1620,7 +1620,7 @@ function NavTab() {
                           <>
                             <button
                               onClick={() => setEditRow({ fund_id: m.id, scheme_code: m.scheme_code || '', scheme_name: m.scheme_name || '' })}
-                              className="text-xs px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors font-medium"
+                              className="text-xs px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-400 dark:text-slate-500 rounded-lg transition-colors font-medium"
                             >
                               {m.scheme_code ? 'Edit' : 'Map'}
                             </button>
@@ -1644,7 +1644,7 @@ function NavTab() {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <div className="text-center py-12 text-slate-400 text-sm">No funds match your search</div>
+            <div className="text-center py-12 text-slate-400 dark:text-slate-500 text-sm">No funds match your search</div>
           )}
         </SectionCard>
       )}
@@ -1721,10 +1721,10 @@ function FeatureFlagsTab() {
       <SectionCard className="p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+            <h2 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               Payments & Billing
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
               {paymentsEnabled
                 ? 'Payments are live — users can upgrade to Pro via Razorpay.'
                 : 'Payments are disabled — the Upgrade button and checkout are hidden from all users.'}
@@ -1734,7 +1734,7 @@ function FeatureFlagsTab() {
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
               paymentsEnabled
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : 'bg-slate-100 text-slate-500 border-slate-200'
+                : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700'
             }`}>
               {paymentsEnabled ? 'Live' : 'Disabled'}
             </span>
@@ -1768,21 +1768,21 @@ function FeatureFlagsTab() {
       <SectionCard className="p-5">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+            <h2 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Lock className="w-4 h-4 text-blue-500" />
               Feature Flags
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
               Toggle which features require a Pro subscription. Changes take effect immediately.
             </p>
           </div>
           <button onClick={load} disabled={loading}
-            className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white transition-colors">
+            className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 transition-colors">
             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
         </div>
-        <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t border-slate-100">
-          <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-slate-100 text-slate-600 border-slate-200">
+        <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700">
             {flags.length} features total
           </span>
           <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -1800,29 +1800,29 @@ function FeatureFlagsTab() {
         <div className="space-y-4">
           {Object.entries(grouped).map(([cat, catFlags]) => (
             <div key={cat}>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-1">
+              <h3 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-1">
                 {CATEGORY_LABELS[cat] || cat}
               </h3>
               <SectionCard>
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-slate-100 dark:divide-slate-700">
                   {catFlags.map(f => {
                     const isPro = f.required_plan === 'pro';
                     return (
-                      <div key={f.key} className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
+                      <div key={f.key} className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors">
                         {/* Icon */}
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                           isPro ? 'bg-blue-50' : 'bg-slate-100'
                         }`}>
                           {isPro
                             ? <Lock className="w-3.5 h-3.5 text-blue-500" />
-                            : <Unlock className="w-3.5 h-3.5 text-slate-400" />
+                            : <Unlock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           }
                         </div>
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-slate-900">{f.label}</span>
+                            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{f.label}</span>
                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${
                               isPro
                                 ? 'bg-blue-50 text-blue-700 border-blue-200'
@@ -1831,7 +1831,7 @@ function FeatureFlagsTab() {
                               {isPro ? 'Pro' : 'Free'}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 mt-0.5 truncate">{f.description}</p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">{f.description}</p>
                         </div>
 
                         {/* Toggle — track: 48×26px, thumb: 20px, inset: 3px, travel: 22px */}
@@ -1930,12 +1930,12 @@ function CacheTab() {
       <SectionCard className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">In-memory response cache</h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">In-memory response cache</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
               Heavy analytics routes are cached for 24 hours. Cache resets on writes or server restart.
             </p>
           </div>
-          <button onClick={loadStats} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white transition-colors">
+          <button onClick={loadStats} className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 transition-colors">
             <RefreshCw className="w-3 h-3" /> Refresh
           </button>
         </div>
@@ -1946,10 +1946,10 @@ function CacheTab() {
           <div className="space-y-4">
 
             {/* Enable / disable toggle */}
-            <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 bg-slate-50">
+            <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
               <div>
-                <p className="text-sm font-medium text-slate-800">Cache enabled</p>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Cache enabled</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
                   When disabled, every request hits the database directly. Disabling also clears all entries.
                 </p>
               </div>
@@ -1959,7 +1959,7 @@ function CacheTab() {
                 className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none
                   ${stats.enabled ? 'bg-emerald-500' : 'bg-slate-300'} ${toggling ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform
+                <span className={`inline-block h-4 w-4 rounded-full bg-white dark:bg-slate-800 shadow transition-transform
                   ${stats.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
               </button>
             </div>
@@ -1967,19 +1967,19 @@ function CacheTab() {
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Total entries', value: stats.total,   color: 'text-slate-700',  bg: 'bg-slate-50 border-slate-200' },
+                { label: 'Total entries', value: stats.total,   color: 'text-slate-700 dark:text-slate-300',  bg: 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700' },
                 { label: 'Alive (fresh)', value: stats.alive,   color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
                 { label: 'Expired',       value: stats.expired, color: 'text-amber-700',  bg: 'bg-amber-50 border-amber-200' },
               ].map(({ label, value, color, bg }) => (
                 <div key={label} className={`border rounded-xl px-4 py-3 ${bg}`}>
                   <p className={`text-2xl font-bold ${color}`}>{value}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">{label}</p>
                 </div>
               ))}
             </div>
 
             {/* Clear + show keys */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => setShowKeys(v => !v)}
                 className="text-xs text-blue-600 hover:underline"
@@ -1998,11 +1998,11 @@ function CacheTab() {
 
             {/* Live key list */}
             {showKeys && keys.length > 0 && (
-              <div className="rounded-xl border border-slate-200 overflow-hidden">
-                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
                   {keys.map(({ key, expiresIn }) => (
-                    <div key={key} className="flex items-center justify-between px-4 py-2 hover:bg-slate-50">
-                      <p className="font-mono text-xs text-slate-700 truncate mr-4">{key}</p>
+                    <div key={key} className="flex items-center justify-between px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                      <p className="font-mono text-xs text-slate-700 dark:text-slate-300 truncate mr-4">{key}</p>
                       <span className="shrink-0 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                         {fmtMs(expiresIn)}
                       </span>
@@ -2012,15 +2012,15 @@ function CacheTab() {
               </div>
             )}
             {showKeys && keys.length === 0 && (
-              <p className="text-xs text-slate-400 text-center py-2">No live keys in cache.</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-2">No live keys in cache.</p>
             )}
           </div>
         ) : null}
       </SectionCard>
 
       <SectionCard className="p-5">
-        <h3 className="text-sm font-semibold text-slate-900 mb-3">What gets cached</h3>
-        <div className="divide-y divide-slate-100 text-sm">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">What gets cached</h3>
+        <div className="divide-y divide-slate-100 dark:divide-slate-700 text-sm">
           {[
             { route: '/api/holdings/cross-fund',              desc: 'Cross-fund stock analysis' },
             { route: '/api/holdings/overlap-matrix',          desc: 'Pairwise fund overlap' },
@@ -2045,9 +2045,9 @@ function CacheTab() {
             <div key={route} className="flex items-center justify-between py-2.5">
               <div>
                 <p className="font-mono text-xs text-blue-700">{route}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">{desc}</p>
               </div>
-              <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full shrink-0 ml-4">24 h</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-full shrink-0 ml-4">24 h</span>
             </div>
           ))}
         </div>
@@ -2083,26 +2083,26 @@ export default function AdminPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Settings className="w-5 h-5 text-slate-400" />
-            <h1 className="text-2xl font-bold text-slate-900">Admin Panel</h1>
+            <Settings className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Admin Panel</h1>
           </div>
-          <p className="text-slate-500 text-sm mt-0.5 ml-7">Data normalisation &amp; fund management</p>
+          <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm mt-0.5 ml-7">Data normalisation &amp; fund management</p>
         </div>
-        <span className="text-xs bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1.5 rounded-full font-medium">
+        <span className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full font-medium">
           {user.primaryEmailAddress.emailAddress}
         </span>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit">
+      <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-xl w-fit">
         {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               tab === t.id
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'
             }`}
           >
             {t.label}
@@ -2174,7 +2174,7 @@ function ContinuityTab() {
     stale: { label: 'Stale',        cls: 'bg-amber-100 text-amber-700 border-amber-200' },
     minor: { label: '1–2 gaps',     cls: 'bg-orange-100 text-orange-700 border-orange-200' },
     major: { label: '3+ gaps',      cls: 'bg-red-100 text-red-700 border-red-200' },
-    empty: { label: 'No data',      cls: 'bg-slate-100 text-slate-500 border-slate-200' },
+    empty: { label: 'No data',      cls: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700' },
   };
 
   return (
@@ -2185,25 +2185,25 @@ function ContinuityTab() {
       <SectionCard>
         <div className="p-5 flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+            <h2 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Activity className="w-4 h-4 text-blue-500" />
               Data Continuity
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
               Funds with internal month gaps or stale extractions
             </p>
           </div>
           <button onClick={load} disabled={loading}
-            className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-50">
+            className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 transition-colors disabled:opacity-50">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
         </div>
 
         {/* Summary pills */}
         {summary && (
-          <div className="px-5 pb-4 flex items-center gap-2 flex-wrap border-t border-slate-100 pt-4">
+          <div className="px-5 pb-4 flex items-center gap-2 flex-wrap border-t border-slate-100 dark:border-slate-800 pt-4">
             {[
-              { key: 'total',  label: `${summary.total} funds`,       cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+              { key: 'total',  label: `${summary.total} funds`,       cls: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700' },
               { key: 'ok',     label: `${summary.ok} complete`,        cls: statusMeta.ok.cls },
               { key: 'stale',  label: `${summary.stale} stale`,        cls: statusMeta.stale.cls },
               { key: 'minor',  label: `${summary.minor} minor gaps`,   cls: statusMeta.minor.cls },
@@ -2222,18 +2222,18 @@ function ContinuityTab() {
         <div className="flex items-center gap-3 flex-wrap">
           {/* Search */}
           <div className="relative flex-1 min-w-48">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search fund name…"
-              className="w-full pl-8 pr-3 py-2 text-sm border border-slate-200 rounded-xl bg-white
+              className="w-full pl-8 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white
                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           {/* Sort */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-sm">
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 p-1 rounded-xl text-sm">
             {[
               { key: 'gaps',  label: 'By gaps' },
               { key: 'stale', label: 'By staleness' },
@@ -2241,7 +2241,7 @@ function ContinuityTab() {
             ].map(s => (
               <button key={s.key} onClick={() => setSortBy(s.key)}
                 className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-                  sortBy === s.key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  sortBy === s.key ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'
                 }`}>
                 {s.label}
               </button>
@@ -2249,7 +2249,7 @@ function ContinuityTab() {
           </div>
 
           {/* Toggle complete funds */}
-          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 dark:text-slate-500 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={hideOk}
@@ -2266,16 +2266,16 @@ function ContinuityTab() {
       )}
 
       {loading && !data && (
-        <div className="flex items-center gap-3 text-slate-500 text-sm p-6">
+        <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm p-6">
           <Spinner /> Loading continuity report…
         </div>
       )}
 
       {/* Fund rows */}
       {filtered.length === 0 && data && !loading && (
-        <div className="text-center py-12 text-slate-400 bg-white border border-slate-200 rounded-2xl">
+        <div className="text-center py-12 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
           <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
-          <p className="font-medium text-slate-500">All funds look good!</p>
+          <p className="font-medium text-slate-500 dark:text-slate-400 dark:text-slate-500">All funds look good!</p>
           <p className="text-xs mt-1">No gaps or issues found matching your filters</p>
         </div>
       )}
@@ -2306,13 +2306,13 @@ function ContinuityRow({ fund: f, statusMeta }) {
     : `${f.months_since_last} months ago`;
 
   return (
-    <div className={`bg-white border rounded-2xl overflow-hidden shadow-sm transition-colors ${
-      f.gap_count > 0 ? 'border-orange-200' : f.status === 'stale' ? 'border-amber-200' : 'border-slate-200'
+    <div className={`bg-white dark:bg-slate-800 border rounded-2xl overflow-hidden shadow-sm transition-colors ${
+      f.gap_count > 0 ? 'border-orange-200' : f.status === 'stale' ? 'border-amber-200' : 'border-slate-200 dark:border-slate-700'
     }`}>
       {/* Row header */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition-colors text-left"
+        className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors text-left"
       >
         {/* Status badge */}
         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${sm.cls}`}>
@@ -2320,7 +2320,7 @@ function ContinuityRow({ fund: f, statusMeta }) {
         </span>
 
         {/* Fund name */}
-        <span className="flex-1 text-sm font-medium text-slate-800 truncate">{f.name}</span>
+        <span className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{f.name}</span>
 
         {/* Meta chips */}
         <div className="flex items-center gap-2 shrink-0">
@@ -2329,10 +2329,10 @@ function ContinuityRow({ fund: f, statusMeta }) {
               {f.gap_count} gap{f.gap_count !== 1 ? 's' : ''}
             </span>
           )}
-          <span className="text-xs text-slate-400">{f.coverage_pct}% coverage</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">{f.coverage_pct}% coverage</span>
           {stalenessLabel && (
             <span className={`text-xs font-medium ${
-              (f.months_since_last ?? 0) > 3 ? 'text-amber-600' : 'text-slate-400'
+              (f.months_since_last ?? 0) > 3 ? 'text-amber-600' : 'text-slate-400 dark:text-slate-500'
             }`}>
               Last: {stalenessLabel}
             </span>
@@ -2342,16 +2342,16 @@ function ContinuityRow({ fund: f, statusMeta }) {
               {fmtMonth(f.first_month)} – {fmtMonth(f.last_month)}
             </span>
           )}
-          {open ? <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
-                : <ChevronRight className="w-3.5 h-3.5 text-slate-400 ml-1" />}
+          {open ? <ChevronDown className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 ml-1" />
+                : <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 ml-1" />}
         </div>
       </button>
 
       {/* Expanded: visual month grid */}
       {open && (
-        <div className="border-t border-slate-100 px-4 py-4">
+        <div className="border-t border-slate-100 dark:border-slate-800 px-4 py-4">
           {f.status === 'empty' ? (
-            <p className="text-sm text-slate-400">No extractions found for this fund.</p>
+            <p className="text-sm text-slate-400 dark:text-slate-500">No extractions found for this fund.</p>
           ) : (
             <>
               <div className="space-y-1.5">
@@ -2365,7 +2365,7 @@ function ContinuityRow({ fund: f, statusMeta }) {
 
                   return (
                     <div key={year} className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-slate-400 w-8 shrink-0 text-right">{year}</span>
+                      <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 w-8 shrink-0 text-right">{year}</span>
                       <div className="grid grid-cols-12 gap-0.5 flex-1">
                         {CAL_MONTHS.map((lbl, idx) => {
                           const isoMonth = `${year}-${String(idx+1).padStart(2,'0')}-01`;
@@ -2383,7 +2383,7 @@ function ContinuityRow({ fund: f, statusMeta }) {
                             textCls = 'text-red-600 font-bold';
                           } else if (inRange) {
                             // Shouldn't happen (gap covers inRange without data) but fallback
-                            cellCls = 'bg-slate-50 border-slate-200';
+                            cellCls = 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700';
                             textCls = 'text-slate-300';
                           } else {
                             cellCls = 'bg-transparent border-transparent';
@@ -2412,7 +2412,7 @@ function ContinuityRow({ fund: f, statusMeta }) {
 
               {/* Legend + gap list */}
               <div className="mt-3 flex items-start gap-6 flex-wrap">
-                <div className="flex items-center gap-3 text-xs text-slate-400">
+                <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-sm bg-emerald-100 border border-emerald-300 inline-block" />
                     Has data

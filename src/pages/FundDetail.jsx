@@ -125,7 +125,7 @@ export default function FundDetail() {
   return (
     <div>
       {/* Back */}
-      <Link to="/funds" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 mb-6 transition-colors">
+      <Link to="/funds" className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> All Funds
       </Link>
 
@@ -134,8 +134,8 @@ export default function FundDetail() {
         <div>
           {fund ? (
             <>
-              <h1 className="text-xl font-bold text-slate-900">{fund.name}</h1>
-              <p className="text-sm text-slate-500 mt-0.5">{fund.extraction_count} available month{fund.extraction_count !== 1 ? 's' : ''}</p>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">{fund.name}</h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">{fund.extraction_count} available month{fund.extraction_count !== 1 ? 's' : ''}</p>
             </>
           ) : (
             <div className="space-y-2">
@@ -148,14 +148,14 @@ export default function FundDetail() {
           <Link
             to={`/funds/${id}/compare`}
             className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600
-                       bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+                       bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors shadow-sm"
           >
             <GitCompare className="w-4 h-4" /> Compare Months
           </Link>
           <button
             onClick={() => window.print()}
             className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600
-                       bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+                       bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors shadow-sm"
           >
             <Printer className="w-4 h-4" /> Print
           </button>
@@ -165,9 +165,9 @@ export default function FundDetail() {
       {/* ── NAV History — fund-level, always shown ───────────────────────── */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-3">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">NAV History</h2>
+          <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">NAV History</h2>
           <span className="h-px flex-1 bg-slate-200" />
-          {!canNav && <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Pro</span>}
+          {!canNav && <span className="text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Pro</span>}
         </div>
         {canNav
           ? <NavHistoryPanel navData={navData} />
@@ -177,7 +177,7 @@ export default function FundDetail() {
 
       {/* ── Per-extraction data ───────────────────────────────────────────── */}
       <div className="flex items-center gap-2 mb-5">
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Monthly Portfolio</h2>
+        <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Monthly Portfolio</h2>
         <span className="h-px flex-1 bg-slate-200" />
       </div>
 
@@ -188,9 +188,9 @@ export default function FundDetail() {
 
       {/* No extractions */}
       {!loading && extractions.length === 0 && (
-        <div className="text-center py-16 text-slate-400 bg-white border border-slate-200 rounded-2xl">
+        <div className="text-center py-16 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
           <RefreshCw className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p className="font-medium text-slate-500">No data available</p>
+          <p className="font-medium text-slate-500 dark:text-slate-400 dark:text-slate-500">No data available</p>
           <p className="text-sm mt-1">No monthly extractions have been processed for this fund</p>
         </div>
       )}
@@ -218,7 +218,7 @@ export default function FundDetail() {
           )}
 
           {/* Tabs — only extraction-scoped views */}
-          <div className="flex gap-1 mb-4 bg-slate-100 rounded-xl p-1 w-fit">
+          <div className="flex gap-1 mb-4 bg-slate-100 dark:bg-slate-700 rounded-xl p-1 w-fit">
             <TabBtn active={activeTab === 'holdings'} onClick={() => setActiveTab('holdings')}>Holdings Table</TabBtn>
             <TabBtn active={activeTab === 'charts'} onClick={() => setActiveTab('charts')}>Charts & Analytics</TabBtn>
           </div>
@@ -230,7 +230,7 @@ export default function FundDetail() {
                 <button
                   onClick={exportCSV}
                   className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600
-                             bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+                             bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors shadow-sm"
                 >
                   <FileDown className="w-4 h-4" /> Export CSV
                 </button>
@@ -263,17 +263,17 @@ export default function FundDetail() {
                 ) : trendData.length > 0 ? (
                   <TrendLineChart data={trendData} stockName={trendStock} industry={trendIndustry} scale={scale} />
                 ) : (
-                  <div className="text-sm text-slate-400 py-8 text-center">
+                  <div className="text-sm text-slate-400 dark:text-slate-500 py-8 text-center">
                     Click a stock below to see its % NAV trend across months
                   </div>
                 )}
               </ChartCard>
               {/* All holdings clickable for trend */}
               {canTrend && (holdingsData?.holdings ?? []).length > 0 && (
-                <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-4">
+                <div className="lg:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-semibold text-slate-700">Click to view trend:</p>
-                    <span className="text-xs text-slate-400">{holdingsData.holdings.length} holdings</span>
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Click to view trend:</p>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">{holdingsData.holdings.length} holdings</span>
                   </div>
                   <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
                     {holdingsData.holdings.map(h => (
@@ -317,15 +317,15 @@ function NavHistoryPanel({ navData }) {
   if (!navData) {
     return (
       <div className="flex justify-center items-center py-20">
-        <span className="w-6 h-6 border-2 border-slate-200 border-t-violet-500 rounded-full animate-spin" />
+        <span className="w-6 h-6 border-2 border-slate-200 dark:border-slate-700 border-t-violet-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!navData.mapped || !navData.history?.length) {
     return (
-      <div className="bg-white border border-slate-200 rounded-2xl p-10 text-center text-slate-400">
-        <p className="font-medium text-slate-500 mb-1">No NAV data available</p>
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-10 text-center text-slate-400 dark:text-slate-500">
+        <p className="font-medium text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-1">No NAV data available</p>
         <p className="text-sm">This fund hasn't been mapped or synced yet. Go to Admin → NAV Mapping to set it up.</p>
       </div>
     );
@@ -377,9 +377,9 @@ function NavHistoryPanel({ navData }) {
     if (!active || !payload?.length) return null;
     const d = payload[0].payload;
     return (
-      <div className="bg-white border border-slate-200 text-slate-800 text-xs rounded-xl px-3 py-2 shadow-lg">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-2 shadow-lg">
         <p className="font-bold text-violet-600">{fmtNav(d.nav)}</p>
-        <p className="text-slate-400 mt-0.5">{fmtDate(d.ts)}</p>
+        <p className="text-slate-400 dark:text-slate-500 mt-0.5">{fmtDate(d.ts)}</p>
       </div>
     );
   }
@@ -387,46 +387,46 @@ function NavHistoryPanel({ navData }) {
   return (
     <div className="space-y-4">
       {/* Header: scheme + key stats */}
-      <div className="bg-white border border-slate-200 rounded-2xl px-5 py-4">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <p className="text-xs text-slate-400 mb-0.5">AMFI Scheme</p>
-            <p className="text-sm font-semibold text-slate-800">{navData.scheme_name}</p>
-            <p className="text-xs text-slate-400 font-mono mt-0.5">{navData.scheme_code}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">AMFI Scheme</p>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{navData.scheme_name}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-mono mt-0.5">{navData.scheme_code}</p>
           </div>
           <div className="flex items-center gap-6 text-center flex-wrap">
             <div>
-              <p className="text-xs text-slate-400 mb-0.5">Latest NAV</p>
-              <p className="text-xl font-bold text-slate-900">{fmtNav(latest.nav)}</p>
-              <p className="text-xs text-slate-400">{fmtDate(latest.ts)}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">Latest NAV</p>
+              <p className="text-xl font-bold text-slate-900 dark:text-slate-100">{fmtNav(latest.nav)}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">{fmtDate(latest.ts)}</p>
             </div>
             <div>
-              <p className="text-xs text-slate-400 mb-0.5">
+              <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">
                 {selectedRange.key === 'all' ? 'All-time return' : `${selectedRange.label} return`}
               </p>
               <p className={`text-xl font-bold ${isPos ? 'text-emerald-500' : 'text-rose-500'}`}>
                 {fmtPct(rangeReturn)}
               </p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 {rangeStart ? `since ${fmtDate(rangeStart.ts)}` : '—'}
               </p>
             </div>
             <div>
-              <p className="text-xs text-slate-400 mb-0.5">High / Low</p>
-              <p className="text-sm font-semibold text-slate-800">
+              <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">High / Low</p>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                 {fmtNav(maxNav)} / {fmtNav(minNav)}
               </p>
-              <p className="text-xs text-slate-400">in selected range</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">in selected range</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Chart card */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-          <h3 className="text-sm font-semibold text-slate-700">NAV History</h3>
-          <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">NAV History</h3>
+          <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-xl">
             {NAV_RANGES.map(r => {
               const days = r.days;
               const hasData = !days || all.some(p => p.ts >= Date.now() - days * 86400 * 1000);
@@ -439,7 +439,7 @@ function NavHistoryPanel({ navData }) {
                     range === r.key
                       ? 'bg-violet-600 text-white shadow-sm'
                       : hasData
-                      ? 'text-slate-500 hover:text-slate-800 hover:bg-white'
+                      ? 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 hover:bg-white dark:bg-slate-800'
                       : 'text-slate-300 cursor-not-allowed'
                   }`}
                 >
@@ -484,7 +484,7 @@ function NavHistoryPanel({ navData }) {
           </LineChart>
         </ResponsiveContainer>
 
-        <p className="text-xs text-slate-400 text-right mt-2">
+        <p className="text-xs text-slate-400 dark:text-slate-500 text-right mt-2">
           {points.length.toLocaleString()} data points · all-time return{' '}
           <span className={allTimePos ? 'text-emerald-500 font-medium' : 'text-rose-500 font-medium'}>
             {fmtPct(parseFloat(allTimeReturn))}
@@ -500,7 +500,7 @@ function TabBtn({ active, onClick, children }) {
     <button
       onClick={onClick}
       className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-        active ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+        active ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-sm' : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'
       }`}
     >
       {children}
@@ -510,8 +510,8 @@ function TabBtn({ active, onClick, children }) {
 
 function ChartCard({ title, children, className = '' }) {
   return (
-    <div className={`bg-white border border-slate-200 rounded-2xl p-5 shadow-sm ${className}`}>
-      <h3 className="text-sm font-semibold text-slate-700 mb-4">{title}</h3>
+    <div className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm ${className}`}>
+      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{title}</h3>
       {children}
     </div>
   );
@@ -519,9 +519,9 @@ function ChartCard({ title, children, className = '' }) {
 
 function SummaryCard({ label, value }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-      <div className="text-xs text-slate-500 mb-1">{label}</div>
-      <div className="font-bold text-slate-800 text-lg">{value}</div>
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
+      <div className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-1">{label}</div>
+      <div className="font-bold text-slate-800 dark:text-slate-200 text-lg">{value}</div>
     </div>
   );
 }

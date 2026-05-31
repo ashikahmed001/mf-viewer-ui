@@ -71,7 +71,7 @@ function buildShortNames(names) {
 
 // Heatmap cell color based on overlap %
 function overlapColor(pct) {
-  if (pct === null) return { bg: 'bg-slate-100',   text: 'text-slate-400',   border: 'border-slate-200',   ring: 'ring-slate-400',   shadow: 'shadow-slate-100' };
+  if (pct === null) return { bg: 'bg-slate-100',   text: 'text-slate-400 dark:text-slate-500',   border: 'border-slate-200 dark:border-slate-700',   ring: 'ring-slate-400',   shadow: 'shadow-slate-100' };
   if (pct >= 60)   return { bg: 'bg-red-100',      text: 'text-red-800',     border: 'border-red-300',     ring: 'ring-red-400',     shadow: 'shadow-red-100' };
   if (pct >= 40)   return { bg: 'bg-orange-100',   text: 'text-orange-800',  border: 'border-orange-300',  ring: 'ring-orange-400',  shadow: 'shadow-orange-100' };
   if (pct >= 20)   return { bg: 'bg-yellow-50',    text: 'text-yellow-800',  border: 'border-yellow-300',  ring: 'ring-yellow-400',  shadow: 'shadow-yellow-100' };
@@ -90,10 +90,10 @@ const SECTOR_COLORS = [
 
 function StatCard({ icon, label, value, sub }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-      <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">{icon} {label}</div>
-      <div className="font-bold text-slate-800 text-lg">{value}</div>
-      {sub && <div className="text-xs text-slate-400 mt-0.5 truncate" title={sub}>{sub}</div>}
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
+      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-1">{icon} {label}</div>
+      <div className="font-bold text-slate-800 dark:text-slate-200 text-lg">{value}</div>
+      {sub && <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate" title={sub}>{sub}</div>}
     </div>
   );
 }
@@ -120,7 +120,7 @@ function InfoTooltip({ desc, tip }) {
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
         onClick={() => setOpen(o => !o)}
-        className="flex items-center justify-center w-3.5 h-3.5 rounded-full text-slate-400 hover:text-violet-600 transition-colors focus:outline-none"
+        className="flex items-center justify-center w-3.5 h-3.5 rounded-full text-slate-400 dark:text-slate-500 hover:text-violet-600 transition-colors focus:outline-none"
         tabIndex={-1}
         aria-label="Info"
       >
@@ -129,7 +129,7 @@ function InfoTooltip({ desc, tip }) {
 
       {open && (
         <div
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl p-3.5 text-left pointer-events-none"
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-3.5 text-left pointer-events-none"
           style={{ minWidth: 220 }}
         >
           {/* Arrow */}
@@ -138,12 +138,12 @@ function InfoTooltip({ desc, tip }) {
           <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 mt-[-1px]"
             style={{ borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '5px solid white' }} />
 
-          <p className="text-xs font-semibold text-slate-700 mb-1 leading-snug">{desc}</p>
+          <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 leading-snug">{desc}</p>
           {tip && (
             <>
-              <div className="border-t border-slate-100 my-2" />
-              <p className="text-xs text-slate-400 font-medium mb-0.5">What to look for</p>
-              <p className="text-xs text-slate-600 leading-relaxed">{tip}</p>
+              <div className="border-t border-slate-100 dark:border-slate-800 my-2" />
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mb-0.5">What to look for</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 dark:text-slate-500 leading-relaxed">{tip}</p>
             </>
           )}
         </div>
@@ -174,7 +174,7 @@ function FundMultiSelect({ funds, selected, onChange, shortNames }) {
     <div className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-slate-200 rounded-xl shadow-sm hover:border-violet-300 hover:text-violet-700 transition-colors"
+        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm hover:border-violet-300 hover:text-violet-700 transition-colors"
       >
         <Filter className="w-4 h-4" />
         {selected.size === funds.length ? 'All funds' : `${selected.size} of ${funds.length} funds`}
@@ -184,17 +184,17 @@ function FundMultiSelect({ funds, selected, onChange, shortNames }) {
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-full mt-1 z-20 bg-white border border-slate-200 rounded-2xl shadow-xl w-72 py-2 max-h-96 overflow-y-auto">
+          <div className="absolute left-0 top-full mt-1 z-20 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl w-72 py-2 max-h-96 overflow-y-auto">
             <button
               onClick={toggleAll}
-              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-left transition-colors border-b border-slate-100"
+              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 text-left transition-colors border-b border-slate-100 dark:border-slate-800"
             >
               <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
                 allSelected ? 'bg-violet-600 border-violet-600' : 'border-slate-300'
               }`}>
                 {allSelected && <Check className="w-3 h-3 text-white" />}
               </div>
-              <span className="text-sm font-semibold text-slate-700">
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 {allSelected ? 'Deselect all' : 'Select all'}
               </span>
             </button>
@@ -203,7 +203,7 @@ function FundMultiSelect({ funds, selected, onChange, shortNames }) {
               <button
                 key={f.fund_id}
                 onClick={() => toggle(f.fund_id)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-left transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 text-left transition-colors"
               >
                 <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
                   selected.has(f.fund_id) ? 'bg-violet-600 border-violet-600' : 'border-slate-300'
@@ -211,8 +211,8 @@ function FundMultiSelect({ funds, selected, onChange, shortNames }) {
                   {selected.has(f.fund_id) && <Check className="w-3 h-3 text-white" />}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-800 leading-snug">{f.fund_name}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{fmtMonth(f.report_month)}</p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 leading-snug">{f.fund_name}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{fmtMonth(f.report_month)}</p>
                 </div>
               </button>
             ))}
@@ -269,36 +269,36 @@ function FundSelect({ funds, value, onChange, shortNames, placeholder = 'Search 
 
   return (
     <div ref={containerRef} className="relative">
-      <div className={`flex items-center gap-2 px-3 py-2 bg-white border rounded-xl shadow-sm transition-all min-w-[220px] ${dropOpen ? 'border-violet-400 ring-2 ring-violet-200' : 'border-slate-200 hover:border-violet-300'}`}>
+      <div className={`flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border rounded-xl shadow-sm transition-all min-w-[220px] ${dropOpen ? 'border-violet-400 ring-2 ring-violet-200' : 'border-slate-200 dark:border-slate-700 hover:border-violet-300'}`}>
         <input
           ref={inputRef}
           value={query}
           onChange={e => { setQuery(e.target.value); setDropOpen(true); }}
           onFocus={() => { setQuery(''); setDropOpen(true); }}
           placeholder={placeholder}
-          className="flex-1 text-sm text-slate-700 bg-transparent outline-none placeholder:text-slate-400 min-w-0"
+          className="flex-1 text-sm text-slate-700 dark:text-slate-300 bg-transparent outline-none placeholder:text-slate-400 dark:text-slate-500 min-w-0"
         />
         {selected && !dropOpen ? (
           <button onMouseDown={e => { e.preventDefault(); onChange(null); setQuery(''); setDropOpen(true); inputRef.current?.focus(); }}
-            className="text-slate-300 hover:text-slate-500 flex-shrink-0">
+            className="text-slate-300 hover:text-slate-500 dark:text-slate-400 dark:text-slate-500 flex-shrink-0">
             <X className="w-3.5 h-3.5" />
           </button>
         ) : (
-          <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${dropOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0 transition-transform ${dropOpen ? 'rotate-180' : ''}`} />
         )}
       </div>
 
       {dropOpen && results.length > 0 && (
-        <div className="absolute left-0 top-full mt-1 z-30 bg-white border border-slate-200 rounded-2xl shadow-xl w-[360px] py-1.5 max-h-72 overflow-y-auto">
+        <div className="absolute left-0 top-full mt-1 z-30 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl w-[360px] py-1.5 max-h-72 overflow-y-auto">
           {results.map(f => (
             <button
               key={f.fund_id}
               onMouseDown={e => { e.preventDefault(); select(f); }}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-left transition-colors ${f.fund_id === value ? 'bg-violet-50' : ''}`}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 text-left transition-colors ${f.fund_id === value ? 'bg-violet-50' : ''}`}
             >
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-800 leading-snug truncate">{f.fund_name}</p>
-                {f.report_month && <p className="text-xs text-slate-400 mt-0.5">{fmtMonth(f.report_month)}</p>}
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-200 leading-snug truncate">{f.fund_name}</p>
+                {f.report_month && <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{fmtMonth(f.report_month)}</p>}
               </div>
               {f.fund_id === value && <Check className="w-4 h-4 text-violet-600 flex-shrink-0" />}
             </button>
@@ -365,8 +365,8 @@ function OverlapTrend({ matrixFunds, shortNames }) {
   return (
     <div>
       {/* Fund selectors */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-6">
-        <p className="text-xs text-slate-500 mb-3 font-medium">Compare two funds over time</p>
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-6">
+        <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-3 font-medium">Compare two funds over time</p>
         <div className="flex items-center gap-3 flex-wrap">
           <FundSelect
             funds={matrixFunds}
@@ -375,7 +375,7 @@ function OverlapTrend({ matrixFunds, shortNames }) {
             shortNames={shortNames}
             placeholder="Fund A…"
           />
-          <span className="text-slate-400 font-bold text-lg">×</span>
+          <span className="text-slate-400 dark:text-slate-500 font-bold text-lg">×</span>
           <FundSelect
             funds={matrixFunds.filter(f => f.fund_id !== fundAId)}
             value={fundBId}
@@ -384,13 +384,13 @@ function OverlapTrend({ matrixFunds, shortNames }) {
             placeholder="Fund B…"
           />
           {trendData && (
-            <span className="ml-auto text-xs text-slate-400">{trendData.length} common month{trendData.length !== 1 ? 's' : ''}</span>
+            <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">{trendData.length} common month{trendData.length !== 1 ? 's' : ''}</span>
           )}
         </div>
       </div>
 
       {fundAId === fundBId && fundAId && (
-        <div className="text-sm text-slate-500 p-4">Please select two different funds.</div>
+        <div className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 p-4">Please select two different funds.</div>
       )}
 
       {loading && (
@@ -402,7 +402,7 @@ function OverlapTrend({ matrixFunds, shortNames }) {
       {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>}
 
       {trendData && trendData.length === 0 && (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-slate-500 text-sm">
+        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm">
           No overlapping months found for these two funds.
         </div>
       )}
@@ -432,12 +432,12 @@ function OverlapTrend({ matrixFunds, shortNames }) {
           </div>
 
           {/* Line chart */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-sm font-semibold text-slate-700">Overlap % Over Time</h2>
-              <span className="text-xs text-slate-400">Click any point to see shared stocks</span>
+              <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Overlap % Over Time</h2>
+              <span className="text-xs text-slate-400 dark:text-slate-500">Click any point to see shared stocks</span>
             </div>
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
               {shortNames.get(fundA?.fund_name)} × {shortNames.get(fundB?.fund_name)}
             </p>
             <ResponsiveContainer width="100%" height={320}>
@@ -455,15 +455,15 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                     if (!active || !payload?.length) return null;
                     const d = payload[0].payload;
                     return (
-                      <div className="bg-white border border-slate-200 rounded-xl shadow-xl p-3 text-sm">
-                        <p className="font-semibold text-slate-700 mb-1">{d.label}</p>
+                      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-3 text-sm">
+                        <p className="font-semibold text-slate-700 dark:text-slate-300 mb-1">{d.label}</p>
                         <p className="text-violet-700 font-bold">{fmt(d.overlap_pct)}% avg overlap</p>
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                           {shortNames.get(fundA?.fund_name)}: {fmt(d.overlap_pct_a)}%
                           {' · '}
                           {shortNames.get(fundB?.fund_name)}: {fmt(d.overlap_pct_b)}%
                         </p>
-                        <p className="text-xs text-slate-400">{d.shared_count} shared stocks</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">{d.shared_count} shared stocks</p>
                         <p className="text-xs text-violet-400 mt-1">Click to drill down</p>
                       </div>
                     );
@@ -494,18 +494,18 @@ function OverlapTrend({ matrixFunds, shortNames }) {
 
           {/* Drill-down for selected month */}
           {monthSel && (
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-6">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden mb-6">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-800 text-sm">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-sm">
                       {shortNames.get(fundA?.fund_name)} × {shortNames.get(fundB?.fund_name)}
                     </span>
                     <span className="text-xs font-semibold px-2 py-0.5 rounded bg-violet-100 text-violet-700">
                       {fmtMonth(monthSel.month)}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500">
+                  <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">
                     <span className={`font-bold px-2 py-0.5 rounded border ${overlapColor(monthSel.overlap_pct).bg} ${overlapColor(monthSel.overlap_pct).text} ${overlapColor(monthSel.overlap_pct).border}`}>
                       {fmt(monthSel.overlap_pct)}% overlap
                     </span>
@@ -513,23 +513,23 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                   </div>
                 </div>
                 <button onClick={() => setSelectedMonth(null)}
-                  className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors">
+                  className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:text-slate-500 transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
               {/* Three-column layout: unique A | shared | unique B */}
-              <div className="grid grid-cols-3 divide-x divide-slate-100">
+              <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-700">
 
                 {/* Unique to Fund A */}
                 <div>
-                  <div className="px-4 py-2.5 bg-blue-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="px-4 py-2.5 bg-blue-50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <p className="text-xs font-semibold text-blue-700">Only in {shortNames.get(fundA?.fund_name)}</p>
                     <span className="text-xs text-blue-400">{monthSel.unique_a?.length ?? 0}</span>
                   </div>
                   <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                     {(monthSel.unique_a ?? []).map(h => (
-                      <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50">
-                        <p className="text-xs font-medium text-slate-800 leading-snug">{h.stock_name}</p>
+                      <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                        <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
                         <div className="flex items-center justify-between mt-0.5">
                           {h.industry
                             ? <span className={`inline-flex items-center px-1 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
@@ -539,26 +539,26 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                       </div>
                     ))}
                     {(monthSel.unique_a ?? []).length === 0 && (
-                      <p className="px-4 py-4 text-xs text-slate-400 text-center">No unique stocks</p>
+                      <p className="px-4 py-4 text-xs text-slate-400 dark:text-slate-500 text-center">No unique stocks</p>
                     )}
                   </div>
                 </div>
 
                 {/* Shared */}
                 <div>
-                  <div className="px-4 py-2.5 bg-violet-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="px-4 py-2.5 bg-violet-50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <p className="text-xs font-semibold text-violet-700">Shared holdings</p>
                     <span className="text-xs text-violet-400">{monthSel.shared_count}</span>
                   </div>
                   <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                     {monthSel.shared_holdings.map(h => (
-                      <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50">
-                        <p className="text-xs font-medium text-slate-800 leading-snug">{h.stock_name}</p>
+                      <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                        <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
                         <div className="flex items-center justify-between mt-0.5">
                           {h.industry
                             ? <span className={`inline-flex items-center px-1 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
                             : <span />}
-                          <span className="text-xs tabular-nums text-slate-500">
+                          <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400 dark:text-slate-500">
                             <span className="text-blue-500 font-semibold">{fmt(h.pct_a, 2)}%</span>
                             {' · '}
                             <span className="text-emerald-500 font-semibold">{fmt(h.pct_b, 2)}%</span>
@@ -567,21 +567,21 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                       </div>
                     ))}
                     {monthSel.shared_holdings.length === 0 && (
-                      <p className="px-4 py-4 text-xs text-slate-400 text-center">No shared stocks</p>
+                      <p className="px-4 py-4 text-xs text-slate-400 dark:text-slate-500 text-center">No shared stocks</p>
                     )}
                   </div>
                 </div>
 
                 {/* Unique to Fund B */}
                 <div>
-                  <div className="px-4 py-2.5 bg-emerald-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="px-4 py-2.5 bg-emerald-50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <p className="text-xs font-semibold text-emerald-700">Only in {shortNames.get(fundB?.fund_name)}</p>
                     <span className="text-xs text-emerald-400">{monthSel.unique_b?.length ?? 0}</span>
                   </div>
                   <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                     {(monthSel.unique_b ?? []).map(h => (
-                      <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50">
-                        <p className="text-xs font-medium text-slate-800 leading-snug">{h.stock_name}</p>
+                      <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                        <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
                         <div className="flex items-center justify-between mt-0.5">
                           {h.industry
                             ? <span className={`inline-flex items-center px-1 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
@@ -591,7 +591,7 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                       </div>
                     ))}
                     {(monthSel.unique_b ?? []).length === 0 && (
-                      <p className="px-4 py-4 text-xs text-slate-400 text-center">No unique stocks</p>
+                      <p className="px-4 py-4 text-xs text-slate-400 dark:text-slate-500 text-center">No unique stocks</p>
                     )}
                   </div>
                 </div>
@@ -630,28 +630,28 @@ function SectorHeatmap({ data, topN }) {
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6 overflow-x-auto">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6 overflow-x-auto">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-sm font-semibold text-slate-700">Sector Allocation Heatmap</h2>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Sector Allocation Heatmap</h2>
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-400">Low</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">Low</span>
           {[0.05,0.2,0.4,0.65,0.85,1].map(t => {
             const r = Math.round(248 + t * (109 - 248));
             const g = Math.round(250 + t * ( 40 - 250));
             const b = Math.round(252 + t * (217 - 252));
             return <span key={t} className="w-5 h-3 rounded-sm inline-block" style={{ backgroundColor: `rgb(${r},${g},${b})` }} />;
           })}
-          <span className="text-xs text-slate-400">High</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">High</span>
         </div>
       </div>
-      <p className="text-xs text-slate-400 mb-4">Each cell = % of NAV — colour intensity = relative weight</p>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Each cell = % of NAV — colour intensity = relative weight</p>
       <table className="border-separate border-spacing-0.5 text-xs">
         <thead>
           <tr>
             <th className="w-32 pb-1" />
             {data.months.map(m => (
               <th key={m} className="pb-1 min-w-[56px]">
-                <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">{fmtMonth(m)}</span>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 whitespace-nowrap">{fmtMonth(m)}</span>
               </th>
             ))}
           </tr>
@@ -660,7 +660,7 @@ function SectorHeatmap({ data, topN }) {
           {industries.map((ind, i) => (
             <tr key={ind}>
               <td className="pr-2 py-0.5 text-right">
-                <span className="inline-flex items-center gap-1 font-medium text-slate-600 truncate max-w-[120px]" title={ind}>
+                <span className="inline-flex items-center gap-1 font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500 truncate max-w-[120px]" title={ind}>
                   <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
                   {ind}
                 </span>
@@ -696,7 +696,7 @@ function SectorBumpChart({ data, topN }) {
   const months     = data.months;
 
   if (months.length < 2) return (
-    <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-slate-500 text-sm mb-6">
+    <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm mb-6">
       Need at least 2 months of data to show rank changes.
     </div>
   );
@@ -742,12 +742,12 @@ function SectorBumpChart({ data, topN }) {
   const labelStep = Math.max(1, Math.ceil(months.length / 12));
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-sm font-semibold text-slate-700">Sector Rank Over Time</h2>
-        <span className="text-xs text-slate-400">#1 = largest allocation · hover to highlight</span>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Sector Rank Over Time</h2>
+        <span className="text-xs text-slate-400 dark:text-slate-500">#1 = largest allocation · hover to highlight</span>
       </div>
-      <p className="text-xs text-slate-400 mb-4">
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
         Lines crossing = sectors swapping rank · S-curve = gradual shift · flat = stable position
       </p>
       <div className="overflow-x-auto">
@@ -901,10 +901,10 @@ function SectorBumpChart({ data, topN }) {
             const indIdx = industries.indexOf(hovered);
             const color  = SECTOR_COLORS[indIdx % SECTOR_COLORS.length];
             return (
-              <span key={m} className="text-xs tabular-nums text-slate-600">
-                <span className="text-slate-400">{fmtMonth(m)}</span>{' '}
+              <span key={m} className="text-xs tabular-nums text-slate-600 dark:text-slate-400 dark:text-slate-500">
+                <span className="text-slate-400 dark:text-slate-500">{fmtMonth(m)}</span>{' '}
                 <span className="font-bold" style={{ color }}>#{rank + 1}</span>{' '}
-                <span className="text-slate-500">({fmt(pct)}%)</span>
+                <span className="text-slate-500 dark:text-slate-400 dark:text-slate-500">({fmt(pct)}%)</span>
               </span>
             );
           })}
@@ -955,8 +955,8 @@ function SectorDrift({ allFunds }) {
     if (!active || !payload?.length) return null;
     const sorted = [...payload].sort((a, b) => b.value - a.value).filter(p => p.value > 0);
     return (
-      <div className="bg-white border border-slate-200 rounded-xl shadow-xl p-3 text-xs max-w-[220px]">
-        <p className="font-semibold text-slate-700 mb-2">{label}</p>
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-3 text-xs max-w-[220px]">
+        <p className="font-semibold text-slate-700 dark:text-slate-300 mb-2">{label}</p>
         {sorted.map(p => (
           <div key={p.dataKey} className="flex justify-between gap-3 py-0.5">
             <span style={{ color: p.fill }} className="truncate max-w-[130px]">{p.dataKey}</span>
@@ -975,8 +975,8 @@ function SectorDrift({ allFunds }) {
   return (
     <div>
       {/* Controls */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-6">
-        <p className="text-xs text-slate-500 mb-3 font-medium">How has this fund's sector allocation shifted?</p>
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-6">
+        <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-3 font-medium">How has this fund's sector allocation shifted?</p>
         <div className="flex items-center gap-4 flex-wrap">
           <FundSelect
             funds={fundList}
@@ -986,24 +986,24 @@ function SectorDrift({ allFunds }) {
             placeholder="Select fund…"
           />
           {/* Chart type selector */}
-          <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
             {chartTypes.map(ct => (
               <button key={ct.id} onClick={() => setChartType(ct.id)}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
                   chartType === ct.id
-                    ? 'bg-white text-violet-700 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
+                    ? 'bg-white dark:bg-slate-800 text-violet-700 shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'
                 }`}>{ct.label}</button>
             ))}
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <span className="text-xs text-slate-500">Top sectors:</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">Top sectors:</span>
             {[5, 8, 12].map(n => (
               <button key={n} onClick={() => setTopN(n)}
                 className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors ${
                   topN === n
                     ? 'bg-violet-600 text-white border-violet-600'
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:border-violet-300'
                 }`}>{n}</button>
             ))}
           </div>
@@ -1023,12 +1023,12 @@ function SectorDrift({ allFunds }) {
 
           {/* Chart */}
           {chartType === 'area' && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6">
               <div className="flex items-center justify-between mb-1">
-                <h2 className="text-sm font-semibold text-slate-700">Sector Allocation Over Time</h2>
-                <span className="text-xs text-slate-400">{data.months.length} month{data.months.length !== 1 ? 's' : ''} · stacked % of NAV</span>
+                <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Sector Allocation Over Time</h2>
+                <span className="text-xs text-slate-400 dark:text-slate-500">{data.months.length} month{data.months.length !== 1 ? 's' : ''} · stacked % of NAV</span>
               </div>
-              <p className="text-xs text-slate-400 mb-4">{allFunds.find(f => f.id === fundId)?.name}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{allFunds.find(f => f.id === fundId)?.name}</p>
               <ResponsiveContainer width="100%" height={380}>
                 <AreaChart data={chartData} margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -1051,30 +1051,30 @@ function SectorDrift({ allFunds }) {
           {chartType === 'bump' && <SectorBumpChart data={data} topN={topN} />}
 
           {/* Month-by-month table */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm overflow-x-auto">
-            <h2 className="text-sm font-semibold text-slate-700 mb-4">Sector Breakdown by Month</h2>
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm overflow-x-auto">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Sector Breakdown by Month</h2>
             <table className="text-xs min-w-max">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="px-3 py-2 text-left font-semibold text-slate-500 uppercase w-28">Sector</th>
+                <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+                  <th className="px-3 py-2 text-left font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase w-28">Sector</th>
                   {data.months.map(m => (
-                    <th key={m} className="px-3 py-2 text-right font-semibold text-slate-500 uppercase whitespace-nowrap">
+                    <th key={m} className="px-3 py-2 text-right font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase whitespace-nowrap">
                       {fmtMonth(m)}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {data.industries.slice(0, topN + 2).map((ind, i) => (
-                  <tr key={ind} className="hover:bg-slate-50">
-                    <td className="px-3 py-2 font-medium text-slate-700 truncate max-w-[120px]" title={ind}>
+                  <tr key={ind} className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                    <td className="px-3 py-2 font-medium text-slate-700 dark:text-slate-300 truncate max-w-[120px]" title={ind}>
                       <span className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
                       {ind}
                     </td>
                     {data.months.map(m => {
                       const val = data.series.find(s => s.month === m)?.[ind] ?? 0;
                       return (
-                        <td key={m} className="px-3 py-2 text-right tabular-nums text-slate-700">
+                        <td key={m} className="px-3 py-2 text-right tabular-nums text-slate-700 dark:text-slate-300">
                           {val > 0 ? `${fmt(val)}%` : <span className="text-slate-300">—</span>}
                         </td>
                       );
@@ -1124,31 +1124,31 @@ function HiddenGems() {
   return (
     <div>
       {/* Header */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-6">
-        <p className="text-xs text-slate-500 mb-3 font-medium">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-6">
+        <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-3 font-medium">
           Stocks held exclusively by one fund — unique high-conviction bets, not consensus picks.
         </p>
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Min allocation:</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">Min allocation:</span>
             {[0.25, 0.5, 1, 2].map(t => (
               <button key={t} onClick={() => setMinPct(t)}
                 className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors ${
                   minPct === t
                     ? 'bg-violet-600 text-white border-violet-600'
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:border-violet-300'
                 }`}>{t}%</button>
             ))}
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <span className="text-xs text-slate-500">Sort:</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">Sort:</span>
             <button onClick={() => setSortBy('pct')}
               className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors ${
-                sortBy === 'pct' ? 'bg-violet-600 text-white border-violet-600' : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
+                sortBy === 'pct' ? 'bg-violet-600 text-white border-violet-600' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:border-violet-300'
               }`}>By allocation</button>
             <button onClick={() => setSortBy('name')}
               className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors ${
-                sortBy === 'name' ? 'bg-violet-600 text-white border-violet-600' : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
+                sortBy === 'name' ? 'bg-violet-600 text-white border-violet-600' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:border-violet-300'
               }`}>By name</button>
           </div>
         </div>
@@ -1184,11 +1184,11 @@ function HiddenGems() {
       {[...byFund.entries()].sort((a, b) => b[1].count - a[1].count).map(([fundId, info]) => {
         const gems = filtered.filter(d => d.fund_id === fundId);
         return (
-          <div key={fundId} className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-4">
-            <div className="flex items-center justify-between px-5 py-3 bg-slate-50 border-b border-slate-100">
+          <div key={fundId} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden mb-4">
+            <div className="flex items-center justify-between px-5 py-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
               <div>
-                <p className="text-sm font-semibold text-slate-800">{info.fund_name}</p>
-                <p className="text-xs text-slate-400">{gems.length} exclusive position{gems.length !== 1 ? 's' : ''} · {fmtMonth(gems[0]?.report_month)}</p>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{info.fund_name}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">{gems.length} exclusive position{gems.length !== 1 ? 's' : ''} · {fmtMonth(gems[0]?.report_month)}</p>
               </div>
               <span className="text-xs font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700">
                 {fmt(gems.reduce((s, g) => s + g.pct, 0))}% total NAV
@@ -1197,27 +1197,27 @@ function HiddenGems() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100">
-                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500 uppercase">#</th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500 uppercase">Stock</th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500 uppercase">Industry</th>
-                    <th className="px-4 py-2 text-right text-xs font-semibold text-slate-500 uppercase">% NAV</th>
+                  <tr className="border-b border-slate-100 dark:border-slate-800">
+                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">#</th>
+                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Stock</th>
+                    <th className="px-4 py-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Industry</th>
+                    <th className="px-4 py-2 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">% NAV</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                   {gems.map((g, i) => {
                     const color = getIndustryColor(g.industry).hex;
                     return (
-                      <tr key={g.isin} className="hover:bg-slate-50">
-                        <td className="px-4 py-2.5 text-xs text-slate-400">{i + 1}</td>
+                      <tr key={g.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                        <td className="px-4 py-2.5 text-xs text-slate-400 dark:text-slate-500">{i + 1}</td>
                         <td className="px-4 py-2.5">
-                          <p className="font-medium text-slate-800">{g.stock_name}</p>
-                          <p className="text-xs text-slate-400 font-mono">{g.isin}</p>
+                          <p className="font-medium text-slate-800 dark:text-slate-200">{g.stock_name}</p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{g.isin}</p>
                         </td>
                         <td className="px-4 py-2.5">
                           {g.industry
                             ? <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(g.industry)}`}>{g.industry}</span>
-                            : <span className="text-slate-400 text-xs">—</span>}
+                            : <span className="text-slate-400 dark:text-slate-500 text-xs">—</span>}
                         </td>
                         <td className="px-4 py-2.5 text-right tabular-nums font-bold text-sm" style={{ color }}>
                           {fmt(g.pct, 4)}%
@@ -1233,7 +1233,7 @@ function HiddenGems() {
       })}
 
       {filtered.length === 0 && (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-slate-500 text-sm">
+        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm">
           No exclusive positions ≥ {minPct}% found. Try lowering the threshold.
         </div>
       )}
@@ -1422,7 +1422,7 @@ function EntryExitTimeline({ allFunds }) {
         <FundSelect funds={fundList} value={fundId} onChange={id => { setFundId(id); setHovered(null); }}
           shortNames={shortNames} />
         {stats && (
-          <span className="text-xs text-slate-400 ml-2">
+          <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">
             {stats.total} stocks · {stats.current} current · {stats.exited} exited · {stats.reentries} re-entries
           </span>
         )}
@@ -1431,7 +1431,7 @@ function EntryExitTimeline({ allFunds }) {
       {/* Controls */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         {/* Filter */}
-        <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
           {[
             { id: 'all',     label: 'All' },
             { id: 'current', label: 'Current' },
@@ -1440,7 +1440,7 @@ function EntryExitTimeline({ allFunds }) {
           ].map(f => (
             <button key={f.id} onClick={() => setFilter(f.id)}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-                filter === f.id ? 'bg-white text-violet-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                filter === f.id ? 'bg-white dark:bg-slate-800 text-violet-700 shadow-sm' : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'
               }`}>
               {f.label}
             </button>
@@ -1448,7 +1448,7 @@ function EntryExitTimeline({ allFunds }) {
         </div>
 
         {/* Sort */}
-        <div className="flex items-center gap-1.5 text-xs text-slate-500">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">
           <span className="font-medium">Sort:</span>
           {[
             { id: 'status',    label: 'Status' },
@@ -1466,7 +1466,7 @@ function EntryExitTimeline({ allFunds }) {
         </div>
 
         {/* Min pct */}
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 ml-auto">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 ml-auto">
           <span className="font-medium">Min % NAV:</span>
           {[0.1, 0.5, 1, 2].map(p => (
             <button key={p} onClick={() => setMinPct(p)}
@@ -1481,15 +1481,15 @@ function EntryExitTimeline({ allFunds }) {
 
       {/* Gantt */}
       {!processed ? (
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center text-slate-400 text-sm">
+        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-12 text-center text-slate-400 dark:text-slate-500 text-sm">
           Select a fund to see its holding timeline
         </div>
       ) : visible.length === 0 ? (
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center text-slate-400 text-sm">
+        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 text-center text-slate-400 dark:text-slate-500 text-sm">
           No stocks match the current filter. Try lowering the Min % NAV.
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
           <div ref={containerRef} className="relative overflow-auto" style={{ maxHeight: 640 }}
             onMouseMove={e => setMousePos({ x: e.clientX, y: e.clientY })}>
 
@@ -1650,31 +1650,31 @@ function EntryExitTimeline({ allFunds }) {
                   <p className="font-semibold text-white text-[13px] leading-snug mb-0.5">
                     {stock.stock_name}
                   </p>
-                  <p className="text-slate-400 text-[11px] mb-2.5">{stock.industry}</p>
+                  <p className="text-slate-400 dark:text-slate-500 text-[11px] mb-2.5">{stock.industry}</p>
                   <div className="space-y-1">
                     <div className="flex justify-between gap-3">
-                      <span className="text-slate-400">Period</span>
+                      <span className="text-slate-400 dark:text-slate-500">Period</span>
                       <span className="text-white font-medium">
                         {fmtMonth(seg.start)} → {fmtMonth(seg.end)}
                       </span>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <span className="text-slate-400">Duration</span>
+                      <span className="text-slate-400 dark:text-slate-500">Duration</span>
                       <span className="text-white font-medium">{nMonths} month{nMonths !== 1 ? 's' : ''}</span>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <span className="text-slate-400">Avg % NAV</span>
+                      <span className="text-slate-400 dark:text-slate-500">Avg % NAV</span>
                       <span className="text-white font-medium">{fmt(segAvg)}%</span>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <span className="text-slate-400">Status</span>
+                      <span className="text-slate-400 dark:text-slate-500">Status</span>
                       <span className={`font-semibold ${ended ? 'text-orange-400' : 'text-emerald-400'}`}>
                         {stock.isReentry && ended ? 'Exited (was re-entry)' : ended ? 'Exited' : 'Currently held'}
                       </span>
                     </div>
                     {stock.isReentry && (
                       <div className="flex justify-between gap-3">
-                        <span className="text-slate-400">Segments</span>
+                        <span className="text-slate-400 dark:text-slate-500">Segments</span>
                         <span className="text-amber-400 font-medium">{stock.segments.length} periods</span>
                       </div>
                     )}
@@ -1685,7 +1685,7 @@ function EntryExitTimeline({ allFunds }) {
           </div>
 
           {/* Legend */}
-          <div className="px-4 py-3 border-t border-slate-100 flex items-center gap-5 flex-wrap text-xs text-slate-500">
+          <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-5 flex-wrap text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">
             <div className="flex items-center gap-1.5">
               <svg width={28} height={12}>
                 <rect x={0} y={1} width={20} height={10} rx={5} fill="#6366f1" fillOpacity={0.82} />
@@ -1714,7 +1714,7 @@ function EntryExitTimeline({ allFunds }) {
               </svg>
               Re-entry (gap = exit + return)
             </div>
-            <span className="ml-auto text-slate-400">{visible.length} stocks shown</span>
+            <span className="ml-auto text-slate-400 dark:text-slate-500">{visible.length} stocks shown</span>
           </div>
         </div>
       )}
@@ -1729,7 +1729,7 @@ const DIFF_COLORS = {
   exit:      { bg: 'bg-red-50',     border: 'border-red-200',     text: 'text-red-700',     badge: 'bg-red-100 text-red-700',     label: 'Exited',     icon: '○' },
   increased: { bg: 'bg-blue-50',    border: 'border-blue-100',    text: 'text-blue-700',    badge: 'bg-blue-100 text-blue-700',   label: 'Increased',  icon: '▲' },
   decreased: { bg: 'bg-orange-50',  border: 'border-orange-100',  text: 'text-orange-700',  badge: 'bg-orange-100 text-orange-700', label: 'Decreased', icon: '▼' },
-  unchanged: { bg: '',              border: 'border-slate-100',   text: 'text-slate-400',   badge: 'bg-slate-100 text-slate-500', label: 'Unchanged',  icon: '—' },
+  unchanged: { bg: '',              border: 'border-slate-100',   text: 'text-slate-400 dark:text-slate-500',   badge: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 dark:text-slate-500', label: 'Unchanged',  icon: '—' },
 };
 
 function MonthlyDiff({ allFunds }) {
@@ -1808,7 +1808,7 @@ function MonthlyDiff({ allFunds }) {
     return diff.filter(r => r.type === filter);
   }, [diff, filter]);
 
-  const selectCls = 'px-3 py-2 text-sm font-medium bg-white border border-slate-200 rounded-xl shadow-sm hover:border-violet-300 focus:outline-none focus:border-violet-400 cursor-pointer text-slate-700';
+  const selectCls = 'px-3 py-2 text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm hover:border-violet-300 focus:outline-none focus:border-violet-400 cursor-pointer text-slate-700 dark:text-slate-300';
 
   return (
     <div>
@@ -1821,14 +1821,14 @@ function MonthlyDiff({ allFunds }) {
               <option key={e.report_month} value={e.report_month}>{fmtMonth(e.report_month)}</option>
             ))}
           </select>
-          <ArrowLeftRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
+          <ArrowLeftRight className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" />
           <select value={monthB ?? ''} onChange={e => setMonthB(e.target.value)} className={selectCls}>
             {extractions.map(e => (
               <option key={e.report_month} value={e.report_month}>{fmtMonth(e.report_month)}</option>
             ))}
           </select>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 ml-auto">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 ml-auto">
           <span className="font-medium">Min change:</span>
           {[0.1, 0.3, 0.5, 1].map(t => (
             <button key={t} onClick={() => setThreshold(t)}
@@ -1860,7 +1860,7 @@ function MonthlyDiff({ allFunds }) {
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${
                     filter === f.id
                       ? 'bg-violet-600 text-white border-violet-600'
-                      : c ? `${c.bg} ${c.border} ${c.text}` : 'bg-white border-slate-200 text-slate-600 hover:border-violet-300'
+                      : c ? `${c.bg} ${c.border} ${c.text}` : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 dark:text-slate-500 hover:border-violet-300'
                   }`}>
                   {f.label}
                 </button>
@@ -1869,20 +1869,20 @@ function MonthlyDiff({ allFunds }) {
           </div>
 
           {/* Table */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-28">Change</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Stock</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{fmtMonth(monthA)}</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{fmtMonth(monthB)}</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Δ</th>
+                <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase w-28">Change</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Stock</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">{fmtMonth(monthA)}</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">{fmtMonth(monthB)}</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Δ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {visible.length === 0 && (
-                  <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-400 text-sm">No changes to show</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-400 dark:text-slate-500 text-sm">No changes to show</td></tr>
                 )}
                 {visible.map(row => {
                   const c = DIFF_COLORS[row.type];
@@ -1894,13 +1894,13 @@ function MonthlyDiff({ allFunds }) {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-slate-800">{row.stock_name}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{row.industry}</p>
+                        <p className="font-semibold text-slate-800 dark:text-slate-200">{row.stock_name}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{row.industry}</p>
                       </td>
-                      <td className="px-4 py-3 text-right tabular-nums text-slate-500">
+                      <td className="px-4 py-3 text-right tabular-nums text-slate-500 dark:text-slate-400 dark:text-slate-500">
                         {row.pctA > 0 ? `${fmt(row.pctA)}%` : '—'}
                       </td>
-                      <td className="px-4 py-3 text-right tabular-nums text-slate-700 font-medium">
+                      <td className="px-4 py-3 text-right tabular-nums text-slate-700 dark:text-slate-300 font-medium">
                         {row.pctB > 0 ? `${fmt(row.pctB)}%` : '—'}
                       </td>
                       <td className={`px-4 py-3 text-right tabular-nums font-bold ${c.text}`}>
@@ -1918,7 +1918,7 @@ function MonthlyDiff({ allFunds }) {
       )}
 
       {!raw && !loading && (
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-10 text-center text-slate-400 text-sm">
+        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-10 text-center text-slate-400 dark:text-slate-500 text-sm">
           Select a fund and two months to compare
         </div>
       )}
@@ -2069,29 +2069,29 @@ function StockTracker({ allFunds }) {
     <div>
       {/* Search box */}
       <div className="relative mb-5 max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
         <input
           ref={searchRef}
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Search stock name or ISIN…"
-          className="w-full pl-9 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 bg-white"
+          className="w-full pl-9 pr-4 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 bg-white dark:bg-slate-800"
         />
         {searching && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">Searching…</span>
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-slate-500">Searching…</span>
         )}
 
         {/* Dropdown results */}
         {results.length > 0 && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setResults([])} />
-            <div className="absolute left-0 top-full mt-1 z-20 bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-h-72 overflow-y-auto py-1">
+            <div className="absolute left-0 top-full mt-1 z-20 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl w-full max-h-72 overflow-y-auto py-1">
               {results.map(r => (
                 <button key={r.isin} onClick={() => { skipSearch.current = true; setSelected(r); setQuery(r.stock_name); setResults([]); }}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-slate-50 text-left transition-colors">
+                  className="w-full flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 text-left transition-colors">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800 truncate">{r.stock_name}</p>
-                    <p className="text-xs text-slate-400">{r.industry} · {r.isin}</p>
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{r.stock_name}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">{r.industry} · {r.isin}</p>
                   </div>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-violet-50 text-violet-700 flex-shrink-0">
                     {r.fund_count} fund{r.fund_count !== 1 ? 's' : ''} ever
@@ -2110,18 +2110,18 @@ function StockTracker({ allFunds }) {
           {/* Header */}
           <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
             <div>
-              <h2 className="text-base font-bold text-slate-800">{selected?.stock_name}</h2>
-              <p className="text-xs text-slate-400 mt-0.5">{selected?.industry} · {selected?.isin}</p>
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-200">{selected?.stock_name}</h2>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{selected?.industry} · {selected?.isin}</p>
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
-              <span className="font-medium text-slate-700">
+            <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 flex-wrap">
+              <span className="font-medium text-slate-700 dark:text-slate-300">
                 {processed.currentHolders.length} fund{processed.currentHolders.length !== 1 ? 's' : ''} currently holding
               </span>
               {processed.exited.length > 0 && (
-                <span>· {processed.exited.length} exited · <span className="text-slate-400">{processed.currentHolders.length + processed.exited.length} total ever</span></span>
+                <span>· {processed.exited.length} exited · <span className="text-slate-400 dark:text-slate-500">{processed.currentHolders.length + processed.exited.length} total ever</span></span>
               )}
               {/* Chart filter segmented control */}
-              <div className="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5 ml-2">
+              <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 ml-2">
                 {[
                   { id: 'active',      label: 'Active only' },
                   { id: 'significant', label: 'Significant' },
@@ -2130,8 +2130,8 @@ function StockTracker({ allFunds }) {
                   <button key={opt.id} onClick={() => setChartFilter(opt.id)}
                     className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                       chartFilter === opt.id
-                        ? 'bg-white text-violet-700 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
+                        ? 'bg-white dark:bg-slate-800 text-violet-700 shadow-sm'
+                        : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'
                     }`}>
                     {opt.label}
                   </button>
@@ -2141,8 +2141,8 @@ function StockTracker({ allFunds }) {
           </div>
 
           {/* Chart */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-4">
-            <p className="text-xs text-slate-400 mb-4">% NAV allocation over time per fund</p>
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-4">
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">% NAV allocation over time per fund</p>
             <ResponsiveContainer width="100%" height={320}>
               <LineChart data={processed.chartData} margin={{ top: 4, right: 16, bottom: 0, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -2162,14 +2162,14 @@ function StockTracker({ allFunds }) {
             </ResponsiveContainer>
 
             {/* Custom legend */}
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-slate-100 pt-3">
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-slate-100 dark:border-slate-800 pt-3">
               {visibleFundIds.map(fid => {
                 const meta = processed.fundMeta.get(fid);
                 const isCurrent = processed.currentHolders.some(h => h.fund_id === fid);
                 return (
                   <div key={fid} className="flex items-center gap-1.5 min-w-0" title={meta?.name}>
                     <span className="w-3 flex-shrink-0" style={{ height: 2, backgroundColor: colorMap.get(fid), display: 'inline-block', borderRadius: 2, verticalAlign: 'middle', marginBottom: 1 }} />
-                    <span className={`text-xs truncate max-w-[160px] ${isCurrent ? 'text-slate-700 font-medium' : 'text-slate-400'}`}>
+                    <span className={`text-xs truncate max-w-[160px] ${isCurrent ? 'text-slate-700 dark:text-slate-300 font-medium' : 'text-slate-400 dark:text-slate-500'}`}>
                       {meta?.short ?? meta?.name}
                     </span>
                   </div>
@@ -2180,43 +2180,43 @@ function StockTracker({ allFunds }) {
 
           {/* Current holders + exited side by side */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">
                   Currently holding · {fmtMonth(processed.latestMonth)}
                 </p>
               </div>
               {processed.currentHolders.length === 0
-                ? <p className="px-4 py-4 text-xs text-slate-400">No fund holds this stock now</p>
+                ? <p className="px-4 py-4 text-xs text-slate-400 dark:text-slate-500">No fund holds this stock now</p>
                 : (
-                  <div className="divide-y divide-slate-100">
+                  <div className="divide-y divide-slate-100 dark:divide-slate-700">
                     {processed.currentHolders.map((h, i) => (
                       <div key={h.fund_id} className="flex items-center gap-3 px-4 py-2.5">
                         <span className="w-2 h-2 rounded-full flex-shrink-0"
                           style={{ backgroundColor: colorMap.get(h.fund_id) ?? '#6366f1' }} />
-                        <span className="text-xs text-slate-700 truncate flex-1" title={h.name}>{h.name}</span>
-                        <span className="text-xs font-bold tabular-nums text-slate-800">{fmt(h.pct)}%</span>
+                        <span className="text-xs text-slate-700 dark:text-slate-300 truncate flex-1" title={h.name}>{h.name}</span>
+                        <span className="text-xs font-bold tabular-nums text-slate-800 dark:text-slate-200">{fmt(h.pct)}%</span>
                       </div>
                     ))}
                   </div>
                 )}
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">
                   Exited · {processed.exited.length} fund{processed.exited.length !== 1 ? 's' : ''}
                 </p>
               </div>
               {processed.exited.length === 0
-                ? <p className="px-4 py-4 text-xs text-slate-400">All funds still holding</p>
+                ? <p className="px-4 py-4 text-xs text-slate-400 dark:text-slate-500">All funds still holding</p>
                 : (
-                  <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+                  <div className="divide-y divide-slate-100 dark:divide-slate-700 max-h-64 overflow-y-auto">
                     {processed.exited.map(h => (
                       <div key={h.fund_id} className="flex items-center gap-3 px-4 py-2.5">
                         <span className="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0" />
-                        <span className="text-xs text-slate-400 truncate flex-1" title={h.name}>{h.name}</span>
-                        <span className="text-xs text-slate-400 tabular-nums">last {fmtMonth(h.lastSeen)}</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 truncate flex-1" title={h.name}>{h.name}</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 tabular-nums">last {fmtMonth(h.lastSeen)}</span>
                       </div>
                     ))}
                   </div>
@@ -2227,7 +2227,7 @@ function StockTracker({ allFunds }) {
       )}
 
       {!selected && (
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center text-slate-400 text-sm">
+        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-12 text-center text-slate-400 dark:text-slate-500 text-sm">
           Search for a stock above to see how all funds have allocated to it over time
         </div>
       )}
@@ -2304,7 +2304,7 @@ function OverlapMatrix() {
           shortNames={shortNames}
         />
         <div className="flex items-center gap-2 ml-2 flex-wrap">
-          <span className="text-xs font-medium text-slate-500">Overlap:</span>
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 dark:text-slate-500">Overlap:</span>
           {[
             { label: '< 5%',   cls: 'bg-emerald-50 border-emerald-100 text-emerald-700' },
             { label: '5–20%',  cls: 'bg-blue-50 border-blue-100 text-blue-700' },
@@ -2317,22 +2317,22 @@ function OverlapMatrix() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6 overflow-x-auto">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6 overflow-x-auto">
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-sm font-semibold text-slate-700">NAV-Weighted Overlap Heatmap</h2>
-          <span className="text-xs text-slate-400">Based on latest available month per fund</span>
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">NAV-Weighted Overlap Heatmap</h2>
+          <span className="text-xs text-slate-400 dark:text-slate-500">Based on latest available month per fund</span>
         </div>
-        <p className="text-xs text-slate-400 mb-4">Each cell = % of both portfolios duplicated — click to see shared stocks.</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Each cell = % of both portfolios duplicated — click to see shared stocks.</p>
         <table className="border-separate border-spacing-1.5">
           <thead>
             <tr>
               <th className="w-36" />
               {visibleFunds.map(f => (
                 <th key={f.fund_id} className="w-28 pb-2">
-                  <div className="text-xs font-semibold text-slate-600 text-center leading-tight px-1" title={f.fund_name}>
+                  <div className="text-xs font-semibold text-slate-600 dark:text-slate-400 dark:text-slate-500 text-center leading-tight px-1" title={f.fund_name}>
                     {shortNames.get(f.fund_name)}
                   </div>
-                  <div className="text-[10px] text-slate-400 text-center font-normal mt-0.5">{fmtMonth(f.report_month)}</div>
+                  <div className="text-[10px] text-slate-400 dark:text-slate-500 text-center font-normal mt-0.5">{fmtMonth(f.report_month)}</div>
                 </th>
               ))}
             </tr>
@@ -2341,16 +2341,16 @@ function OverlapMatrix() {
             {visibleFunds.map(fRow => (
               <tr key={fRow.fund_id}>
                 <td className="pr-3 py-0.5">
-                  <div className="text-xs font-semibold text-slate-600 text-right" title={fRow.fund_name}>
+                  <div className="text-xs font-semibold text-slate-600 dark:text-slate-400 dark:text-slate-500 text-right" title={fRow.fund_name}>
                     {shortNames.get(fRow.fund_name)}
-                    <div className="text-[10px] text-slate-400 font-normal mt-0.5">{fmtMonth(fRow.report_month)}</div>
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500 font-normal mt-0.5">{fmtMonth(fRow.report_month)}</div>
                   </div>
                 </td>
                 {visibleFunds.map(fCol => {
                   if (fRow.fund_id === fCol.fund_id) return (
                     <td key={fCol.fund_id} className="w-28 h-14">
-                      <div className="w-full h-12 rounded-xl bg-slate-100 flex items-center justify-center">
-                        <span className="text-xs text-slate-400">—</span>
+                      <div className="w-full h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                        <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
                       </div>
                     </td>
                   );
@@ -2383,20 +2383,20 @@ function OverlapMatrix() {
 
       {/* Drill-down */}
       {selected && (
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden mb-6">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden mb-6">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <div>
-                  <span className="font-semibold text-slate-800 text-sm">{selected.pair.fund_a_name}</span>
-                  <span className="ml-2 text-xs text-slate-400">
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-sm">{selected.pair.fund_a_name}</span>
+                  <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">
                     {fmtMonth(funds.find(f => f.fund_id === selected.pair.fund_a_id)?.report_month)}
                   </span>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                 <div>
-                  <span className="font-semibold text-slate-800 text-sm">{selected.pair.fund_b_name}</span>
-                  <span className="ml-2 text-xs text-slate-400">
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-sm">{selected.pair.fund_b_name}</span>
+                  <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">
                     {fmtMonth(funds.find(f => f.fund_id === selected.pair.fund_b_id)?.report_month)}
                   </span>
                 </div>
@@ -2405,31 +2405,31 @@ function OverlapMatrix() {
                 <span className={`text-xs font-bold px-2 py-0.5 rounded border ${overlapColor(selected.pair.overlap_pct).bg} ${overlapColor(selected.pair.overlap_pct).text} ${overlapColor(selected.pair.overlap_pct).border}`}>
                   {fmt(selected.pair.overlap_pct)}% overlap
                 </span>
-                <span className="text-xs text-slate-500">{selected.pair.shared_count} shared stocks</span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">{selected.pair.shared_count} shared stocks</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">
                   {fmt(selected.pair.overlap_pct_a)}% of {shortNames.get(selected.pair.fund_a_name)} ·{' '}
                   {fmt(selected.pair.overlap_pct_b)}% of {shortNames.get(selected.pair.fund_b_name)}
                 </span>
               </div>
             </div>
             <button onClick={() => setSelected(null)}
-              className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors">
+              className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:text-slate-500 transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
           {/* Three-column layout: unique A | shared | unique B */}
-          <div className="grid grid-cols-3 divide-x divide-slate-100">
+          <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-700">
 
             {/* Unique to Fund A */}
             <div>
-              <div className="px-4 py-2.5 bg-blue-50 border-b border-slate-100 flex items-center justify-between">
+              <div className="px-4 py-2.5 bg-blue-50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <p className="text-xs font-semibold text-blue-700">Only in {shortNames.get(selected.pair.fund_a_name)}</p>
                 <span className="text-xs text-blue-400">{selected.pair.unique_a?.length ?? 0}</span>
               </div>
               <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                 {(selected.pair.unique_a ?? []).map(h => (
-                  <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50">
-                    <p className="text-xs font-medium text-slate-800 leading-snug">{h.stock_name}</p>
+                  <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                    <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
                     <div className="flex items-center justify-between mt-0.5 gap-1">
                       {h.industry
                         ? <span className={`inline-flex items-center px-1 py-0.5 rounded border font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
@@ -2439,21 +2439,21 @@ function OverlapMatrix() {
                   </div>
                 ))}
                 {(selected.pair.unique_a ?? []).length === 0 && (
-                  <p className="px-4 py-6 text-xs text-slate-400 text-center">No unique stocks</p>
+                  <p className="px-4 py-6 text-xs text-slate-400 dark:text-slate-500 text-center">No unique stocks</p>
                 )}
               </div>
             </div>
 
             {/* Shared */}
             <div>
-              <div className="px-4 py-2.5 bg-violet-50 border-b border-slate-100 flex items-center justify-between">
+              <div className="px-4 py-2.5 bg-violet-50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <p className="text-xs font-semibold text-violet-700">Shared holdings</p>
                 <span className="text-xs text-violet-400">{selected.pair.shared_count}</span>
               </div>
               <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                 {selected.pair.shared_holdings.map(h => (
-                  <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50">
-                    <p className="text-xs font-medium text-slate-800 leading-snug">{h.stock_name}</p>
+                  <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                    <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
                     <div className="flex items-center justify-between mt-0.5 gap-1">
                       {h.industry
                         ? <span className={`inline-flex items-center px-1 py-0.5 rounded border font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
@@ -2467,21 +2467,21 @@ function OverlapMatrix() {
                   </div>
                 ))}
                 {selected.pair.shared_holdings.length === 0 && (
-                  <p className="px-4 py-6 text-xs text-slate-400 text-center">No shared stocks</p>
+                  <p className="px-4 py-6 text-xs text-slate-400 dark:text-slate-500 text-center">No shared stocks</p>
                 )}
               </div>
             </div>
 
             {/* Unique to Fund B */}
             <div>
-              <div className="px-4 py-2.5 bg-emerald-50 border-b border-slate-100 flex items-center justify-between">
+              <div className="px-4 py-2.5 bg-emerald-50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <p className="text-xs font-semibold text-emerald-700">Only in {shortNames.get(selected.pair.fund_b_name)}</p>
                 <span className="text-xs text-emerald-400">{selected.pair.unique_b?.length ?? 0}</span>
               </div>
               <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                 {(selected.pair.unique_b ?? []).map(h => (
-                  <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50">
-                    <p className="text-xs font-medium text-slate-800 leading-snug">{h.stock_name}</p>
+                  <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                    <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
                     <div className="flex items-center justify-between mt-0.5 gap-1">
                       {h.industry
                         ? <span className={`inline-flex items-center px-1 py-0.5 rounded border font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
@@ -2491,7 +2491,7 @@ function OverlapMatrix() {
                   </div>
                 ))}
                 {(selected.pair.unique_b ?? []).length === 0 && (
-                  <p className="px-4 py-6 text-xs text-slate-400 text-center">No unique stocks</p>
+                  <p className="px-4 py-6 text-xs text-slate-400 dark:text-slate-500 text-center">No unique stocks</p>
                 )}
               </div>
             </div>
@@ -2502,43 +2502,43 @@ function OverlapMatrix() {
 
       {/* Ranked pairs table */}
       {!selected && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">All Pairs — Ranked by Overlap</h2>
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">All Pairs — Ranked by Overlap</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">#</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">Fund A</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">Fund B</th>
-                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 uppercase">Overlap %</th>
-                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 uppercase">Shared stocks</th>
-                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 uppercase">Weighted NAV</th>
+                <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">#</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Fund A</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Fund B</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Overlap %</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Shared stocks</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Weighted NAV</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {[...visiblePairs].sort((a, b) => b.overlap_pct - a.overlap_pct).map((p, i) => {
                   const c = overlapColor(p.overlap_pct);
                   return (
                     <tr key={`${p.fund_a_id}-${p.fund_b_id}`}
-                      className="hover:bg-slate-50 cursor-pointer transition-colors"
+                      className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 cursor-pointer transition-colors"
                       onClick={() => setSelected({ pair: p, rowId: p.fund_a_id, colId: p.fund_b_id })}>
-                      <td className="px-4 py-2.5 text-xs text-slate-400">{i + 1}</td>
+                      <td className="px-4 py-2.5 text-xs text-slate-400 dark:text-slate-500">{i + 1}</td>
                       <td className="px-4 py-2.5">
-                        <p className="text-sm font-medium text-slate-700">{shortNames.get(p.fund_a_name)}</p>
-                        <p className="text-xs text-slate-400">{fmtMonth(funds.find(f => f.fund_id === p.fund_a_id)?.report_month)}</p>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{shortNames.get(p.fund_a_name)}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">{fmtMonth(funds.find(f => f.fund_id === p.fund_a_id)?.report_month)}</p>
                       </td>
                       <td className="px-4 py-2.5">
-                        <p className="text-sm font-medium text-slate-700">{shortNames.get(p.fund_b_name)}</p>
-                        <p className="text-xs text-slate-400">{fmtMonth(funds.find(f => f.fund_id === p.fund_b_id)?.report_month)}</p>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{shortNames.get(p.fund_b_name)}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">{fmtMonth(funds.find(f => f.fund_id === p.fund_b_id)?.report_month)}</p>
                       </td>
                       <td className="px-4 py-2.5 text-right">
                         <span className={`text-xs font-bold px-2 py-0.5 rounded border ${c.bg} ${c.text} ${c.border}`}>
                           {fmt(p.overlap_pct)}%
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-sm text-slate-700">{p.shared_count}</td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-sm text-slate-700">{fmt(p.weighted_overlap, 4)}%</td>
+                      <td className="px-4 py-2.5 text-right tabular-nums text-sm text-slate-700 dark:text-slate-300">{p.shared_count}</td>
+                      <td className="px-4 py-2.5 text-right tabular-nums text-sm text-slate-700 dark:text-slate-300">{fmt(p.weighted_overlap, 4)}%</td>
                     </tr>
                   );
                 })}
@@ -2637,15 +2637,15 @@ function ConvictionTreemap({ filtered }) {
     : mousePos.x + 16;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-sm font-semibold text-slate-700">Conviction Treemap</h2>
-        <span className="text-xs text-slate-400">Size = total market value · colour = fund count</span>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Conviction Treemap</h2>
+        <span className="text-xs text-slate-400 dark:text-slate-500">Size = total market value · colour = fund count</span>
       </div>
-      <p className="text-xs text-slate-400 mb-3">Larger = bigger combined position · hover to preview · click to pin breakdown</p>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">Larger = bigger combined position · hover to preview · click to pin breakdown</p>
       <div className="flex items-center gap-4 mb-4 flex-wrap">
         {[1, 2, 3, 4].map(n => (
-          <span key={n} className="flex items-center gap-1.5 text-xs text-slate-600">
+          <span key={n} className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 dark:text-slate-500">
             <span className="w-3 h-3 rounded-sm inline-block" style={{ backgroundColor: fundCountColor(n) }} />
             {n === 4 ? '4+ funds' : `${n} fund${n > 1 ? 's' : ''}`}
           </span>
@@ -2680,26 +2680,26 @@ function ConvictionTreemap({ filtered }) {
                 padding: '10px 12px',
               }}>
               <p className="font-semibold text-white text-[13px] leading-snug mb-0.5">{d.name}</p>
-              <p className="text-slate-400 text-[11px] mb-2.5">{d.industry}</p>
+              <p className="text-slate-400 dark:text-slate-500 text-[11px] mb-2.5">{d.industry}</p>
               <div className="space-y-1">
                 <div className="flex justify-between gap-3">
-                  <span className="text-slate-400">Avg allocation</span>
+                  <span className="text-slate-400 dark:text-slate-500">Avg allocation</span>
                   <span className="text-white font-medium">{fmt(d.avg_pct_nav)}%</span>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <span className="text-slate-400">Funds holding</span>
+                  <span className="text-slate-400 dark:text-slate-500">Funds holding</span>
                   <span className="font-medium" style={{ color: fundCountColor(d.fund_count) }}>
                     {d.fund_count} fund{d.fund_count !== 1 ? 's' : ''}
                   </span>
                 </div>
                 {d.size > 0 && (
                   <div className="flex justify-between gap-3">
-                    <span className="text-slate-400">Market value</span>
+                    <span className="text-slate-400 dark:text-slate-500">Market value</span>
                     <span className="text-white font-medium">₹{fmt(d.size)} L</span>
                   </div>
                 )}
               </div>
-              <p className="text-slate-500 mt-2.5 text-[10px] border-t border-slate-700 pt-2">
+              <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-2.5 text-[10px] border-t border-slate-700 pt-2">
                 Click to pin fund-by-fund breakdown ↓
               </p>
             </div>
@@ -2709,19 +2709,19 @@ function ConvictionTreemap({ filtered }) {
 
       {/* Pinned detail panel */}
       {selectedData && (
-        <div className="mt-4 rounded-xl border border-slate-200 overflow-hidden">
-          <div className="flex items-start justify-between bg-slate-50 border-b border-slate-200 px-4 py-3">
+        <div className="mt-4 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="flex items-start justify-between bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
             <div>
-              <h3 className="text-sm font-semibold text-slate-800 leading-tight">{selectedData.name}</h3>
-              <p className="text-xs text-slate-500 mt-0.5">{selectedData.industry}</p>
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-tight">{selectedData.name}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">{selectedData.industry}</p>
             </div>
             <button onClick={() => setSelected(null)}
-              className="ml-4 text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-200 transition-colors flex-shrink-0">
+              className="ml-4 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300 p-1 rounded-lg hover:bg-slate-200 transition-colors flex-shrink-0">
               <X size={14} />
             </button>
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-slate-200 border-b border-slate-200">
+          <div className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-slate-700 border-b border-slate-200 dark:border-slate-700">
             {[
               { label: 'Avg Alloc',     value: `${fmt(selectedData.avg_pct_nav)}%` },
               { label: 'Funds Holding', value: `${selectedData.fund_count}`,
@@ -2729,7 +2729,7 @@ function ConvictionTreemap({ filtered }) {
               { label: 'Market Value',  value: `₹${fmt(selectedData.size)} L` },
             ].map(({ label, value, color }) => (
               <div key={label} className="px-4 py-3 text-center">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wide">{label}</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">{label}</p>
                 <p className="text-base font-bold mt-0.5" style={{ color: color || '#1e293b' }}>{value}</p>
               </div>
             ))}
@@ -2737,7 +2737,7 @@ function ConvictionTreemap({ filtered }) {
 
           {selectedData.fund_allocs.length > 0 && (
             <div className="px-4 py-3">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wide mb-2.5">Fund-by-fund allocation</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2.5">Fund-by-fund allocation</p>
               {(() => {
                 const maxPct = Math.max(...selectedData.fund_allocs.map(x => x.pct), 0.01);
                 return (
@@ -2746,11 +2746,11 @@ function ConvictionTreemap({ filtered }) {
                       .sort((a, b) => b.pct - a.pct)
                       .map(a => (
                         <div key={a.name} className="flex items-center gap-2.5">
-                          <span className="text-[11px] text-slate-500 truncate flex-none w-44"
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 dark:text-slate-500 truncate flex-none w-44"
                             title={a.name}>
                             {a.name}
                           </span>
-                          <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                          <div className="flex-1 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
                             <div className="h-full rounded-full"
                               style={{
                                 width: `${(a.pct / maxPct) * 100}%`,
@@ -2758,7 +2758,7 @@ function ConvictionTreemap({ filtered }) {
                                 transition: 'width 0.3s ease',
                               }} />
                           </div>
-                          <span className="text-[11px] font-semibold text-slate-700 tabular-nums flex-none w-10 text-right">
+                          <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 tabular-nums flex-none w-10 text-right">
                             {fmt(a.pct)}%
                           </span>
                         </div>
@@ -2802,20 +2802,20 @@ function ConvictionLollipop({ filtered }) {
   const yOf = i   => PAD_T + i * ROW_H + ROW_H / 2;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-sm font-semibold text-slate-700">Conviction Lollipop</h2>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Conviction Lollipop</h2>
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-400 mr-1">Sort:</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500 mr-1">Sort:</span>
           {[['pct', 'Avg %'], ['funds', 'Funds'], ['value', 'Mkt value']].map(([k, l]) => (
             <button key={k} onClick={() => setSortBy(k)}
               className={`px-2 py-0.5 text-xs font-semibold rounded-md border transition-colors ${
-                sortBy === k ? 'bg-violet-600 text-white border-violet-600' : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
+                sortBy === k ? 'bg-violet-600 text-white border-violet-600' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:border-violet-300'
               }`}>{l}</button>
           ))}
         </div>
       </div>
-      <p className="text-xs text-slate-400 mb-4">Bar = avg allocation % · dot colour = # of funds holding · top {TOP}</p>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Bar = avg allocation % · dot colour = # of funds holding · top {TOP}</p>
       <div className="overflow-y-auto" style={{ maxHeight: 560 }}>
         <svg width={SVG_W} height={SVG_H} style={{ display: 'block' }}>
           {/* Max line */}
@@ -2859,7 +2859,7 @@ function ConvictionLollipop({ filtered }) {
       </div>
       <div className="flex items-center gap-4 mt-3 flex-wrap">
         {[1, 2, 3, 4].map(n => (
-          <span key={n} className="flex items-center gap-1.5 text-xs text-slate-600">
+          <span key={n} className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 dark:text-slate-500">
             <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: fundCountColor(n) }} />
             {n === 4 ? '4+ funds' : `${n} fund${n > 1 ? 's' : ''}`}
           </span>
@@ -2887,22 +2887,22 @@ function ConvictionHeatmap({ filtered }) {
   const shortFundName = fn => fn.split(' ').slice(0, 2).join(' ');
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6 overflow-x-auto">
-      <h2 className="text-sm font-semibold text-slate-700 mb-1">Stock × Fund Allocation Heatmap</h2>
-      <p className="text-xs text-slate-400 mb-4">Each cell = that fund's exact allocation % · empty = not held</p>
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6 overflow-x-auto">
+      <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Stock × Fund Allocation Heatmap</h2>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Each cell = that fund's exact allocation % · empty = not held</p>
       <table className="border-separate border-spacing-0.5 text-xs">
         <thead>
           <tr>
             <th className="w-36 pb-2" />
             {fundNames.map(fn => (
               <th key={fn} className="pb-2 min-w-[68px] text-center">
-                <span className="text-xs font-semibold text-slate-500 whitespace-nowrap" title={fn}>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 whitespace-nowrap" title={fn}>
                   {shortFundName(fn)}
                 </span>
               </th>
             ))}
             <th className="pb-2 min-w-[56px] text-center">
-              <span className="text-xs font-semibold text-slate-500">Avg %</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500">Avg %</span>
             </th>
           </tr>
         </thead>
@@ -2912,7 +2912,7 @@ function ConvictionHeatmap({ filtered }) {
             return (
               <tr key={d.isin}>
                 <td className="pr-2 py-0.5 text-right max-w-[140px]">
-                  <span className="font-medium text-slate-700 block truncate" title={d.stock_name}>
+                  <span className="font-medium text-slate-700 dark:text-slate-300 block truncate" title={d.stock_name}>
                     {d.stock_name.length > 19 ? d.stock_name.slice(0, 17) + '…' : d.stock_name}
                   </span>
                 </td>
@@ -2929,7 +2929,7 @@ function ConvictionHeatmap({ filtered }) {
                   );
                 })}
                 <td className="min-w-[56px]">
-                  <div className="rounded-md px-1.5 py-1.5 text-center tabular-nums font-semibold bg-slate-100 text-slate-700">
+                  <div className="rounded-md px-1.5 py-1.5 text-center tabular-nums font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                     {fmt(d.avg_pct_nav)}%
                   </div>
                 </td>
@@ -2984,22 +2984,22 @@ function ConvictionConnectedDot({ filtered }) {
   const TIP_H = 68;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-sm font-semibold text-slate-700">Conviction Spread</h2>
-        <span className="text-xs text-slate-400">Only stocks held by 2+ funds</span>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Conviction Spread</h2>
+        <span className="text-xs text-slate-400 dark:text-slate-500">Only stocks held by 2+ funds</span>
       </div>
-      <p className="text-xs text-slate-500 mb-1">
+      <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-1">
         Each row is one stock. Every <span className="font-medium">colored dot</span> is a fund's % NAV allocation.
         The <span className="font-medium">grey line</span> spans the range between the lowest and highest believer.
       </p>
-      <p className="text-xs text-slate-400 mb-3">
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
         <span className="text-emerald-600 font-medium">Short line</span> = consensus pick (all funds hold similar %) ·
         <span className="text-orange-500 font-medium"> Long line</span> = split conviction (one fund is far more bullish than others)
       </p>
       <div className="flex flex-wrap gap-3 mb-4">
         {allFundNames.map(fn => (
-          <span key={fn} className="flex items-center gap-1.5 text-xs text-slate-600" title={fn}>
+          <span key={fn} className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 dark:text-slate-500" title={fn}>
             <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: fundColorMap.get(fn) }} />
             <span className="truncate max-w-[130px]">{fn.split(' ').slice(0, 3).join(' ')}</span>
           </span>
@@ -3076,7 +3076,7 @@ function ConvictionConnectedDot({ filtered }) {
                 <span className="font-semibold text-white text-[12px] leading-snug truncate">{hovered.fund}</span>
               </div>
               <div className="flex justify-between gap-4">
-                <span className="text-slate-400 truncate max-w-[120px]">{hovered.stock}</span>
+                <span className="text-slate-400 dark:text-slate-500 truncate max-w-[120px]">{hovered.stock}</span>
                 <span className="text-white font-bold tabular-nums">{fmt(hovered.pct)}% NAV</span>
               </div>
             </div>
@@ -3105,8 +3105,8 @@ function BubbleTooltip({ active, payload }) {
   const d = payload[0].payload;
   const color = getIndustryColor(d.industry).hex;
   return (
-    <div className="bg-white border border-slate-200 rounded-xl shadow-xl p-4 text-sm max-w-[260px] z-50">
-      <p className="font-bold text-slate-800 mb-0.5 leading-snug">{d.stock_name}</p>
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-4 text-sm max-w-[260px] z-50">
+      <p className="font-bold text-slate-800 dark:text-slate-200 mb-0.5 leading-snug">{d.stock_name}</p>
       {d.industry && (
         <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-xs font-medium mb-2 ${industryBadgeClass(d.industry)}`}>
           {d.industry}
@@ -3114,23 +3114,23 @@ function BubbleTooltip({ active, payload }) {
       )}
       <div className="space-y-1 mt-1 text-xs">
         <div className="flex justify-between gap-4">
-          <span className="text-slate-500">Funds holding</span>
+          <span className="text-slate-500 dark:text-slate-400 dark:text-slate-500">Funds holding</span>
           <span className="font-bold" style={{ color }}>{d.fund_count}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-slate-500">Avg allocation</span>
-          <span className="font-bold text-slate-700">{fmt(d.avg_pct_nav)}%</span>
+          <span className="text-slate-500 dark:text-slate-400 dark:text-slate-500">Avg allocation</span>
+          <span className="font-bold text-slate-700 dark:text-slate-300">{fmt(d.avg_pct_nav)}%</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-slate-500">Total value (L)</span>
-          <span className="font-bold text-slate-700">₹{fmt(d.total_market_value)}</span>
+          <span className="text-slate-500 dark:text-slate-400 dark:text-slate-500">Total value (L)</span>
+          <span className="font-bold text-slate-700 dark:text-slate-300">₹{fmt(d.total_market_value)}</span>
         </div>
       </div>
       {d.fund_names?.length > 0 && (
-        <div className="mt-2 pt-2 border-t border-slate-100">
-          <p className="text-xs text-slate-400 mb-1">Held by:</p>
+        <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">Held by:</p>
           {d.fund_names.map((fn, i) => (
-            <p key={i} className="text-xs text-slate-600 truncate" title={fn}>• {fn}</p>
+            <p key={i} className="text-xs text-slate-600 dark:text-slate-400 dark:text-slate-500 truncate" title={fn}>• {fn}</p>
           ))}
         </div>
       )}
@@ -3187,9 +3187,9 @@ function HighConviction() {
       {!loading && !error && (
         <>
           {/* Controls */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-6">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-6">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="flex items-center gap-1.5 text-sm font-medium text-slate-600">
+              <span className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500">
                 <Filter className="w-4 h-4" /> Min funds:
               </span>
               {[1, 2, 3, 4, 5].filter(n => n <= maxFunds).map(n => (
@@ -3197,34 +3197,34 @@ function HighConviction() {
                   className={`px-3 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${
                     minFunds === n
                       ? 'bg-violet-600 text-white border-violet-600'
-                      : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300 hover:text-violet-600'
+                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:border-violet-300 hover:text-violet-600'
                   }`}>
                   {n}+ {n === 1 ? '(all)' : `fund${n > 1 ? 's' : ''}`}
                 </button>
               ))}
               {/* Chart type pill toggle */}
-              <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1 ml-auto">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-xl p-1 ml-auto">
                 {chartTypes.map(ct => (
                   <button key={ct.id} onClick={() => setChartType(ct.id)}
                     className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
                       chartType === ct.id
-                        ? 'bg-white text-violet-700 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
+                        ? 'bg-white dark:bg-slate-800 text-violet-700 shadow-sm'
+                        : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'
                     }`}>{ct.label}</button>
                 ))}
               </div>
-              <span className="text-xs text-slate-400">{filtered.length} stock{filtered.length !== 1 ? 's' : ''}</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">{filtered.length} stock{filtered.length !== 1 ? 's' : ''}</span>
             </div>
           </div>
 
           {/* Chart */}
           {chartType === 'bubble' && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6">
               <div className="flex items-center justify-between mb-1">
-                <h2 className="text-sm font-semibold text-slate-700">Conviction Bubble Chart</h2>
-                <span className="text-xs text-slate-400">Bubble size = total market value (₹ L)</span>
+                <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Conviction Bubble Chart</h2>
+                <span className="text-xs text-slate-400 dark:text-slate-500">Bubble size = total market value (₹ L)</span>
               </div>
-              <p className="text-xs text-slate-400 mb-4">X = number of funds holding · Y = average allocation %</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">X = number of funds holding · Y = average allocation %</p>
               <ResponsiveContainer width="100%" height={480}>
                 <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -3255,35 +3255,35 @@ function HighConviction() {
 
           {/* Detail table — always shown below the chart */}
           {filtered.filter(d => d.fund_count >= 2).length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-              <h2 className="text-sm font-semibold text-slate-700 mb-4">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
                 Multi-Fund Holdings — {filtered.filter(d => d.fund_count >= 2).length} stocks
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">Stock</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">Industry</th>
-                      <th className="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase">Funds</th>
-                      <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 uppercase">Avg Alloc %</th>
-                      <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 uppercase">Total Value (L)</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">Held by</th>
+                    <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Stock</th>
+                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Industry</th>
+                      <th className="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Funds</th>
+                      <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Avg Alloc %</th>
+                      <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Total Value (L)</th>
+                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase">Held by</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                     {filtered.filter(d => d.fund_count >= 2).map(d => {
                       const color = getIndustryColor(d.industry).hex;
                       return (
-                        <tr key={d.isin} className="hover:bg-slate-50">
+                        <tr key={d.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
                           <td className="px-4 py-2.5">
-                            <p className="font-medium text-slate-800">{d.stock_name}</p>
-                            <p className="text-xs text-slate-400 font-mono">{d.isin}</p>
+                            <p className="font-medium text-slate-800 dark:text-slate-200">{d.stock_name}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{d.isin}</p>
                           </td>
                           <td className="px-4 py-2.5">
                             {d.industry
                               ? <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(d.industry)}`}>{d.industry}</span>
-                              : <span className="text-slate-400 text-xs">—</span>}
+                              : <span className="text-slate-400 dark:text-slate-500 text-xs">—</span>}
                           </td>
                           <td className="px-4 py-2.5 text-center">
                             <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-xs font-bold"
@@ -3292,11 +3292,11 @@ function HighConviction() {
                             </span>
                           </td>
                           <td className="px-4 py-2.5 text-right font-bold tabular-nums" style={{ color }}>{fmt(d.avg_pct_nav)}%</td>
-                          <td className="px-4 py-2.5 text-right tabular-nums text-slate-700">₹{fmt(d.total_market_value)}</td>
+                          <td className="px-4 py-2.5 text-right tabular-nums text-slate-700 dark:text-slate-300">₹{fmt(d.total_market_value)}</td>
                           <td className="px-4 py-2.5">
                             <div className="flex flex-wrap gap-1">
                               {d.fund_names.map((fn, i) => (
-                                <span key={i} className="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded truncate max-w-[140px]" title={fn}>
+                                <span key={i} className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded truncate max-w-[140px]" title={fn}>
                                   {fn.split(' ').slice(0, 3).join(' ')}…
                                 </span>
                               ))}
@@ -3362,34 +3362,34 @@ function NewEntries() {
 
       {/* Filter */}
       <div className="flex items-center gap-2 mb-4 text-xs">
-        <span className="text-slate-500 font-medium">Show entries by min funds:</span>
+        <span className="text-slate-500 dark:text-slate-400 dark:text-slate-500 font-medium">Show entries by min funds:</span>
         {[1, 2, 3].map(n => (
           <button key={n} onClick={() => setMinFunds(n)}
-            className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${minFunds === n ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+            className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${minFunds === n ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:bg-slate-200'}`}>
             {n}+
           </button>
         ))}
       </div>
 
       {rows.length === 0
-        ? <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center text-slate-400 text-sm">No new entries found for this filter</div>
+        ? <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 text-center text-slate-400 dark:text-slate-500 text-sm">No new entries found for this filter</div>
         : (
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Stock</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Industry</th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Funds entered</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Fund · Allocation</th>
+                <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Stock</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Industry</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Funds entered</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Fund · Allocation</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {rows.map(r => (
-                  <tr key={r.isin} className="hover:bg-slate-50 transition-colors">
+                  <tr key={r.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-slate-800">{r.stock_name}</p>
-                      <p className="text-xs text-slate-400">{r.isin}</p>
+                      <p className="font-semibold text-slate-800 dark:text-slate-200">{r.stock_name}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">{r.isin}</p>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${industryBadgeClass(r.industry)}`}>{r.industry || '—'}</span>
@@ -3397,13 +3397,13 @@ function NewEntries() {
                     <td className="px-4 py-3 text-center">
                       <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
                         r.fund_count >= 3 ? 'bg-emerald-100 text-emerald-700' :
-                        r.fund_count === 2 ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
+                        r.fund_count === 2 ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 dark:text-slate-500'
                       }`}>{r.fund_count}</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
                         {r.funds.map(f => (
-                          <span key={f.name} className="text-xs bg-slate-100 rounded-lg px-2 py-0.5 text-slate-600" title={f.name}>
+                          <span key={f.name} className="text-xs bg-slate-100 dark:bg-slate-700 rounded-lg px-2 py-0.5 text-slate-600 dark:text-slate-400 dark:text-slate-500" title={f.name}>
                             {f.name.split(' ').slice(0, 3).join(' ')} · <span className="font-semibold">{fmt(f.pct)}%</span>
                           </span>
                         ))}
@@ -3492,8 +3492,8 @@ function FundChurn({ allFunds }) {
   return (
     <div className="space-y-5">
       {/* Fund picker */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Select Funds to Compare</h2>
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+        <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">Select Funds to Compare</h2>
         <ConcentrationFundPicker
           funds={sortedFunds}
           selected={selected}
@@ -3502,21 +3502,21 @@ function FundChurn({ allFunds }) {
           shortNames={shortNames}
         />
         {selected.size === 0 && (
-          <p className="text-xs text-slate-400 mt-2">No funds selected — search above to add funds to the chart.</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">No funds selected — search above to add funds to the chart.</p>
         )}
       </div>
 
       {/* Trend chart */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-sm font-semibold text-slate-700">Monthly Turnover Rate</h2>
-            <p className="text-xs text-slate-400 mt-0.5">% of holdings that changed vs previous month · higher = more active management</p>
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Monthly Turnover Rate</h2>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">% of holdings that changed vs previous month · higher = more active management</p>
           </div>
-          <span className="text-xs text-slate-400">{selected.size} fund{selected.size !== 1 ? 's' : ''} shown</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">{selected.size} fund{selected.size !== 1 ? 's' : ''} shown</span>
         </div>
         {selected.size === 0 ? (
-          <p className="text-sm text-slate-400 text-center py-16">Select funds above to see the chart</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-16">Select funds above to see the chart</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData} margin={{ top: 4, right: 16, bottom: 0, left: 0 }}>
@@ -3537,20 +3537,20 @@ function FundChurn({ allFunds }) {
 
       {/* Average turnover bars — only selected funds */}
       {visibleFunds.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-700 mb-3">Average Turnover by Fund</h2>
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Average Turnover by Fund</h2>
           <div className="space-y-2">
             {visibleFunds.map(f => {
               const avg   = avgByFund.get(f.id) ?? 0;
               const color = colors.get(f.id);
               return (
-                <div key={f.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50">
+                <div key={f.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900">
                   <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-                  <span className="text-xs text-slate-600 w-44 truncate" title={f.name}>{shortNames.get(f.name) ?? f.name}</span>
-                  <div className="flex-1 bg-slate-100 rounded-full h-2">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 dark:text-slate-500 w-44 truncate" title={f.name}>{shortNames.get(f.name) ?? f.name}</span>
+                  <div className="flex-1 bg-slate-100 dark:bg-slate-700 rounded-full h-2">
                     <div className="h-2 rounded-full transition-all" style={{ width: `${(avg / maxAvg) * 100}%`, backgroundColor: color }} />
                   </div>
-                  <span className="text-xs font-bold tabular-nums w-14 text-right text-slate-700">{fmt(avg, 1)}% avg</span>
+                  <span className="text-xs font-bold tabular-nums w-14 text-right text-slate-700 dark:text-slate-300">{fmt(avg, 1)}% avg</span>
                 </div>
               );
             })}
@@ -3629,28 +3629,28 @@ function SectorRotationCalendar() {
   const visMonths = months.slice(-18);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-sm font-semibold text-slate-700">Sector Rotation Calendar</h2>
-        <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Sector Rotation Calendar</h2>
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5">
           {[{ id: 'absolute', label: 'Allocation %' }, { id: 'delta', label: 'Month-on-Month Δ' }].map(m => (
             <button key={m.id} onClick={() => setMode(m.id)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${mode === m.id ? 'bg-white text-violet-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${mode === m.id ? 'bg-white dark:bg-slate-800 text-violet-700 shadow-sm' : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'}`}>
               {m.label}
             </button>
           ))}
         </div>
       </div>
-      <p className="text-xs text-slate-400 mb-4">
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
         {mode === 'absolute' ? 'Average % NAV allocated to each sector across all funds' : 'Change in avg allocation vs previous month · green = funds added to sector · red = reduced'}
       </p>
       <div className="overflow-x-auto">
         <table className="text-xs border-collapse" style={{ minWidth: visMonths.length * 52 + 180 }}>
           <thead>
             <tr>
-              <th className="text-left pr-3 pb-2 text-slate-500 font-semibold sticky left-0 bg-white z-10 w-44">Sector</th>
+              <th className="text-left pr-3 pb-2 text-slate-500 dark:text-slate-400 dark:text-slate-500 font-semibold sticky left-0 bg-white dark:bg-slate-800 z-10 w-44">Sector</th>
               {visMonths.map(m => (
-                <th key={m} className="pb-2 text-center text-slate-400 font-medium w-12"
+                <th key={m} className="pb-2 text-center text-slate-400 dark:text-slate-500 font-medium w-12"
                   style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', height: 60 }}>
                   {fmtMonth(m)}
                 </th>
@@ -3660,7 +3660,7 @@ function SectorRotationCalendar() {
           <tbody>
             {sectors.map(sector => (
               <tr key={sector} className="border-t border-slate-50">
-                <td className="pr-3 py-1 text-slate-600 font-medium sticky left-0 bg-white z-10 truncate max-w-[170px]" title={sector}>{sector}</td>
+                <td className="pr-3 py-1 text-slate-600 dark:text-slate-400 dark:text-slate-500 font-medium sticky left-0 bg-white dark:bg-slate-800 z-10 truncate max-w-[170px]" title={sector}>{sector}</td>
                 {visMonths.map((m, i) => {
                   const val = getValue(sector, m, months.indexOf(m));
                   const { bg, text } = cellColor(val);
@@ -3742,14 +3742,14 @@ function StockDiscovery() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <div className="flex items-center gap-1.5 text-xs text-slate-500">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">
           <span className="font-medium">Min peak funds:</span>
           {[2, 3, 5, 8].map(n => (
             <button key={n} onClick={() => setMinGrowth(n)}
               className={`px-2.5 py-1 rounded-lg transition-colors ${minGrowth === n ? 'bg-violet-100 text-violet-700 font-semibold' : 'hover:bg-slate-100'}`}>{n}+</button>
           ))}
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 ml-auto">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 ml-auto">
           <span className="font-medium">Sort:</span>
           {[{ id: 'peak', label: 'Peak funds' }, { id: 'velocity', label: 'Fastest adoption' }, { id: 'recent', label: 'Recent' }].map(s => (
             <button key={s.id} onClick={() => setSortBy(s.id)}
@@ -3758,16 +3758,16 @@ function StockDiscovery() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs" style={{ minWidth: visMonths.length * 36 + 340 }}>
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="text-left px-4 py-3 font-semibold text-slate-500 uppercase tracking-wide sticky left-0 bg-slate-50 z-10 w-48">Stock</th>
-                <th className="text-center px-3 py-3 font-semibold text-slate-500 uppercase tracking-wide w-16">Peak</th>
-                <th className="text-center px-3 py-3 font-semibold text-slate-500 uppercase tracking-wide w-16">Now</th>
+              <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+                <th className="text-left px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide sticky left-0 bg-slate-50 dark:bg-slate-900 z-10 w-48">Stock</th>
+                <th className="text-center px-3 py-3 font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide w-16">Peak</th>
+                <th className="text-center px-3 py-3 font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide w-16">Now</th>
                 {visMonths.map(m => (
-                  <th key={m} className="text-center py-2 font-medium text-slate-400 w-9"
+                  <th key={m} className="text-center py-2 font-medium text-slate-400 dark:text-slate-500 w-9"
                     style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', height: 52 }}>
                     {fmtMonth(m)}
                   </th>
@@ -3778,16 +3778,16 @@ function StockDiscovery() {
               {stocks.slice(0, 60).map(s => {
                 const monthMap = new Map(s.tl.map(t => [t.month, t.fund_count]));
                 return (
-                  <tr key={s.isin} className="hover:bg-slate-50">
-                    <td className="px-4 py-2 sticky left-0 bg-white z-10">
-                      <p className="font-semibold text-slate-800 truncate max-w-[180px]" title={s.stock_name}>{s.stock_name}</p>
-                      <p className="text-slate-400 truncate">{s.industry}</p>
+                  <tr key={s.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
+                    <td className="px-4 py-2 sticky left-0 bg-white dark:bg-slate-800 z-10">
+                      <p className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[180px]" title={s.stock_name}>{s.stock_name}</p>
+                      <p className="text-slate-400 dark:text-slate-500 truncate">{s.industry}</p>
                     </td>
                     <td className="px-3 py-2 text-center">
                       <span className="font-bold text-violet-700">{s.peak_funds}</span>
                     </td>
                     <td className="px-3 py-2 text-center">
-                      <span className={`font-bold ${s.latestFunds > 0 ? 'text-slate-800' : 'text-slate-300'}`}>{s.latestFunds || '—'}</span>
+                      <span className={`font-bold ${s.latestFunds > 0 ? 'text-slate-800 dark:text-slate-200' : 'text-slate-300'}`}>{s.latestFunds || '—'}</span>
                     </td>
                     {visMonths.map(m => {
                       const cnt = monthMap.get(m) ?? 0;
@@ -3807,7 +3807,7 @@ function StockDiscovery() {
             </tbody>
           </table>
         </div>
-        <div className="px-4 py-2.5 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-400">
+        <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center gap-4 text-xs text-slate-400 dark:text-slate-500">
           <span>Cell = # funds holding · darker = closer to peak adoption</span>
           <div className="flex items-center gap-1.5 ml-auto">
             {[1, 2, 3, 4].map(n => <div key={n} className="w-5 h-5 rounded flex items-center justify-center text-white font-bold" style={{ backgroundColor: dotColor(n, 4) }}>{n}</div>)}
@@ -3854,7 +3854,7 @@ function ConcentrationFundPicker({ funds, selected, setSelected, colors, shortNa
     <div ref={containerRef} className="relative">
       {/* Input box with pills */}
       <div
-        className="flex flex-wrap gap-1.5 p-2 border border-slate-200 rounded-xl bg-white min-h-[42px] cursor-text focus-within:ring-2 focus-within:ring-violet-300 focus-within:border-violet-400 transition-all"
+        className="flex flex-wrap gap-1.5 p-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 min-h-[42px] cursor-text focus-within:ring-2 focus-within:ring-violet-300 focus-within:border-violet-400 transition-all"
         onClick={() => { inputRef.current?.focus(); setDropOpen(true); }}
       >
         {selectedFunds.map(f => (
@@ -3875,21 +3875,21 @@ function ConcentrationFundPicker({ funds, selected, setSelected, colors, shortNa
           onChange={e => { setQuery(e.target.value); setDropOpen(true); }}
           onFocus={() => setDropOpen(true)}
           placeholder={selectedFunds.length === 0 ? 'Search and select funds…' : ''}
-          className="flex-1 min-w-[140px] outline-none text-xs text-slate-700 bg-transparent py-0.5 px-1 placeholder:text-slate-400"
+          className="flex-1 min-w-[140px] outline-none text-xs text-slate-700 dark:text-slate-300 bg-transparent py-0.5 px-1 placeholder:text-slate-400 dark:text-slate-500"
         />
       </div>
 
       {/* Dropdown */}
       {dropOpen && results.length > 0 && (
-        <div className="absolute z-30 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto">
+        <div className="absolute z-30 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-56 overflow-y-auto">
           {results.map(f => {
             const on = selected.has(f.id);
             return (
               <div key={f.id}
                 onMouseDown={e => { e.preventDefault(); toggle(f); setQuery(''); }}
-                className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer text-xs transition-colors ${on ? 'bg-violet-50' : 'hover:bg-slate-50'}`}>
+                className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer text-xs transition-colors ${on ? 'bg-violet-50' : 'hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900'}`}>
                 <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: colors.get(f.id) }} />
-                <span className="flex-1 truncate text-slate-700">{f.name}</span>
+                <span className="flex-1 truncate text-slate-700 dark:text-slate-300">{f.name}</span>
                 {on && <Check className="w-3 h-3 text-violet-600 flex-shrink-0" />}
               </div>
             );
@@ -3971,20 +3971,20 @@ function ConcentrationScore({ allFunds }) {
     <div>
       {/* Metric selector */}
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-xs text-slate-500 font-medium">Metric:</span>
-        <div className="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5">
+        <span className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 font-medium">Metric:</span>
+        <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5">
           {[
             { id: 'hhi',             label: 'HHI Concentration' },
             { id: 'top_holding_pct', label: 'Top Holding %' },
             { id: 'holding_count',   label: 'Holdings Count' },
           ].map(m => (
             <button key={m.id} onClick={() => setMetric(m.id)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${metric === m.id ? 'bg-white text-violet-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${metric === m.id ? 'bg-white dark:bg-slate-800 text-violet-700 shadow-sm' : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'}`}>
               {m.label}
             </button>
           ))}
         </div>
-        <span className="text-xs text-slate-400 ml-2">
+        <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">
           {metric === 'hhi' ? 'Higher HHI = fewer, larger bets. Lower = more diversified.' :
            metric === 'top_holding_pct' ? 'What % of NAV is in the single largest holding.' :
            'Total number of distinct stocks held.'}
@@ -4005,9 +4005,9 @@ function ConcentrationScore({ allFunds }) {
       </div>
 
       {/* Trend chart */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-4">
-        <h2 className="text-sm font-semibold text-slate-700 mb-0.5">{metricLabel} Over Time</h2>
-        <p className="text-xs text-slate-400 mb-4">Click fund names below to toggle lines</p>
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-4">
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-0.5">{metricLabel} Over Time</h2>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Click fund names below to toggle lines</p>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData} margin={{ top: 4, right: 16, bottom: 0, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -4023,20 +4023,20 @@ function ConcentrationScore({ allFunds }) {
           </LineChart>
         </ResponsiveContainer>
         {/* Legend */}
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-slate-100 pt-3">
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-slate-100 dark:border-slate-800 pt-3">
           {funds.filter(f => selected.has(f.id)).map(f => (
             <div key={f.id} className="flex items-center gap-1.5 cursor-pointer"
               onClick={() => setSelected(s => { const n = new Set(s); n.delete(f.id); return n; })}>
               <span className="w-3 flex-shrink-0" style={{ height: 2, backgroundColor: colors.get(f.id), display: 'inline-block', borderRadius: 2, verticalAlign: 'middle' }} />
-              <span className="text-xs text-slate-600">{shortNames.get(f.name) ?? f.name}</span>
+              <span className="text-xs text-slate-600 dark:text-slate-400 dark:text-slate-500">{shortNames.get(f.name) ?? f.name}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Fund selector */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Select Funds to Compare</h2>
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+        <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">Select Funds to Compare</h2>
         <ConcentrationFundPicker
           funds={sortedFunds}
           selected={selected}
@@ -4045,7 +4045,7 @@ function ConcentrationScore({ allFunds }) {
           shortNames={shortNames}
         />
         {selected.size === 0 && (
-          <p className="text-xs text-slate-400 mt-2">No funds selected — search above to add funds to the chart.</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">No funds selected — search above to add funds to the chart.</p>
         )}
       </div>
     </div>
@@ -4185,34 +4185,34 @@ function StockIntelligence({ allFunds }) {
     <div className="space-y-5">
       {/* ── Search bar ── */}
       <div className="relative">
-        <div className={`flex items-center gap-2.5 px-4 py-3 bg-white border rounded-2xl shadow-sm transition-all ${results.length ? 'border-violet-400 ring-2 ring-violet-200' : 'border-slate-200 focus-within:border-violet-400 focus-within:ring-2 focus-within:ring-violet-200'}`}>
+        <div className={`flex items-center gap-2.5 px-4 py-3 bg-white dark:bg-slate-800 border rounded-2xl shadow-sm transition-all ${results.length ? 'border-violet-400 ring-2 ring-violet-200' : 'border-slate-200 dark:border-slate-700 focus-within:border-violet-400 focus-within:ring-2 focus-within:ring-violet-200'}`}>
           <Brain className="w-4 h-4 text-violet-400 flex-shrink-0" />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search for a stock by name or ISIN to generate its intelligence report…"
-            className="flex-1 outline-none text-sm text-slate-700 bg-transparent placeholder:text-slate-400"
+            className="flex-1 outline-none text-sm text-slate-700 dark:text-slate-300 bg-transparent placeholder:text-slate-400 dark:text-slate-500"
           />
           {(query || selected) && (
-            <button onClick={clearSelection} className="text-slate-300 hover:text-slate-500 flex-shrink-0">
+            <button onClick={clearSelection} className="text-slate-300 hover:text-slate-500 dark:text-slate-400 dark:text-slate-500 flex-shrink-0">
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
         {results.length > 0 && (
-          <div className="absolute z-30 w-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-64 overflow-y-auto">
+          <div className="absolute z-30 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl max-h-64 overflow-y-auto">
             {results.map(r => (
               <button key={r.isin}
                 onMouseDown={() => { skipSearch.current = true; setSelected(r); setQuery(r.stock_name); setResults([]); }}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-violet-50 text-left transition-colors border-b border-slate-50 last:border-0">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800">{r.stock_name}</p>
-                  <p className="text-xs text-slate-400 font-mono">{r.isin}</p>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{r.stock_name}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{r.isin}</p>
                 </div>
                 {r.industry && (
                   <span className={`text-xs px-2 py-0.5 rounded border font-medium flex-shrink-0 ${industryBadgeClass(r.industry)}`}>{r.industry}</span>
                 )}
-                <span className="text-xs text-slate-400 flex-shrink-0">{r.fund_count} fund{r.fund_count!==1?'s':''}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 flex-shrink-0">{r.fund_count} fund{r.fund_count!==1?'s':''}</span>
               </button>
             ))}
           </div>
@@ -4225,8 +4225,8 @@ function StockIntelligence({ allFunds }) {
           <div className="w-16 h-16 bg-violet-50 border border-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Brain className="w-8 h-8 text-violet-300" />
           </div>
-          <p className="text-slate-600 font-medium">Stock Intelligence Report</p>
-          <p className="text-sm text-slate-400 mt-1">Search for any stock to see its conviction score, fund adoption trend, holding breakdown, and sector peers.</p>
+          <p className="text-slate-600 dark:text-slate-400 dark:text-slate-500 font-medium">Stock Intelligence Report</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Search for any stock to see its conviction score, fund adoption trend, holding breakdown, and sector peers.</p>
         </div>
       )}
 
@@ -4240,12 +4240,12 @@ function StockIntelligence({ allFunds }) {
       {processed && selected && (
         <>
           {/* ── Header card ── */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <h2 className="text-xl font-bold text-slate-900 truncate">{selected.stock_name}</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{selected.stock_name}</h2>
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                  <span className="text-xs text-slate-400 font-mono bg-slate-50 px-2 py-0.5 rounded border border-slate-200">{selected.isin}</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 font-mono bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">{selected.isin}</span>
                   {selected.industry && (
                     <span className={`text-xs px-2 py-0.5 rounded border font-medium ${industryBadgeClass(selected.industry)}`}>{selected.industry}</span>
                   )}
@@ -4257,15 +4257,15 @@ function StockIntelligence({ allFunds }) {
                   <span className={`text-3xl font-black tabular-nums ${scoreMeta.color}`}>{processed.score}</span>
                   <span className={`text-xs font-bold uppercase tracking-wide ${scoreMeta.color}`}>{scoreMeta.label}</span>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">Conviction Score</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Conviction Score</p>
               </div>
             </div>
             {/* Score bar */}
             <div className="mt-4">
-              <div className="flex justify-between text-xs text-slate-400 mb-1">
+              <div className="flex justify-between text-xs text-slate-400 dark:text-slate-500 mb-1">
                 <span>Fading</span><span>Building</span><span>Strong</span>
               </div>
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div className={`h-2 rounded-full transition-all ${scoreMeta.bar}`} style={{ width: `${processed.score}%` }} />
               </div>
             </div>
@@ -4273,41 +4273,41 @@ function StockIntelligence({ allFunds }) {
 
           {/* ── 4 stat cards ── */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Funds Holding</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">{processed.currentCount}</p>
-              <p className="text-xs text-slate-400 mt-0.5">of {processed.totalFunds} · peak {processed.peakCount}</p>
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+              <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wide">Funds Holding</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{processed.currentCount}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">of {processed.totalFunds} · peak {processed.peakCount}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Avg Allocation</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">{fmt(processed.currentAvg, 2)}%</p>
-              <p className="text-xs text-slate-400 mt-0.5">across current holders</p>
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+              <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wide">Avg Allocation</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{fmt(processed.currentAvg, 2)}%</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">across current holders</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">6M Allocation Δ</p>
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+              <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wide">6M Allocation Δ</p>
               <div className="flex items-center gap-1.5 mt-1">
                 {processed.delta6m > 0.05 ? <ArrowUp className="w-5 h-5 text-emerald-500" />
                   : processed.delta6m < -0.05 ? <ArrowDown className="w-5 h-5 text-red-400" />
-                  : <Minus className="w-5 h-5 text-slate-400" />}
-                <p className={`text-2xl font-bold tabular-nums ${processed.delta6m > 0.05 ? 'text-emerald-600' : processed.delta6m < -0.05 ? 'text-red-500' : 'text-slate-700'}`}>
+                  : <Minus className="w-5 h-5 text-slate-400 dark:text-slate-500" />}
+                <p className={`text-2xl font-bold tabular-nums ${processed.delta6m > 0.05 ? 'text-emerald-600' : processed.delta6m < -0.05 ? 'text-red-500' : 'text-slate-700 dark:text-slate-300'}`}>
                   {processed.delta6m > 0 ? '+' : ''}{fmt(processed.delta6m, 2)}%
                 </p>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">avg allocation change</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">avg allocation change</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Months Tracked</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">{processed.months.length}</p>
-              <p className="text-xs text-slate-400 mt-0.5">since {fmtMonth(processed.months[0])}</p>
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+              <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wide">Months Tracked</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{processed.months.length}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">since {fmtMonth(processed.months[0])}</p>
             </div>
           </div>
 
           {/* ── Trend chart + Fund breakdown ── */}
           <div className="grid grid-cols-5 gap-4">
             {/* Adoption + allocation trend chart */}
-            <div className="col-span-3 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-              <h3 className="text-sm font-semibold text-slate-700">Adoption Trend</h3>
-              <p className="text-xs text-slate-400 mt-0.5 mb-4">Fund count (purple) and avg allocation % (amber) over time</p>
+            <div className="col-span-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Adoption Trend</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 mb-4">Fund count (purple) and avg allocation % (amber) over time</p>
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={processed.monthStats} margin={{ top: 4, right: 50, bottom: 0, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -4326,14 +4326,14 @@ function StockIntelligence({ allFunds }) {
                     activeDot={{ r: 4, strokeWidth: 0 }} />
                 </LineChart>
               </ResponsiveContainer>
-              <div className="mt-3 flex items-center gap-5 border-t border-slate-100 pt-3">
+              <div className="mt-3 flex items-center gap-5 border-t border-slate-100 dark:border-slate-800 pt-3">
                 <div className="flex items-center gap-1.5">
                   <span className="w-4 inline-block rounded-full" style={{ height: 3, backgroundColor: '#8b5cf6' }} />
-                  <span className="text-xs text-slate-500">Funds Holding</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">Funds Holding</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-4 inline-block rounded-full" style={{ height: 2, backgroundColor: '#f59e0b' }} />
-                  <span className="text-xs text-slate-500">Avg Allocation %</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">Avg Allocation %</span>
                 </div>
               </div>
             </div>
@@ -4347,22 +4347,22 @@ function StockIntelligence({ allFunds }) {
                 const weeksDiff  = (new Date() - latestDate) / (1000 * 60 * 60 * 24 * 7);
                 const isStale    = weeksDiff > 8;
                 return (
-                  <div key={f.fund_id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50">
+                  <div key={f.fund_id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900">
                     <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: colors.get(f.fund_id) }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-slate-800 truncate" title={f.fund_name}>{f.fund_name}</p>
-                      <p className="text-xs text-slate-400">since {fmtMonth(f.first_month)}</p>
+                      <p className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate" title={f.fund_name}>{f.fund_name}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">since {fmtMonth(f.first_month)}</p>
                     </div>
                     <div className="text-right flex-shrink-0 flex flex-col items-end gap-0.5">
-                      <p className="text-xs font-bold text-slate-800 tabular-nums">{fmt(f.current_pct, 2)}%</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200 tabular-nums">{fmt(f.current_pct, 2)}%</p>
                       {f.delta != null && (
-                        <p className={`text-xs font-semibold tabular-nums ${f.delta > 0.01 ? 'text-emerald-600' : f.delta < -0.01 ? 'text-red-400' : 'text-slate-400'}`}>
+                        <p className={`text-xs font-semibold tabular-nums ${f.delta > 0.01 ? 'text-emerald-600' : f.delta < -0.01 ? 'text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
                           {f.delta > 0 ? '+' : ''}{fmt(f.delta, 2)}%
                         </p>
                       )}
                       <span
                         title={`Fund data last updated: ${fmtMonth(f.fund_latest_month)}`}
-                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${isStale ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${isStale ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500'}`}>
                         {isStale ? '⚠ ' : ''}{fmtMonth(f.fund_latest_month)}
                       </span>
                     </div>
@@ -4370,23 +4370,23 @@ function StockIntelligence({ allFunds }) {
                 );
               };
               return (
-                <div className="col-span-2 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col">
-                  <div className="px-5 pt-5 pb-3 border-b border-slate-100">
-                    <h3 className="text-sm font-semibold text-slate-700">Fund Breakdown</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                <div className="col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm flex flex-col">
+                  <div className="px-5 pt-5 pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Fund Breakdown</h3>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                       {activeFunds.length} active · {exitedFunds.length} exited
                     </p>
                   </div>
                   <div className="flex-1 overflow-y-auto p-3 space-y-1.5" style={{ maxHeight: 260 }}>
                     {activeFunds.length === 0 && (
-                      <p className="text-xs text-slate-400 text-center py-4">No funds currently hold this stock</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No funds currently hold this stock</p>
                     )}
                     {activeFunds.map(renderFundRow)}
                     {exitedFunds.length > 0 && (
                       <div className="pt-1">
                         <button
                           onClick={() => setShowExited(v => !v)}
-                          className="w-full text-left text-xs text-slate-400 hover:text-slate-600 py-1.5 px-2 flex items-center gap-1.5 transition-colors">
+                          className="w-full text-left text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:text-slate-500 py-1.5 px-2 flex items-center gap-1.5 transition-colors">
                           <span className={`transition-transform ${showExited ? 'rotate-90' : ''}`}>▶</span>
                           {showExited ? 'Hide' : 'Show'} {exitedFunds.length} exited fund{exitedFunds.length !== 1 ? 's' : ''}
                         </button>
@@ -4396,8 +4396,8 @@ function StockIntelligence({ allFunds }) {
                               <div key={f.fund_id} className="flex items-center gap-2.5 p-2.5 rounded-xl opacity-45">
                                 <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: colors.get(f.fund_id) }} />
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-medium text-slate-800 truncate" title={f.fund_name}>{f.fund_name}</p>
-                                  <p className="text-xs text-slate-400">exited after {fmtMonth(f.last_month)}</p>
+                                  <p className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate" title={f.fund_name}>{f.fund_name}</p>
+                                  <p className="text-xs text-slate-400 dark:text-slate-500">exited after {fmtMonth(f.last_month)}</p>
                                 </div>
                                 <span className="text-xs text-red-400 font-medium flex-shrink-0">Exited</span>
                               </div>
@@ -4414,22 +4414,22 @@ function StockIntelligence({ allFunds }) {
 
           {/* ── Sector Peers ── */}
           {peers?.length > 0 && selected.industry && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-              <h3 className="text-sm font-semibold text-slate-700">Sector Peers — {selected.industry}</h3>
-              <p className="text-xs text-slate-400 mt-0.5 mb-4">Other stocks in the same sector ranked by fund adoption in the latest month · click to analyse</p>
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Sector Peers — {selected.industry}</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 mb-4">Other stocks in the same sector ranked by fund adoption in the latest month · click to analyse</p>
               <div className="grid grid-cols-2 gap-2">
                 {peers.map((p, i) => (
                   <button key={p.isin}
                     onClick={() => { skipSearch.current = true; setSelected({ isin: p.isin, stock_name: p.stock_name, industry: selected.industry }); setQuery(p.stock_name); }}
-                    className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 hover:border-violet-200 hover:bg-violet-50 text-left transition-colors group">
+                    className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-violet-200 hover:bg-violet-50 text-left transition-colors group">
                     <span className="text-xs font-bold text-slate-300 group-hover:text-violet-400 w-5 flex-shrink-0">#{i+1}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-800 truncate">{p.stock_name}</p>
-                      <p className="text-xs text-slate-400 font-mono">{p.isin.slice(0,12)}</p>
+                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{p.stock_name}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{p.isin.slice(0,12)}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="text-xs font-bold text-violet-700">{p.fund_count} fund{p.fund_count!==1?'s':''}</p>
-                      <p className="text-xs text-slate-400">{fmt(p.avg_pct,2)}% avg</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">{fmt(p.avg_pct,2)}% avg</p>
                     </div>
                   </button>
                 ))}
@@ -4503,26 +4503,26 @@ function PortfolioBlender({ allFunds }) {
       <div className="grid grid-cols-3 gap-5">
         {/* Left: fund picker + weights */}
         <div className="col-span-1">
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-4">
-            <h2 className="text-sm font-semibold text-slate-700 mb-3">Select Funds & Weights</h2>
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-4">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Select Funds & Weights</h2>
             <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
               {fundList.map(f => {
                 const w   = weights[f.id] ?? 0;
                 const on  = w > 0;
                 const col = colorMap.get(f.id) ?? '#6366f1';
                 return (
-                  <div key={f.id} className={`rounded-xl border p-3 transition-colors ${on ? 'border-violet-200 bg-violet-50' : 'border-slate-100 hover:border-slate-200'}`}>
+                  <div key={f.id} className={`rounded-xl border p-3 transition-colors ${on ? 'border-violet-200 bg-violet-50' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:border-slate-700'}`}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium text-slate-700 truncate flex-1 mr-2" title={f.name}>
+                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate flex-1 mr-2" title={f.name}>
                         {shortNames.get(f.name) ?? f.name}
                       </span>
                       <div className="flex items-center gap-1">
                         <input type="number" min={0} max={100} value={w || ''}
                           placeholder="0"
                           onChange={e => setWeight(f.id, parseInt(e.target.value) || 0)}
-                          className="w-12 text-xs text-right border border-slate-200 rounded-lg px-1.5 py-1 focus:outline-none focus:border-violet-400"
+                          className="w-12 text-xs text-right border border-slate-200 dark:border-slate-700 rounded-lg px-1.5 py-1 focus:outline-none focus:border-violet-400"
                         />
-                        <span className="text-xs text-slate-400">%</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500">%</span>
                       </div>
                     </div>
                     <input type="range" min={0} max={100} value={w}
@@ -4537,13 +4537,13 @@ function PortfolioBlender({ allFunds }) {
             {/* Weight total indicator */}
             <div className={`mt-3 flex items-center justify-between text-xs px-2 py-1.5 rounded-lg ${
               totalWeight === 100 ? 'bg-emerald-50 text-emerald-700' :
-              totalWeight > 100 ? 'bg-red-50 text-red-700' : 'bg-slate-50 text-slate-500'
+              totalWeight > 100 ? 'bg-red-50 text-red-700' : 'bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 dark:text-slate-500'
             }`}>
               <span>Total weight</span>
               <span className="font-bold">{totalWeight}%</span>
             </div>
             {totalWeight !== 100 && totalWeight > 0 && (
-              <p className="text-xs text-slate-400 mt-1.5 text-center">
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 text-center">
                 {totalWeight < 100 ? `${100 - totalWeight}% unallocated — blended result will be normalised` : 'Over 100% — reduce weights'}
               </p>
             )}
@@ -4555,7 +4555,7 @@ function PortfolioBlender({ allFunds }) {
           {loading && <div className="skeleton h-64 rounded-2xl" />}
           {error   && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>}
           {!selected.length && !loading && (
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center text-slate-400 text-sm">
+            <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-12 text-center text-slate-400 dark:text-slate-500 text-sm">
               Set weights for 2+ funds to see your blended portfolio
             </div>
           )}
@@ -4563,34 +4563,34 @@ function PortfolioBlender({ allFunds }) {
           {blended && !loading && (
             <>
               {/* Sector breakdown */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-4">
-                <h2 className="text-sm font-semibold text-slate-700 mb-3">Blended Sector Allocation</h2>
+              <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-4">
+                <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Blended Sector Allocation</h2>
                 <div className="space-y-1.5">
                   {blended.sectors.slice(0, 12).map((s, i) => (
                     <div key={s.name} className="flex items-center gap-2.5">
-                      <span className="text-xs text-slate-500 w-40 truncate">{s.name}</span>
-                      <div className="flex-1 bg-slate-100 rounded-full h-2">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 w-40 truncate">{s.name}</span>
+                      <div className="flex-1 bg-slate-100 dark:bg-slate-700 rounded-full h-2">
                         <div className="h-2 rounded-full bg-violet-500" style={{ width: `${Math.min((s.pct / (blended.sectors[0]?.pct ?? 1)) * 100, 100)}%`, backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
                       </div>
-                      <span className="text-xs font-bold tabular-nums text-slate-700 w-12 text-right">{fmt(s.pct)}%</span>
+                      <span className="text-xs font-bold tabular-nums text-slate-700 dark:text-slate-300 w-12 text-right">{fmt(s.pct)}%</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Top holdings */}
-              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                  <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Blended Top Holdings</p>
-                  <p className="text-xs text-slate-400">{blended.rows.length} stocks · weights normalised to 100%</p>
+              <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+                  <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Blended Top Holdings</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">{blended.rows.length} stocks · weights normalised to 100%</p>
                 </div>
-                <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
+                <div className="divide-y divide-slate-100 dark:divide-slate-700 max-h-80 overflow-y-auto">
                   {blended.rows.slice(0, 30).map((r, i) => (
-                    <div key={r.isin} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50">
+                    <div key={r.isin} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900">
                       <span className="text-xs text-slate-300 w-5 tabular-nums">{i + 1}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-800 truncate">{r.stock_name}</p>
-                        <p className="text-xs text-slate-400 truncate">{r.industry}</p>
+                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{r.stock_name}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{r.industry}</p>
                       </div>
                       {/* Per-fund contribution dots */}
                       <div className="flex items-center gap-1">
@@ -4599,10 +4599,10 @@ function PortfolioBlender({ allFunds }) {
                             title={`${f.name}: ${fmt(f.pct)}%`} />
                         ))}
                       </div>
-                      <div className="w-20 bg-slate-100 rounded-full h-1.5 mr-2">
+                      <div className="w-20 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 mr-2">
                         <div className="h-1.5 rounded-full bg-violet-500" style={{ width: `${Math.min((r.blended_pct / (blended.rows[0]?.blended_pct ?? 1)) * 100, 100)}%` }} />
                       </div>
-                      <span className="text-xs font-bold tabular-nums text-slate-800 w-14 text-right">{fmt(r.blended_pct)}%</span>
+                      <span className="text-xs font-bold tabular-nums text-slate-800 dark:text-slate-200 w-14 text-right">{fmt(r.blended_pct)}%</span>
                     </div>
                   ))}
                 </div>
@@ -4744,11 +4744,11 @@ export default function CrossFundAnalysis() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
           <Layers className="w-5 h-5 text-violet-600" />
           Analysis
         </h1>
-        <p className="text-slate-500 text-sm mt-1">
+        <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm mt-1">
           Cross-fund holdings analysis and portfolio overlap detection.
         </p>
       </div>
@@ -4759,7 +4759,7 @@ export default function CrossFundAnalysis() {
         return (
           <div className="mb-6">
             {/* Category row — underline style */}
-            <div className="flex border-b border-slate-200 gap-0">
+            <div className="flex border-b border-slate-200 dark:border-slate-700 gap-0">
               {TAB_GROUPS.map(group => {
                 const isActive = group.label === activeGroup.label;
                 return (
@@ -4768,7 +4768,7 @@ export default function CrossFundAnalysis() {
                     className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors whitespace-nowrap ${
                       isActive
                         ? 'border-violet-600 text-violet-700'
-                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                        : 'border-transparent text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300 hover:border-slate-300'
                     }`}>
                     {group.label}
                   </button>
@@ -4783,7 +4783,7 @@ export default function CrossFundAnalysis() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                     tab === t.id
                       ? 'bg-violet-100 text-violet-700'
-                      : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                      : 'text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 dark:bg-slate-700 hover:text-slate-700 dark:text-slate-300'
                   }`}>
                   {t.icon} {t.label}
                 </button>

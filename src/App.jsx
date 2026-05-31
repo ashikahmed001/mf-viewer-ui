@@ -5,6 +5,7 @@ import Layout from './components/Layout.jsx';
 import AuthProvider from './components/AuthProvider.jsx';
 import { SubscriptionProvider } from './context/SubscriptionContext.jsx';
 import { FeatureFlagsProvider } from './context/FeatureFlagsContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import GatedPage from './components/GatedPage.jsx';
 
 // ─── Auth shell — always bundled, needed before any plan check ────────────────
@@ -50,6 +51,7 @@ function AdminRoute() {
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
+    <ThemeProvider>
     <Routes>
       {/* Public — no chunk split needed, tiny components */}
       <Route path="/sign-in/*" element={<SignInPage />} />
@@ -108,5 +110,6 @@ export default function App() {
         }
       />
     </Routes>
+    </ThemeProvider>
   );
 }

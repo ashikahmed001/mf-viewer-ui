@@ -69,25 +69,25 @@ function FundRow({ entry, maxStreak, direction }) {
   const gainSign = entry.gain >= 0 ? '+' : '';
 
   return (
-    <div className="flex items-center gap-3 py-2.5 px-4 hover:bg-slate-50 transition-colors">
+    <div className="flex items-center gap-3 py-2.5 px-4 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors">
       <Sparkline history={entry.pct_history} color={color} />
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-slate-700 truncate" title={entry.fund_name}>
+        <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate" title={entry.fund_name}>
           {entry.fund_name.split(' ').slice(0, 4).join(' ')}
           {entry.fund_name.split(' ').length > 4 ? '…' : ''}
         </p>
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           <StreakBadge streak={entry.streak} maxStreak={maxStreak} direction={direction} />
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-slate-400 dark:text-slate-500">
             {entry.up_count}/{entry.window_count - 1} months {direction === 'rising' ? 'up' : 'down'}
           </span>
         </div>
       </div>
       <div className="text-right flex-shrink-0">
-        <div className="text-xs tabular-nums text-slate-500">
+        <div className="text-xs tabular-nums text-slate-500 dark:text-slate-400 dark:text-slate-500">
           {fmt(entry.oldest_pct)}%
-          <span className="mx-1 text-slate-500">→</span>
-          <span className="font-semibold text-slate-700">{fmt(entry.latest_pct)}%</span>
+          <span className="mx-1 text-slate-500 dark:text-slate-400 dark:text-slate-500">→</span>
+          <span className="font-semibold text-slate-700 dark:text-slate-300">{fmt(entry.latest_pct)}%</span>
         </div>
         <div className={`text-xs font-bold tabular-nums ${
           direction === 'rising'
@@ -110,10 +110,10 @@ function StockCard({ stockGroup, maxStreak, isMultiFund, direction }) {
   const isRising   = direction === 'rising';
 
   return (
-    <div className={`bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
+    <div className={`bg-white dark:bg-slate-800 border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
       isMultiFund
         ? isRising ? 'border-violet-200 ring-1 ring-violet-100' : 'border-red-200 ring-1 ring-red-50'
-        : 'border-slate-200'
+        : 'border-slate-200 dark:border-slate-700'
     }`}>
       {/* Header */}
       <div className="flex items-start justify-between gap-2 p-4">
@@ -133,8 +133,8 @@ function StockCard({ stockGroup, maxStreak, isMultiFund, direction }) {
               </span>
             )}
           </div>
-          <p className="font-semibold text-slate-800 text-sm leading-snug">{stock_name}</p>
-          <p className="text-xs text-slate-400 font-mono mt-0.5">{isin}</p>
+          <p className="font-semibold text-slate-800 dark:text-slate-200 text-sm leading-snug">{stock_name}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-mono mt-0.5">{isin}</p>
         </div>
         <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
           <StreakBadge streak={bestStreak} maxStreak={maxStreak} direction={direction} />
@@ -149,7 +149,7 @@ function StockCard({ stockGroup, maxStreak, isMultiFund, direction }) {
       </div>
 
       {/* Per-fund rows */}
-      <div className="border-t border-slate-100 divide-y divide-slate-100">
+      <div className="border-t border-slate-100 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
         {entries.map((entry, i) => (
           <FundRow key={`${entry.fund_id}-${i}`} entry={entry} maxStreak={maxStreak} direction={direction} />
         ))}
@@ -160,11 +160,11 @@ function StockCard({ stockGroup, maxStreak, isMultiFund, direction }) {
 
 // ─── Table view ───────────────────────────────────────────────────────────────
 
-function SortHeader({ label, col, sortCol, sortDir, onSort, accentColor = 'text-slate-700' }) {
+function SortHeader({ label, col, sortCol, sortDir, onSort, accentColor = 'text-slate-700 dark:text-slate-300' }) {
   const active = sortCol === col;
   return (
     <th
-      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide cursor-pointer select-none hover:text-slate-700 dark:text-slate-300 whitespace-nowrap"
       onClick={() => onSort(col)}
     >
       <span className="inline-flex items-center gap-1">
@@ -238,12 +238,12 @@ function TableView({ flatRows, maxStreak, direction }) {
   const isRising = direction === 'rising';
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
-        <span className="text-xs text-slate-400">{sorted.length} row{sorted.length !== 1 ? 's' : ''}</span>
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-slate-800">
+        <span className="text-xs text-slate-400 dark:text-slate-500">{sorted.length} row{sorted.length !== 1 ? 's' : ''}</span>
         <button
           onClick={() => downloadCSV(sorted, direction)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-400 px-3 py-1.5 rounded-lg transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 hover:border-slate-400 px-3 py-1.5 rounded-lg transition-colors"
         >
           <Download className="w-3.5 h-3.5" /> Download CSV
         </button>
@@ -251,18 +251,18 @@ function TableView({ flatRows, maxStreak, direction }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm min-w-[900px]">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-100">
+            <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
               <SortHeader label="Stock"       col="stock_name" {...hp} />
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Industry</th>
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Fund</th>
+              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Industry</th>
+              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Fund</th>
               <SortHeader label="Streak"      col="streak"     {...hp} />
               <SortHeader label={isRising ? 'Up / Window' : 'Down / Window'} col="up_count" {...hp} />
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Trend</th>
+              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Trend</th>
               <SortHeader label="Allocation"  col="latest_pct" {...hp} />
               <SortHeader label="Change"      col="gain"       {...hp} />
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
             {sorted.map((entry, i) => {
               const color    = getIndustryColor(entry.industry).hex;
               const gainSign = entry.gain >= 0 ? '+' : '';
@@ -270,20 +270,20 @@ function TableView({ flatRows, maxStreak, direction }) {
                 ? entry.gain > 0 ? 'text-emerald-600' : 'text-red-500'
                 : entry.gain < 0 ? 'text-red-500' : 'text-emerald-600';
               return (
-                <tr key={`${entry.fund_id}-${entry.isin}-${i}`} className="hover:bg-slate-50 transition-colors">
+                <tr key={`${entry.fund_id}-${entry.isin}-${i}`} className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-slate-800 leading-snug">{entry.stock_name}</p>
-                    <p className="text-xs text-slate-400 font-mono">{entry.isin}</p>
+                    <p className="font-medium text-slate-800 dark:text-slate-200 leading-snug">{entry.stock_name}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{entry.isin}</p>
                   </td>
                   <td className="px-4 py-3">
                     {entry.industry
                       ? <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(entry.industry)}`}>
                           {entry.industry}
                         </span>
-                      : <span className="text-slate-400 text-xs">—</span>}
+                      : <span className="text-slate-400 dark:text-slate-500 text-xs">—</span>}
                   </td>
                   <td className="px-4 py-3 max-w-[180px]">
-                    <p className="text-xs text-slate-600 truncate" title={entry.fund_name}>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 dark:text-slate-500 truncate" title={entry.fund_name}>
                       {entry.fund_name.split(' ').slice(0, 4).join(' ')}
                       {entry.fund_name.split(' ').length > 4 ? '…' : ''}
                     </p>
@@ -292,16 +292,16 @@ function TableView({ flatRows, maxStreak, direction }) {
                     <StreakBadge streak={entry.streak} maxStreak={maxStreak} direction={direction} />
                   </td>
                   <td className="px-4 py-3 text-center tabular-nums">
-                    <span className="text-xs font-semibold text-slate-700">{entry.up_count}</span>
-                    <span className="text-xs text-slate-400">/{entry.window_count - 1}</span>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{entry.up_count}</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">/{entry.window_count - 1}</span>
                   </td>
                   <td className="px-4 py-3">
                     <Sparkline history={entry.pct_history} color={color} width={80} height={28} />
                   </td>
                   <td className="px-4 py-3 tabular-nums text-right">
-                    <span className="text-xs text-slate-500">{fmt(entry.oldest_pct)}%</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">{fmt(entry.oldest_pct)}%</span>
                     <span className="mx-1 text-slate-300 text-xs">→</span>
-                    <span className="text-sm font-semibold text-slate-700">{fmt(entry.latest_pct)}%</span>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{fmt(entry.latest_pct)}%</span>
                   </td>
                   <td className="px-4 py-3 text-right tabular-nums">
                     <span className={`text-sm font-bold ${gainColor}`}>
@@ -401,16 +401,16 @@ function ConvictionPanel({ direction }) {
       )}
 
       {/* Filter bar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-6">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-6">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 text-sm font-medium text-slate-600">
+            <span className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500">
               <Filter className="w-4 h-4" /> Window:
             </span>
             {[4, 5, 6, 8].map(n => (
               <button key={n} onClick={() => setLookback(n)}
                 className={`px-3 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${
-                  lookback === n ? accentActive : `bg-white text-slate-600 border-slate-200 ${accentHover}`
+                  lookback === n ? accentActive : `bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 ${accentHover}`
                 }`}>
                 {n}mo
               </button>
@@ -418,11 +418,11 @@ function ConvictionPanel({ direction }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-600">Min streak:</span>
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500">Min streak:</span>
             {[2, 3, 4, 5].filter(n => n < lookback).map(n => (
               <button key={n} onClick={() => setMinStreak(n)}
                 className={`px-3 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${
-                  minStreak === n ? streakActive : `bg-white text-slate-600 border-slate-200 ${streakHover}`
+                  minStreak === n ? streakActive : `bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 ${streakHover}`
                 }`}>
                 {n}+
               </button>
@@ -432,22 +432,22 @@ function ConvictionPanel({ direction }) {
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <div onClick={() => setMultiOnly(v => !v)}
               className={`w-9 h-5 rounded-full transition-colors relative ${multiOnly ? 'bg-violet-600' : 'bg-slate-200'}`}>
-              <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${multiOnly ? 'translate-x-4' : ''}`} />
+              <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white dark:bg-slate-800 rounded-full shadow transition-transform ${multiOnly ? 'translate-x-4' : ''}`} />
             </div>
-            <span className="text-sm font-medium text-slate-600">Multi-fund only</span>
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500">Multi-fund only</span>
           </label>
 
           <div className="ml-auto flex items-center gap-3">
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-400 dark:text-slate-500">
               {totalShown} {viewMode === 'table' ? 'row' : 'stock'}{totalShown !== 1 ? 's' : ''}
             </span>
-            <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
               <button onClick={() => setViewMode('cards')} title="Card view"
-                className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}>
+                className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards' ? 'bg-white dark:bg-slate-800 shadow-sm text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:text-slate-500'}`}>
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button onClick={() => setViewMode('table')} title="Table view"
-                className={`p-1.5 rounded-md transition-colors ${viewMode === 'table' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}>
+                className={`p-1.5 rounded-md transition-colors ${viewMode === 'table' ? 'bg-white dark:bg-slate-800 shadow-sm text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:text-slate-500'}`}>
                 <Table2 className="w-4 h-4" />
               </button>
             </div>
@@ -466,11 +466,11 @@ function ConvictionPanel({ direction }) {
       )}
 
       {!loading && !error && totalShown === 0 && (
-        <div className="text-center py-16 text-slate-400 bg-white border border-slate-200 rounded-2xl">
+        <div className="text-center py-16 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
           {isRising
             ? <Flame className="w-10 h-10 mx-auto mb-3 opacity-30" />
             : <TrendingDown className="w-10 h-10 mx-auto mb-3 opacity-30" />}
-          <p className="font-medium text-slate-500">No {isRising ? 'rising' : 'falling'} stocks found</p>
+          <p className="font-medium text-slate-500 dark:text-slate-400 dark:text-slate-500">No {isRising ? 'rising' : 'falling'} stocks found</p>
           <p className="text-sm mt-1">Try lowering the min streak or widening the window</p>
         </div>
       )}
@@ -500,13 +500,13 @@ export default function RisingConviction() {
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
           {tab === 'rising'
             ? <Flame className="w-5 h-5 text-emerald-600" />
             : <TrendingDown className="w-5 h-5 text-red-500" />}
           Conviction Tracker
         </h1>
-        <p className="text-slate-500 text-sm mt-1">
+        <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm mt-1">
           {tab === 'rising'
             ? 'Stocks being consistently added to — consecutive monthly increases in % NAV allocation.'
             : 'Stocks being consistently trimmed — consecutive monthly decreases in % NAV allocation.'}
@@ -520,7 +520,7 @@ export default function RisingConviction() {
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${
             tab === 'rising'
               ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-              : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-600'
+              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:border-emerald-300 hover:text-emerald-600'
           }`}
         >
           <Flame className="w-4 h-4" /> Rising Conviction
@@ -530,7 +530,7 @@ export default function RisingConviction() {
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${
             tab === 'losing'
               ? 'bg-red-500 text-white border-red-500 shadow-sm'
-              : 'bg-white text-slate-600 border-slate-200 hover:border-red-300 hover:text-red-600'
+              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:border-red-300 hover:text-red-600'
           }`}
         >
           <TrendingDown className="w-4 h-4" /> Losing Conviction
@@ -545,10 +545,10 @@ export default function RisingConviction() {
 
 function StatCard({ icon, label, value, sub }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-      <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">{icon} {label}</div>
-      <div className="font-bold text-slate-800 text-lg">{value}</div>
-      {sub && <div className="text-xs text-slate-400 mt-0.5 truncate" title={sub}>{sub}</div>}
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
+      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mb-1">{icon} {label}</div>
+      <div className="font-bold text-slate-800 dark:text-slate-200 text-lg">{value}</div>
+      {sub && <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate" title={sub}>{sub}</div>}
     </div>
   );
 }
