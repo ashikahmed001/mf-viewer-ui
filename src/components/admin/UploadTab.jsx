@@ -302,6 +302,51 @@ function FundNameAutocomplete({ value, onChange }) {
   );
 }
 
+// ─── MonthYearPicker ──────────────────────────────────────────────────────────
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: 10 }, (_, i) => CURRENT_YEAR - i); // last 10 years
+
+function MonthYearPicker({ value, onChange }) {
+  // value is 'YYYY-MM' or 'YYYY-MM-DD'
+  const parts  = (value || '').slice(0, 7).split('-');
+  const year   = parts[0] ? parseInt(parts[0]) : '';
+  const month  = parts[1] ? parseInt(parts[1]) : '';
+
+  function emit(y, m) {
+    if (y && m) onChange(`${y}-${String(m).padStart(2, '0')}`);
+  }
+
+  const selectCls = `px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600
+    bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200
+    focus:outline-none focus:ring-2 focus:ring-indigo-400 appearance-none cursor-pointer`;
+
+  return (
+    <div className="flex gap-2">
+      <select
+        value={month}
+        onChange={e => emit(year || CURRENT_YEAR, e.target.value)}
+        className={`flex-1 ${selectCls}`}
+      >
+        <option value="">Month</option>
+        {MONTHS.map((m, i) => (
+          <option key={m} value={i + 1}>{m}</option>
+        ))}
+      </select>
+      <select
+        value={year}
+        onChange={e => emit(e.target.value, month || 1)}
+        className={`w-28 ${selectCls}`}
+      >
+        <option value="">Year</option>
+        {YEARS.map(y => (
+          <option key={y} value={y}>{y}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 // ─── ExtractionReview ─────────────────────────────────────────────────────────
 function ExtractionReview({ draft, onDiscard, onSaved }) {
   const [data, setData] = useState(() => ({
@@ -379,11 +424,9 @@ function ExtractionReview({ draft, onDiscard, onSaved }) {
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Report Month</label>
-            <input
-              type="month"
-              value={data.report_month?.slice(0, 7) || ''}
-              onChange={e => update({ report_month: e.target.value })}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            <MonthYearPicker
+              value={data.report_month}
+              onChange={v => update({ report_month: v })}
             />
           </div>
           <div>
