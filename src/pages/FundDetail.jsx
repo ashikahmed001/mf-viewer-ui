@@ -182,7 +182,7 @@ export default function FundDetail() {
       </div>
 
       {/* Month Selector */}
-      <div className="mb-6 max-w-sm">
+      <div className="mb-6 max-w-full sm:max-w-sm">
         <MonthSelector extractions={extractions} value={selectedId} onChange={v => { setSelectedId(v); setIndustry(''); setSearch(''); }} />
       </div>
 
@@ -218,7 +218,7 @@ export default function FundDetail() {
           )}
 
           {/* Tabs — only extraction-scoped views */}
-          <div className="flex gap-1 mb-4 bg-slate-100 dark:bg-slate-700 rounded-xl p-1 w-fit">
+          <div className="flex gap-1 mb-4 bg-slate-100 dark:bg-slate-700 rounded-xl p-1 w-full sm:w-fit overflow-x-auto">
             <TabBtn active={activeTab === 'holdings'} onClick={() => setActiveTab('holdings')}>Holdings Table</TabBtn>
             <TabBtn active={activeTab === 'charts'} onClick={() => setActiveTab('charts')}>Charts & Analytics</TabBtn>
           </div>
@@ -450,7 +450,7 @@ function NavHistoryPanel({ navData }) {
           </div>
         </div>
 
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={typeof window !== 'undefined' && window.innerWidth < 640 ? 200 : 300}>
           <LineChart data={points} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f8fafc" vertical={false} />
             <XAxis

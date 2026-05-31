@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Layers, Flame, Newspaper, Settings, Zap, Sun, Moon, Clock, X } from 'lucide-react';
+import { Home, Layers, Flame, Newspaper, Settings, Zap, Sun, Moon, Clock, X, Menu } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
 import { useState, useRef, useEffect } from 'react';
 import { useSubscription } from '../context/SubscriptionContext.jsx';
@@ -149,44 +149,56 @@ export default function Layout({ children }) {
   const { isDark, prefs } = useTheme();
 
   const [showPrefs, setShowPrefs] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const panelRef = useRef(null);
 
-  // Close panel on outside click
+  // Close prefs panel on outside click
   useEffect(() => {
     function handle(e) { if (panelRef.current && !panelRef.current.contains(e.target)) setShowPrefs(false); }
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
   }, []);
 
+  // Close mobile drawer on route change
+  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
   const ThemeIcon = prefs.mode === 'dark' ? Moon : prefs.mode === 'light' ? Sun : Clock;
+
+  const navItems = [
+    { to: '/',         icon: <Newspaper className="w-5 h-5" />, label: 'Feed',     active: location.pathname === '/'                  },
+    { to: '/funds',    icon: <Home      className="w-5 h-5" />, label: 'Funds',    active: location.pathname.startsWith('/funds')      },
+    { to: '/analysis', icon: <Layers    className="w-5 h-5" />, label: 'Analysis', active: location.pathname === '/analysis'           },
+    { to: '/rising',   icon: <Flame     className="w-5 h-5" />, label: 'Rising',   active: location.pathname === '/rising'             },
+    ...(isAdmin ? [{ to: '/admin', icon: <Settings className="w-5 h-5" />, label: 'Admin', active: location.pathname === '/admin' }] : []),
+  ];
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Nav */}
-      <header className="bg-slate-900 text-white shadow-lg no-print">
+      <header className="bg-slate-900 text-white shadow-lg no-print sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
               <FundSightLogo />
             </Link>
-            <nav className="flex items-center gap-4 text-sm font-medium">
-              <NavLink to="/"         icon={<Newspaper className="w-4 h-4" />} label="Feed"     active={location.pathname === '/'} />
-              <NavLink to="/funds"    icon={<Home      className="w-4 h-4" />} label="Funds"    active={location.pathname.startsWith('/funds')} />
-              <NavLink to="/analysis" icon={<Layers    className="w-4 h-4" />} label="Analysis" active={location.pathname === '/analysis'} />
-              <NavLink to="/rising"   icon={<Flame     className="w-4 h-4" />} label="Rising"   active={location.pathname === '/rising'} />
-              {isAdmin && (
-                <NavLink to="/admin" icon={<Settings className="w-4 h-4" />} label="Admin" active={location.pathname === '/admin'} />
-              )}
+
+            {/* Desktop nav */}
+            <nav className="hidden md:flex items-center gap-3 text-sm font-medium">
+              {navItems.map(({ to, icon, label, active }) => (
+                <NavLink key={to} to={to} icon={icon} label={label} active={active} />
+              ))}
               {paymentsEnabled && !isPro && (
-                <Link
-                  to="/pricing"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold bg-indigo-500 hover:bg-indigo-400 text-white transition-colors"
-                >
+                <Link to="/pricing" className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold bg-indigo-500 hover:bg-indigo-400 text-white transition-colors">
                   <Zap className="w-3.5 h-3.5" /> Upgrade
                 </Link>
               )}
-
-              {/* Theme preferences button */}
               <div ref={panelRef} className="relative">
                 <button
                   onClick={() => setShowPrefs(v => !v)}
@@ -198,15 +210,80 @@ export default function Layout({ children }) {
                 </button>
                 {showPrefs && <PreferencesPanel onClose={() => setShowPrefs(false)} />}
               </div>
-
               <UserButton afterSignOutUrl="/sign-in" />
             </nav>
+
+            {/* Mobile: theme + avatar + hamburger */}
+            <div className="flex md:hidden items-center gap-2">
+              <button
+                onClick={() => setShowPrefs(v => !v)}
+                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+              >
+                <ThemeIcon className="w-4 h-4" />
+              </button>
+              <UserButton afterSignOutUrl="/sign-in" />
+              <button
+                onClick={() => setMobileOpen(v => !v)}
+                className="flex items-center justify-center w-9 h-9 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile prefs panel (inline, below header) */}
+        {showPrefs && (
+          <div className="md:hidden border-t border-slate-800">
+            <div className="max-w-7xl mx-auto px-4 py-3">
+              <PreferencesPanel onClose={() => setShowPrefs(false)} />
+            </div>
+          </div>
+        )}
       </header>
 
+      {/* Mobile drawer overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile drawer */}
+      <div className={`fixed top-16 right-0 bottom-0 z-30 w-72 bg-slate-900 shadow-2xl transform transition-transform duration-200 md:hidden
+        ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}
+      >
+        <nav className="flex flex-col p-4 gap-1">
+          {navItems.map(({ to, icon, label, active }) => (
+            <Link
+              key={to}
+              to={to}
+              onClick={() => setMobileOpen(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                active ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              {icon}
+              {label}
+            </Link>
+          ))}
+
+          {paymentsEnabled && !isPro && (
+            <Link
+              to="/pricing"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold bg-indigo-500 hover:bg-indigo-400 text-white transition-colors mt-2"
+            >
+              <Zap className="w-5 h-5" /> Upgrade to Pro
+            </Link>
+          )}
+        </nav>
+      </div>
+
       {/* Main */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {children}
       </main>
 

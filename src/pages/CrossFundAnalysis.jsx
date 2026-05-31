@@ -4758,8 +4758,8 @@ export default function CrossFundAnalysis() {
         const activeGroup = TAB_GROUPS.find(g => g.tabs.some(t => t.id === tab)) ?? TAB_GROUPS[0];
         return (
           <div className="mb-6">
-            {/* Category row — underline style */}
-            <div className="flex border-b border-slate-200 dark:border-slate-700 gap-0">
+            {/* Category row — underline style, scrollable on mobile */}
+            <div className="flex border-b border-slate-200 dark:border-slate-700 gap-0 overflow-x-auto">
               {TAB_GROUPS.map(group => {
                 const isActive = group.label === activeGroup.label;
                 return (

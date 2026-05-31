@@ -402,27 +402,27 @@ function ConvictionPanel({ direction }) {
 
       {/* Filter bar */}
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400">
               <Filter className="w-4 h-4" /> Window:
             </span>
             {[4, 5, 6, 8].map(n => (
               <button key={n} onClick={() => setLookback(n)}
-                className={`px-3 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${
-                  lookback === n ? accentActive : `bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 ${accentHover}`
+                className={`px-2.5 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${
+                  lookback === n ? accentActive : `bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 ${accentHover}`
                 }`}>
                 {n}mo
               </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500">Min streak:</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Min streak:</span>
             {[2, 3, 4, 5].filter(n => n < lookback).map(n => (
               <button key={n} onClick={() => setMinStreak(n)}
-                className={`px-3 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${
-                  minStreak === n ? streakActive : `bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 ${streakHover}`
+                className={`px-2.5 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${
+                  minStreak === n ? streakActive : `bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 ${streakHover}`
                 }`}>
                 {n}+
               </button>
@@ -434,10 +434,10 @@ function ConvictionPanel({ direction }) {
               className={`w-9 h-5 rounded-full transition-colors relative ${multiOnly ? 'bg-violet-600' : 'bg-slate-200'}`}>
               <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white dark:bg-slate-800 rounded-full shadow transition-transform ${multiOnly ? 'translate-x-4' : ''}`} />
             </div>
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500">Multi-fund only</span>
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Multi-fund only</span>
           </label>
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="flex items-center gap-3 sm:ml-auto">
             <span className="text-xs text-slate-400 dark:text-slate-500">
               {totalShown} {viewMode === 'table' ? 'row' : 'stock'}{totalShown !== 1 ? 's' : ''}
             </span>
@@ -514,7 +514,7 @@ export default function RisingConviction() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         <button
           onClick={() => setTab('rising')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${

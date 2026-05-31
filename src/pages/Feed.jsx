@@ -409,18 +409,18 @@ export default function Feed() {
   return (
     <div>
       {/* ── Page header ──────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-6">
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Newspaper className="w-5 h-5 text-indigo-500" />
             Activity Feed
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm mt-1">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Month-over-month changes — entries, exits, and conviction shifts.
           </p>
         </div>
         {!loading && !error && latest && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 shrink-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 shadow-sm">
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 shrink-0 sm:mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 shadow-sm w-fit">
             <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
             {fmtMonth(latest.month)}
           </div>
@@ -440,23 +440,21 @@ export default function Feed() {
       {/* ── Filter bar ───────────────────────────────────────────────────── */}
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 shadow-sm mb-6 space-y-3">
 
-        {/* Row 1: Lookback + fund picker */}
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Row 1: Lookback + fund picker + notable */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">Last</span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {[3, 6, 9, 12].map(n => (
               <button key={n} onClick={() => setMonths(n)}
-                className={`px-3 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${
+                className={`px-2.5 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${
                   months === n
                     ? 'bg-slate-900 text-white border-slate-900'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:border-slate-400'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400'
                 }`}>
                 {n}mo
               </button>
             ))}
           </div>
-
-          <div className="w-px h-5 bg-slate-200 hidden sm:block" />
 
           {/* Fund picker */}
           {funds.length > 0 && (
@@ -464,7 +462,7 @@ export default function Feed() {
           )}
 
           {/* Notable toggle */}
-          <label className="ml-auto flex items-center gap-2 cursor-pointer select-none">
+          <label className="flex items-center gap-2 cursor-pointer select-none sm:ml-auto">
             <button
               onClick={() => setNotable(v => !v)}
               className={`w-9 h-5 rounded-full transition-colors relative shrink-0
@@ -472,7 +470,7 @@ export default function Feed() {
             >
               <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white dark:bg-slate-800 rounded-full shadow transition-transform ${notable ? 'translate-x-4' : ''}`} />
             </button>
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500 whitespace-nowrap">Notable only</span>
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">Notable only</span>
           </label>
         </div>
 

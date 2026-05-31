@@ -56,7 +56,7 @@ export default function Home() {
 
       {/* Stats row */}
       {!loading && (
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
           <StatCard value={funds.length} label="Total Funds" />
           <StatCard value={funds.reduce((a, b) => a + (b.extraction_count || 0), 0)} label="Total Extractions" />
           <StatCard value={filtered.length} label="Showing" />
@@ -113,9 +113,9 @@ export default function Home() {
 
 function StatCard({ value, label }) {
   return (
-    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm text-center">
-      <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">{value}</div>
-      <div className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">{label}</div>
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 sm:p-4 shadow-sm text-center">
+      <div className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200">{value}</div>
+      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{label}</div>
     </div>
   );
 }
