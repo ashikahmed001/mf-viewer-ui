@@ -278,14 +278,17 @@ function IsinRemapTab({ onCountChange }) {
 
 // ─── Tab: Name Normalisation ──────────────────────────────────────────────────
 function NameNormTab({ onCountChange }) {
-  const [issues, setIssues]     = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [expanded, setExpanded] = useState({});
-  const [pending, setPending]   = useState({});
-  const { show, toast, hide }   = useToast();
+  const [issues, setIssues]       = useState([]);
+  const [loading, setLoading]     = useState(false);
+  const [expanded, setExpanded]   = useState({});
+  const [pending, setPending]     = useState({});
+  const [selected, setSelected]   = useState(new Set()); // set of ISINs
+  const [bulkRunning, setBulkRunning] = useState(false);
+  const { show, toast, hide }     = useToast();
 
   const load = useCallback(async () => {
     setLoading(true);
+    setSelected(new Set());
     try { setIssues(await adminGetNameIssues()); }
     catch (e) { show(e.response?.data?.error || e.message, false); }
     finally { setLoading(false); }
@@ -293,6 +296,7 @@ function NameNormTab({ onCountChange }) {
 
   useEffect(() => { load(); }, [load]);
 
+  // Fix a single ISIN to the given name
   async function applyFix(isin, name) {
     const key = `${isin}:${name}`;
     setPending(p => ({ ...p, [key]: true }));
@@ -308,16 +312,67 @@ function NameNormTab({ onCountChange }) {
     }
   }
 
+  // Fix all selected ISINs — pick the variant with the most rows
+  async function fixSelected() {
+    if (!selected.size) return;
+    setBulkRunning(true);
+    let fixed = 0, failed = 0;
+    for (const isin of selected) {
+      const issue = issues.find(i => i.isin === isin);
+      if (!issue) continue;
+      // Sort by row_count desc, pick the winner
+      const winner = [...issue.names].sort((a, b) => b.row_count - a.row_count)[0];
+      try {
+        await adminFixName(isin, winner.stock_name);
+        fixed++;
+      } catch { failed++; }
+    }
+    show(`Fixed ${fixed} ISIN${fixed !== 1 ? 's' : ''}${failed ? ` · ${failed} failed` : ''}`, failed === 0);
+    await load();
+    onCountChange?.();
+    setBulkRunning(false);
+  }
+
+  const allIsins  = issues.map(i => i.isin);
+  const allSelected = allIsins.length > 0 && allIsins.every(i => selected.has(i));
+
+  function toggleAll() {
+    if (allSelected) setSelected(new Set());
+    else setSelected(new Set(allIsins));
+  }
+
+  function toggleOne(isin) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(isin) ? next.delete(isin) : next.add(isin);
+      return next;
+    });
+  }
+
   return (
     <div>
       {toast && <Toast {...toast} onClose={hide} />}
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm">
-          ISINs appearing under multiple name variants. Click "Use this name" to normalise all rows to that name.
+
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <p className="text-slate-500 dark:text-slate-400 text-sm">
+          ISINs appearing under multiple name variants.
         </p>
-        <button onClick={load} className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 transition-colors">
-          <RefreshCw className="w-3 h-3" /> Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          {selected.size > 0 && (
+            <button
+              onClick={fixSelected}
+              disabled={bulkRunning}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+            >
+              {bulkRunning ? <Spinner /> : <CheckCircle className="w-3 h-3" />}
+              Fix {selected.size} selected — use most common name
+            </button>
+          )}
+          <button onClick={load} className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 transition-colors">
+            <RefreshCw className="w-3 h-3" /> Refresh
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -328,49 +383,81 @@ function NameNormTab({ onCountChange }) {
           No name conflicts found
         </div>
       ) : (
-        <div className="space-y-2">
-          {issues.map(({ isin, names }) => {
-            const open = expanded[isin];
-            const suggested = names[0].stock_name;
-            return (
-              <SectionCard key={isin}>
-                <button
-                  onClick={() => setExpanded(e => ({ ...e, [isin]: !open }))}
-                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 rounded-2xl transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    {open
-                      ? <ChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                      : <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
-                    <span className="font-mono text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">{isin}</span>
-                    <span className="font-semibold text-slate-900 dark:text-slate-100">{suggested}</span>
-                    <Badge color="amber">{names.length} variants</Badge>
-                  </div>
-                </button>
+        <>
+          {/* Select all bar */}
+          <div className="flex items-center gap-3 px-2 pb-2">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={toggleAll}
+              className="w-4 h-4 rounded accent-indigo-600 cursor-pointer"
+            />
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              {selected.size > 0 ? `${selected.size} of ${issues.length} selected` : `Select all (${issues.length})`}
+            </span>
+          </div>
 
-                {open && (
-                  <div className="border-t border-slate-100 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
-                    {names.map(n => (
-                      <div key={n.stock_name} className="px-5 py-3 flex items-center gap-4">
-                        <span className="text-slate-800 dark:text-slate-200 text-sm flex-1">{n.stock_name}</span>
-                        <span className="text-slate-400 dark:text-slate-500 text-xs w-36 shrink-0 text-right">{fmtMonth(n.first_month)} → {fmtMonth(n.last_month)}</span>
-                        <span className="text-slate-400 dark:text-slate-500 text-xs w-16 shrink-0 text-right">{n.row_count} rows</span>
-                        <button
-                          disabled={!!pending[`${isin}:${n.stock_name}`]}
-                          onClick={() => applyFix(isin, n.stock_name)}
-                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg transition-colors font-medium shrink-0"
-                        >
-                          {pending[`${isin}:${n.stock_name}`] ? <Spinner /> : null}
-                          Use this name
-                        </button>
-                      </div>
-                    ))}
+          <div className="space-y-2">
+            {issues.map(({ isin, names }) => {
+              const open     = expanded[isin];
+              const isSelected = selected.has(isin);
+              // Winner = most rows
+              const winner   = [...names].sort((a, b) => b.row_count - a.row_count)[0];
+              return (
+                <SectionCard key={isin}>
+                  <div className="flex items-center gap-3 px-5 py-4">
+                    {/* Checkbox */}
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleOne(isin)}
+                      onClick={e => e.stopPropagation()}
+                      className="w-4 h-4 rounded accent-indigo-600 cursor-pointer shrink-0"
+                    />
+                    {/* Expand toggle */}
+                    <button
+                      onClick={() => setExpanded(e => ({ ...e, [isin]: !open }))}
+                      className="flex items-center gap-3 flex-1 text-left"
+                    >
+                      {open
+                        ? <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                        : <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />}
+                      <span className="font-mono text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded shrink-0">{isin}</span>
+                      <span className="font-semibold text-slate-900 dark:text-slate-100 truncate">{winner.stock_name}</span>
+                      <Badge color="amber">{names.length} variants</Badge>
+                    </button>
                   </div>
-                )}
-              </SectionCard>
-            );
-          })}
-        </div>
+
+                  {open && (
+                    <div className="border-t border-slate-100 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
+                      {[...names].sort((a, b) => b.row_count - a.row_count).map(n => {
+                        const isWinner = n.stock_name === winner.stock_name;
+                        return (
+                          <div key={n.stock_name} className={`px-5 py-3 flex items-center gap-4 ${isWinner ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''}`}>
+                            <span className="text-slate-800 dark:text-slate-200 text-sm flex-1 flex items-center gap-2">
+                              {n.stock_name}
+                              {isWinner && <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">most rows</span>}
+                            </span>
+                            <span className="text-slate-400 dark:text-slate-500 text-xs w-36 shrink-0 text-right">{fmtMonth(n.first_month)} → {fmtMonth(n.last_month)}</span>
+                            <span className="text-slate-400 dark:text-slate-500 text-xs w-16 shrink-0 text-right">{n.row_count} rows</span>
+                            <button
+                              disabled={!!pending[`${isin}:${n.stock_name}`]}
+                              onClick={() => applyFix(isin, n.stock_name)}
+                              className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg transition-colors font-medium shrink-0"
+                            >
+                              {pending[`${isin}:${n.stock_name}`] ? <Spinner /> : null}
+                              Use this name
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </SectionCard>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );
