@@ -282,9 +282,10 @@ function NameNormTab({ onCountChange }) {
   const [loading, setLoading]     = useState(false);
   const [expanded, setExpanded]   = useState({});
   const [pending, setPending]     = useState({});
-  const [selected, setSelected]   = useState(new Set()); // set of ISINs
+  const [selected, setSelected]     = useState(new Set()); // set of ISINs
   const [bulkRunning, setBulkRunning] = useState(false);
-  const { show, toast, hide }     = useToast();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const { show, toast, hide }         = useToast();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -353,6 +354,52 @@ function NameNormTab({ onCountChange }) {
     <div>
       {toast && <Toast {...toast} onClose={hide} />}
 
+      {/* Bulk fix confirmation dialog */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                <CheckCircle className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Fix {selected.size} ISIN{selected.size !== 1 ? 's' : ''}?</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  Each selected ISIN will be normalised to its <span className="font-medium text-slate-700 dark:text-slate-200">most common name variant</span> (highest row count). All other variants will be overwritten.
+                </p>
+              </div>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl px-4 py-3 mb-5 max-h-40 overflow-y-auto space-y-1">
+              {[...selected].map(isin => {
+                const issue  = issues.find(i => i.isin === isin);
+                const winner = issue ? [...issue.names].sort((a, b) => b.row_count - a.row_count)[0] : null;
+                return (
+                  <div key={isin} className="flex items-center gap-2 text-xs">
+                    <span className="font-mono text-slate-400 dark:text-slate-500 shrink-0">{isin}</span>
+                    <span className="text-slate-400">→</span>
+                    <span className="text-slate-700 dark:text-slate-200 font-medium truncate">{winner?.stock_name}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { setShowConfirm(false); fixSelected(); }}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors"
+              >
+                Confirm & fix
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <p className="text-slate-500 dark:text-slate-400 text-sm">
@@ -361,7 +408,7 @@ function NameNormTab({ onCountChange }) {
         <div className="flex items-center gap-2">
           {selected.size > 0 && (
             <button
-              onClick={fixSelected}
+              onClick={() => setShowConfirm(true)}
               disabled={bulkRunning}
               className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
             >
