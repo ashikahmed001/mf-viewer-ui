@@ -4589,6 +4589,22 @@ function PortfolioBlender({ allFunds }) {
                 </div>
               </div>
 
+              {/* Unaccounted amount note */}
+              {(() => {
+                const tracked = blended.rows.reduce((s, r) => s + r.rupees, 0);
+                const untracked = totalInvested - tracked;
+                const pct = ((untracked / totalInvested) * 100).toFixed(1);
+                if (untracked <= 0) return null;
+                return (
+                  <div className="flex items-start gap-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 mb-4 text-xs text-slate-500 dark:text-slate-400">
+                    <span className="shrink-0 mt-0.5">ℹ️</span>
+                    <span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{fmtInr(untracked)} ({pct}%)</span> of your investment is in cash, TREPS, government bonds, or other instruments not tracked in equity holdings — this is normal for mutual funds.
+                    </span>
+                  </div>
+                );
+              })()}
+
               {/* Top holdings */}
               <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
