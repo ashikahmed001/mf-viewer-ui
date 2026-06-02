@@ -4454,20 +4454,17 @@ function fmtInr(val) {
 }
 
 function PortfolioBlender({ allFunds }) {
-  const [weights,    setWeights]    = useState({}); // fundId → weight (0-100)
-  const [totalInvest, setTotalInvest] = useState(''); // total ₹ investment
-  const [raw,        setRaw]        = useState(null);
-  const [loading,    setLoading]    = useState(false);
-  const [error,      setError]      = useState(null);
+  const [amounts, setAmounts] = useState({}); // fundId → ₹ amount invested
+  const [raw,     setRaw]     = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState(null);
 
-  const investAmt = parseFloat(totalInvest) || 0;
+  const fundList   = allFunds.map(f => ({ id: f.id, name: f.name }));
+  const shortNames = useMemo(() => buildShortNames(fundList.map(f => f.name)), [fundList]);
+  const selected   = fundList.filter(f => (amounts[f.id] ?? 0) > 0);
+  const totalInvested = selected.reduce((s, f) => s + (amounts[f.id] ?? 0), 0);
 
-  const fundList    = allFunds.map(f => ({ id: f.id, name: f.name }));
-  const shortNames  = useMemo(() => buildShortNames(fundList.map(f => f.name)), [fundList]);
-  const selected    = fundList.filter(f => (weights[f.id] ?? 0) > 0);
-  const totalWeight = selected.reduce((s, f) => s + (weights[f.id] ?? 0), 0);
-
-  // Fetch blended holdings whenever selection/weights change (debounced)
+  // Fetch raw holdings whenever selected funds change
   useEffect(() => {
     const ids = selected.map(f => f.id);
     if (!ids.length) { setRaw(null); return; }
@@ -4479,31 +4476,34 @@ function PortfolioBlender({ allFunds }) {
     return () => clearTimeout(t);
   }, [JSON.stringify(selected.map(f => f.id).sort())]);
 
+  // For each holding, compute: Σ (fund_amount × holding_pct_nav / 100)
   const blended = useMemo(() => {
-    if (!raw?.length || !selected.length) return null;
-    const normalizer = totalWeight > 0 ? totalWeight / 100 : 1;
-    // By ISIN: weighted sum
+    if (!raw?.length || !selected.length || totalInvested === 0) return null;
     const byIsin = new Map();
     for (const row of raw) {
-      const w = (weights[row.fund_id] ?? 0) / 100 / normalizer;
-      if (!w) continue;
-      if (!byIsin.has(row.isin)) byIsin.set(row.isin, { isin: row.isin, stock_name: row.stock_name, industry: row.industry, blended_pct: 0, funds: [] });
+      const fundAmt = amounts[row.fund_id] ?? 0;
+      if (!fundAmt) continue;
+      // rupees in this stock from this fund
+      const rupees = fundAmt * (row.pct_nav / 100);
+      if (!byIsin.has(row.isin)) {
+        byIsin.set(row.isin, { isin: row.isin, stock_name: row.stock_name, industry: row.industry, rupees: 0, funds: [] });
+      }
       const entry = byIsin.get(row.isin);
-      entry.blended_pct += row.pct_nav * w;
-      entry.funds.push({ name: row.fund_name, pct: row.pct_nav, weight: w * 100 });
+      entry.rupees += rupees;
+      entry.funds.push({ name: row.fund_name, fund_amt: fundAmt, pct: row.pct_nav, rupees });
     }
-    const rows = [...byIsin.values()].sort((a, b) => b.blended_pct - a.blended_pct);
-    // Sector breakdown
+    const rows = [...byIsin.values()].sort((a, b) => b.rupees - a.rupees);
+    // Sector breakdown by rupees
     const bySector = new Map();
     for (const r of rows) {
-      bySector.set(r.industry, (bySector.get(r.industry) ?? 0) + r.blended_pct);
+      bySector.set(r.industry, (bySector.get(r.industry) ?? 0) + r.rupees);
     }
-    const sectors = [...bySector.entries()].sort((a, b) => b[1] - a[1]).map(([name, pct]) => ({ name, pct: +pct.toFixed(2) }));
+    const sectors = [...bySector.entries()].sort((a, b) => b[1] - a[1]).map(([name, rupees]) => ({ name, rupees }));
     return { rows, sectors };
-  }, [raw, weights, totalWeight]);
+  }, [raw, amounts, totalInvested]);
 
-  function setWeight(fundId, val) {
-    setWeights(w => ({ ...w, [fundId]: Math.max(0, Math.min(100, val)) }));
+  function setAmount(fundId, val) {
+    setAmounts(a => ({ ...a, [fundId]: Math.max(0, val) }));
   }
 
   const colorMap = useMemo(() => new Map(selected.map((f, i) => [f.id, BLEND_COLORS[i % BLEND_COLORS.length]])), [selected]);
@@ -4511,82 +4511,44 @@ function PortfolioBlender({ allFunds }) {
   return (
     <div>
       <div className="grid grid-cols-3 gap-5">
-        {/* Left: fund picker + weights */}
+        {/* Left: fund picker + ₹ amounts */}
         <div className="col-span-1">
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-4">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Select Funds & Weights</h2>
-            {/* Total investment input */}
-            <div className="mb-3">
-              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total investment (optional)</label>
-              <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-600 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-400 focus-within:border-violet-400 bg-white dark:bg-slate-700">
-                <span className="px-2.5 py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 select-none">₹</span>
-                <input
-                  type="number"
-                  min={0}
-                  value={totalInvest}
-                  onChange={e => setTotalInvest(e.target.value)}
-                  placeholder="e.g. 500000"
-                  className="flex-1 px-2.5 py-2 text-sm text-slate-800 dark:text-slate-200 bg-transparent focus:outline-none"
-                />
-              </div>
-              {investAmt > 0 && (
-                <p className="text-xs text-violet-600 dark:text-violet-400 mt-1 font-medium">{fmtInr(investAmt)}</p>
-              )}
-            </div>
-            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">How much are you investing?</h2>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">Enter the rupee amount per fund — see exactly how your money is split across holdings.</p>
+            <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
               {fundList.map(f => {
-                const w   = weights[f.id] ?? 0;
-                const on  = w > 0;
+                const amt = amounts[f.id] ?? 0;
+                const on  = amt > 0;
                 const col = colorMap.get(f.id) ?? '#6366f1';
                 return (
-                  <div key={f.id} className={`rounded-xl border p-3 transition-colors ${on ? 'border-violet-200 bg-violet-50' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:border-slate-700'}`}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex-1 mr-2 min-w-0">
-                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate block" title={f.name}>
-                          {shortNames.get(f.name) ?? f.name}
-                        </span>
-                        {investAmt > 0 && w > 0 && (
-                          <span className="text-[10px] text-violet-600 dark:text-violet-400 font-medium">
-                            {fmtInr((w / (totalWeight || 100)) * investAmt)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <input type="number" min={0} max={100} value={w || ''}
-                          placeholder="0"
-                          onChange={e => setWeight(f.id, parseInt(e.target.value) || 0)}
-                          className="w-12 text-xs text-right border border-slate-200 dark:border-slate-700 rounded-lg px-1.5 py-1 focus:outline-none focus:border-violet-400"
-                        />
-                        <span className="text-xs text-slate-400 dark:text-slate-500">%</span>
-                      </div>
+                  <div key={f.id} className={`rounded-xl border p-3 transition-colors ${on ? 'border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/20' : 'border-slate-100 dark:border-slate-700 hover:border-slate-200'}`}>
+                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300 block truncate mb-2" title={f.name}>
+                      {shortNames.get(f.name) ?? f.name}
+                    </span>
+                    <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-violet-400 bg-white dark:bg-slate-700">
+                      <span className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-r border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 select-none" style={{ color: on ? col : undefined }}>₹</span>
+                      <input
+                        type="number"
+                        min={0}
+                        value={amt || ''}
+                        placeholder="0"
+                        onChange={e => setAmount(f.id, parseFloat(e.target.value) || 0)}
+                        className="flex-1 px-2 py-1.5 text-sm text-slate-800 dark:text-slate-200 bg-transparent focus:outline-none"
+                      />
                     </div>
-                    <input type="range" min={0} max={100} value={w}
-                      onChange={e => setWeight(f.id, parseInt(e.target.value))}
-                      className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-                      style={{ accentColor: col }}
-                    />
+                    {on && <p className="text-[10px] text-violet-600 dark:text-violet-400 mt-1 font-medium">{fmtInr(amt)}</p>}
                   </div>
                 );
               })}
             </div>
-            {/* Weight total indicator */}
-            <div className={`mt-3 flex items-center justify-between text-xs px-2 py-1.5 rounded-lg ${
-              totalWeight === 100 ? 'bg-emerald-50 text-emerald-700' :
-              totalWeight > 100 ? 'bg-red-50 text-red-700' : 'bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400'
+            {/* Total invested summary */}
+            <div className={`mt-3 flex items-center justify-between text-xs px-3 py-2 rounded-lg ${
+              totalInvested > 0 ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' : 'bg-slate-50 dark:bg-slate-900 text-slate-400'
             }`}>
-              <span>Total weight</span>
-              <span className="font-bold flex items-center gap-2">
-                {investAmt > 0 && totalWeight > 0 && (
-                  <span className="text-violet-600 dark:text-violet-400 font-semibold">{fmtInr(investAmt)}</span>
-                )}
-                {totalWeight}%
-              </span>
+              <span>Total invested</span>
+              <span className="font-bold">{totalInvested > 0 ? fmtInr(totalInvested) : '—'}</span>
             </div>
-            {totalWeight !== 100 && totalWeight > 0 && (
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 text-center">
-                {totalWeight < 100 ? `${100 - totalWeight}% unallocated — blended result will be normalised` : 'Over 100% — reduce weights'}
-              </p>
-            )}
           </div>
         </div>
 
@@ -4596,7 +4558,13 @@ function PortfolioBlender({ allFunds }) {
           {error   && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>}
           {!selected.length && !loading && (
             <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-12 text-center text-slate-400 dark:text-slate-500 text-sm">
-              Set weights for 2+ funds to see your blended portfolio
+              Enter an amount for 1+ funds to see where your money goes
+            </div>
+          )}
+
+          {selected.length > 0 && totalInvested === 0 && !loading && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 text-center text-amber-700 dark:text-amber-400 text-sm">
+              Enter a ₹ amount for at least one fund to see your holding breakdown
             </div>
           )}
 
@@ -4604,15 +4572,18 @@ function PortfolioBlender({ allFunds }) {
             <>
               {/* Sector breakdown */}
               <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-4">
-                <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Blended Sector Allocation</h2>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Sector Allocation</h2>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">of {fmtInr(totalInvested)}</span>
+                </div>
                 <div className="space-y-1.5">
                   {blended.sectors.slice(0, 12).map((s, i) => (
                     <div key={s.name} className="flex items-center gap-2.5">
                       <span className="text-xs text-slate-500 dark:text-slate-400 w-40 truncate">{s.name}</span>
                       <div className="flex-1 bg-slate-100 dark:bg-slate-700 rounded-full h-2">
-                        <div className="h-2 rounded-full bg-violet-500" style={{ width: `${Math.min((s.pct / (blended.sectors[0]?.pct ?? 1)) * 100, 100)}%`, backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
+                        <div className="h-2 rounded-full" style={{ width: `${Math.min((s.rupees / (blended.sectors[0]?.rupees ?? 1)) * 100, 100)}%`, backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
                       </div>
-                      <span className="text-xs font-bold tabular-nums text-slate-700 dark:text-slate-300 w-12 text-right">{fmt(s.pct)}%</span>
+                      <span className="text-xs font-bold tabular-nums text-slate-700 dark:text-slate-300 w-20 text-right">{fmtInr(s.rupees)}</span>
                     </div>
                   ))}
                 </div>
@@ -4621,28 +4592,33 @@ function PortfolioBlender({ allFunds }) {
               {/* Top holdings */}
               <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
-                  <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Blended Top Holdings</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500">{blended.rows.length} stocks · weights normalised to 100%</p>
+                  <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Where your money goes</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">{blended.rows.length} stocks</p>
                 </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-700 max-h-80 overflow-y-auto">
-                  {blended.rows.slice(0, 30).map((r, i) => (
-                    <div key={r.isin} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700">
-                      <span className="text-xs text-slate-300 w-5 tabular-nums">{i + 1}</span>
+                <div className="divide-y divide-slate-100 dark:divide-slate-700 max-h-96 overflow-y-auto">
+                  {blended.rows.slice(0, 40).map((r, i) => (
+                    <div key={r.isin} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700">
+                      <span className="text-xs text-slate-300 w-5 tabular-nums shrink-0">{i + 1}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{r.stock_name}</p>
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{r.stock_name}</p>
                         <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{r.industry}</p>
+                        {/* Per-fund breakdown */}
+                        <div className="flex flex-wrap gap-x-3 mt-0.5">
+                          {r.funds.map(f => {
+                            const fundId = selected.find(s => s.name === f.name)?.id;
+                            const col = colorMap.get(fundId) ?? '#94a3b8';
+                            return (
+                              <span key={f.name} className="text-[10px] text-slate-400" style={{ color: col }}>
+                                {shortNames.get(f.name) ?? f.name}: {fmtInr(f.rupees)}
+                              </span>
+                            );
+                          })}
+                        </div>
                       </div>
-                      {/* Per-fund contribution dots */}
-                      <div className="flex items-center gap-1">
-                        {r.funds.map(f => (
-                          <div key={f.name} className="w-2 h-2 rounded-full" style={{ backgroundColor: colorMap.get(selected.find(s => s.name === f.name)?.id) ?? '#94a3b8' }}
-                            title={`${f.name}: ${fmt(f.pct)}%`} />
-                        ))}
+                      <div className="w-20 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 mr-1 shrink-0">
+                        <div className="h-1.5 rounded-full bg-violet-500" style={{ width: `${Math.min((r.rupees / (blended.rows[0]?.rupees ?? 1)) * 100, 100)}%` }} />
                       </div>
-                      <div className="w-20 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 mr-2">
-                        <div className="h-1.5 rounded-full bg-violet-500" style={{ width: `${Math.min((r.blended_pct / (blended.rows[0]?.blended_pct ?? 1)) * 100, 100)}%` }} />
-                      </div>
-                      <span className="text-xs font-bold tabular-nums text-slate-800 dark:text-slate-200 w-14 text-right">{fmt(r.blended_pct)}%</span>
+                      <span className="text-sm font-bold tabular-nums text-slate-800 dark:text-slate-200 w-20 text-right shrink-0">{fmtInr(r.rupees)}</span>
                     </div>
                   ))}
                 </div>
