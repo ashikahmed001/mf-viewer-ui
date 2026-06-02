@@ -4749,8 +4749,8 @@ export default function CrossFundAnalysis() {
       tabs: [
         {
           id: 'blender',    label: 'Portfolio Blender', icon: <Blend className="w-4 h-4" />,
-          desc: 'Combine multiple funds into one virtual blended portfolio',
-          tip:  'Look for unintentional overweights — a stock at 3% in 4 funds means 12% of your blended portfolio is in one name. Check the industry totals section for hidden sector concentrations that individual fund views would miss.',
+          desc: 'See exactly where your money goes across multiple funds',
+          tip:  'Enter the rupee amount you invest in each fund. Every holding shows how much of your actual money sits in that stock — across all your funds combined. Use the sector breakdown to spot hidden concentrations you\'d miss looking at funds individually.',
         },
       ],
     },
