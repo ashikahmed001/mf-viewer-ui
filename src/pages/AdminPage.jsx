@@ -11,7 +11,7 @@ import {
   adminBulkDeleteFunds, adminBulkDeleteExtractions,
   adminGetFundGaps,
   adminGetCacheStats, adminClearCache, adminSetCacheEnabled,
-  getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping, syncLatestNav, adminGetCounts,
+  getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping, syncLatestNav, adminGetCounts, adminFixNameBatch,
 } from '../api/client.js';
 import api from '../api/client.js';
 import { AlertTriangle, CheckCircle, RefreshCw, ChevronDown, ChevronRight, Settings, X, Search, Activity, TrendingUp, Lock, Unlock } from 'lucide-react';
@@ -313,25 +313,26 @@ function NameNormTab({ onCountChange }) {
     }
   }
 
-  // Fix all selected ISINs — pick the variant with the most rows
+  // Fix all selected ISINs in a single batch request
   async function fixSelected() {
     if (!selected.size) return;
     setBulkRunning(true);
-    let fixed = 0, failed = 0;
-    for (const isin of selected) {
-      const issue = issues.find(i => i.isin === isin);
-      if (!issue) continue;
-      // Sort by row_count desc, pick the winner
-      const winner = [...issue.names].sort((a, b) => b.row_count - a.row_count)[0];
-      try {
-        await adminFixName(isin, winner.stock_name);
-        fixed++;
-      } catch { failed++; }
+    try {
+      const fixes = [...selected].flatMap(isin => {
+        const issue = issues.find(i => i.isin === isin);
+        if (!issue) return [];
+        const winner = [...issue.names].sort((a, b) => b.row_count - a.row_count)[0];
+        return [{ isin, canonical_name: winner.stock_name }];
+      });
+      const r = await adminFixNameBatch(fixes);
+      show(`Fixed ${r.fixed} ISIN${r.fixed !== 1 ? 's' : ''} — ${r.total_rows} rows updated`);
+      await load();
+      onCountChange?.();
+    } catch (e) {
+      show(e.response?.data?.error || e.message, false);
+    } finally {
+      setBulkRunning(false);
     }
-    show(`Fixed ${fixed} ISIN${fixed !== 1 ? 's' : ''}${failed ? ` · ${failed} failed` : ''}`, failed === 0);
-    await load();
-    onCountChange?.();
-    setBulkRunning(false);
   }
 
   const allIsins  = issues.map(i => i.isin);
