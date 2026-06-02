@@ -249,3 +249,5 @@ export const uploadBatchStream = (files, { onStart, onProgress, onResult, onDone
 
 export const importExtraction = (draft, replace = false) =>
   api.post('/admin/import', { ...draft, replace }, { timeout: 60000 }).then(r => r.data);
+
+export const adminGetCounts = () => api.get('/admin/counts').then(r => r.data);

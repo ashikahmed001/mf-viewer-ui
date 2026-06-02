@@ -11,7 +11,7 @@ import {
   adminBulkDeleteFunds, adminBulkDeleteExtractions,
   adminGetFundGaps,
   adminGetCacheStats, adminClearCache, adminSetCacheEnabled,
-  getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping, syncLatestNav,
+  getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping, syncLatestNav, adminGetCounts,
 } from '../api/client.js';
 import api from '../api/client.js';
 import { AlertTriangle, CheckCircle, RefreshCw, ChevronDown, ChevronRight, Settings, X, Search, Activity, TrendingUp, Lock, Unlock } from 'lucide-react';
@@ -2154,12 +2154,25 @@ const TABS = [
 
 export default function AdminPage() {
   const { user, isLoaded } = useUser();
-  const [tab, setTab] = useState('isin');
+  const [tab, setTab]       = useState('isin');
+  const [counts, setCounts] = useState({});
+
+  useEffect(() => {
+    adminGetCounts().then(setCounts).catch(() => {});
+  }, []);
 
   if (!isLoaded) return null;
   if (user?.primaryEmailAddress?.emailAddress !== ADMIN_EMAIL) {
     return <Navigate to="/" replace />;
   }
+
+  // Only these 4 tabs get badges
+  const badgeCount = {
+    isin:       counts.isin         || 0,
+    names:      counts.names        || 0,
+    continuity: counts.continuity   || 0,
+    nav:        counts.nav_unmapped || 0,
+  };
 
   return (
     <div className="space-y-6">
@@ -2180,19 +2193,31 @@ export default function AdminPage() {
       {/* Tabs — horizontally scrollable on mobile */}
       <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-xl w-max sm:w-fit min-w-full sm:min-w-0">
-          {TABS.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                tab === t.id
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+          {TABS.map(t => {
+            const count = badgeCount[t.id] || 0;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  tab === t.id
+                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
+              >
+                {t.label}
+                {count > 0 && (
+                  <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold
+                    ${tab === t.id
+                      ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                      : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300'
+                    }`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
