@@ -4608,8 +4608,8 @@ function PortfolioBlender({ allFunds }) {
                             const fundId = selected.find(s => s.name === f.name)?.id;
                             const col = colorMap.get(fundId) ?? '#94a3b8';
                             return (
-                              <span key={f.name} className="text-[10px] text-slate-400" style={{ color: col }}>
-                                {shortNames.get(f.name) ?? f.name}: {fmtInr(f.rupees)}
+                              <span key={f.name} className="text-[10px]" style={{ color: col }}>
+                                {shortNames.get(f.name) ?? f.name}: {fmtInr(f.rupees)} <span className="opacity-60">({fmt(f.pct)}% NAV)</span>
                               </span>
                             );
                           })}
