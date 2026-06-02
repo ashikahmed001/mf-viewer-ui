@@ -4446,11 +4446,21 @@ function StockIntelligence({ allFunds }) {
 
 const BLEND_COLORS = ['#6366f1','#f43f5e','#10b981','#f59e0b','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
 
+function fmtInr(val) {
+  if (!val || val <= 0) return null;
+  if (val >= 1e7) return `₹${(val / 1e7).toFixed(2)} Cr`;
+  if (val >= 1e5) return `₹${(val / 1e5).toFixed(2)} L`;
+  return `₹${val.toLocaleString('en-IN')}`;
+}
+
 function PortfolioBlender({ allFunds }) {
-  const [weights,  setWeights]  = useState({}); // fundId → weight (0-100)
-  const [raw,      setRaw]      = useState(null);
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState(null);
+  const [weights,    setWeights]    = useState({}); // fundId → weight (0-100)
+  const [totalInvest, setTotalInvest] = useState(''); // total ₹ investment
+  const [raw,        setRaw]        = useState(null);
+  const [loading,    setLoading]    = useState(false);
+  const [error,      setError]      = useState(null);
+
+  const investAmt = parseFloat(totalInvest) || 0;
 
   const fundList    = allFunds.map(f => ({ id: f.id, name: f.name }));
   const shortNames  = useMemo(() => buildShortNames(fundList.map(f => f.name)), [fundList]);
@@ -4505,6 +4515,24 @@ function PortfolioBlender({ allFunds }) {
         <div className="col-span-1">
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-4">
             <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Select Funds & Weights</h2>
+            {/* Total investment input */}
+            <div className="mb-3">
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total investment (optional)</label>
+              <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-600 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-400 focus-within:border-violet-400 bg-white dark:bg-slate-700">
+                <span className="px-2.5 py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 select-none">₹</span>
+                <input
+                  type="number"
+                  min={0}
+                  value={totalInvest}
+                  onChange={e => setTotalInvest(e.target.value)}
+                  placeholder="e.g. 500000"
+                  className="flex-1 px-2.5 py-2 text-sm text-slate-800 dark:text-slate-200 bg-transparent focus:outline-none"
+                />
+              </div>
+              {investAmt > 0 && (
+                <p className="text-xs text-violet-600 dark:text-violet-400 mt-1 font-medium">{fmtInr(investAmt)}</p>
+              )}
+            </div>
             <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
               {fundList.map(f => {
                 const w   = weights[f.id] ?? 0;
@@ -4513,9 +4541,16 @@ function PortfolioBlender({ allFunds }) {
                 return (
                   <div key={f.id} className={`rounded-xl border p-3 transition-colors ${on ? 'border-violet-200 bg-violet-50' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:border-slate-700'}`}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate flex-1 mr-2" title={f.name}>
-                        {shortNames.get(f.name) ?? f.name}
-                      </span>
+                      <div className="flex-1 mr-2 min-w-0">
+                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate block" title={f.name}>
+                          {shortNames.get(f.name) ?? f.name}
+                        </span>
+                        {investAmt > 0 && w > 0 && (
+                          <span className="text-[10px] text-violet-600 dark:text-violet-400 font-medium">
+                            {fmtInr((w / (totalWeight || 100)) * investAmt)}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-1">
                         <input type="number" min={0} max={100} value={w || ''}
                           placeholder="0"
@@ -4540,7 +4575,12 @@ function PortfolioBlender({ allFunds }) {
               totalWeight > 100 ? 'bg-red-50 text-red-700' : 'bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400'
             }`}>
               <span>Total weight</span>
-              <span className="font-bold">{totalWeight}%</span>
+              <span className="font-bold flex items-center gap-2">
+                {investAmt > 0 && totalWeight > 0 && (
+                  <span className="text-violet-600 dark:text-violet-400 font-semibold">{fmtInr(investAmt)}</span>
+                )}
+                {totalWeight}%
+              </span>
             </div>
             {totalWeight !== 100 && totalWeight > 0 && (
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 text-center">
