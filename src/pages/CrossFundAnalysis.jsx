@@ -4476,6 +4476,16 @@ function PortfolioBlender({ allFunds }) {
     return () => clearTimeout(t);
   }, [JSON.stringify(selected.map(f => f.id).sort())]);
 
+  // Total NAV % covered per fund (sum of pct_nav for all holdings of that fund)
+  const fundNavCoverage = useMemo(() => {
+    if (!raw?.length) return {};
+    const coverage = {};
+    for (const row of raw) {
+      coverage[row.fund_id] = (coverage[row.fund_id] ?? 0) + row.pct_nav;
+    }
+    return coverage;
+  }, [raw]);
+
   // For each holding, compute: Σ (fund_amount × holding_pct_nav / 100)
   const blended = useMemo(() => {
     if (!raw?.length || !selected.length || totalInvested === 0) return null;
@@ -4537,7 +4547,16 @@ function PortfolioBlender({ allFunds }) {
                         className="flex-1 px-2 py-1.5 text-sm text-slate-800 dark:text-slate-200 bg-transparent focus:outline-none"
                       />
                     </div>
-                    {on && <p className="text-[10px] text-violet-600 dark:text-violet-400 mt-1 font-medium">{fmtInr(amt)}</p>}
+                    {on && (
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-[10px] text-violet-600 dark:text-violet-400 font-medium">{fmtInr(amt)}</p>
+                        {fundNavCoverage[f.id] != null && (
+                          <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                            {fundNavCoverage[f.id].toFixed(1)}% NAV tracked
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
