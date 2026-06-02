@@ -160,7 +160,7 @@ function FundSelect({ funds, value, onChange, placeholder = 'Search fund…', ex
 }
 
 // ─── Tab: ISIN Remap ──────────────────────────────────────────────────────────
-function IsinRemapTab() {
+function IsinRemapTab({ onCountChange }) {
   const [issues, setIssues]     = useState([]);
   const [loading, setLoading]   = useState(false);
   const [expanded, setExpanded] = useState({});
@@ -183,6 +183,7 @@ function IsinRemapTab() {
       const r = await adminRemapIsin(old_isin, new_isin);
       show(`Remapped ${old_isin} → ${new_isin}  (${r.moved} rows moved)`);
       await load();
+      onCountChange?.();
     } catch (e) {
       show(e.response?.data?.error || e.message, false);
     } finally {
@@ -276,7 +277,7 @@ function IsinRemapTab() {
 }
 
 // ─── Tab: Name Normalisation ──────────────────────────────────────────────────
-function NameNormTab() {
+function NameNormTab({ onCountChange }) {
   const [issues, setIssues]     = useState([]);
   const [loading, setLoading]   = useState(false);
   const [expanded, setExpanded] = useState({});
@@ -299,6 +300,7 @@ function NameNormTab() {
       const r = await adminFixName(isin, name);
       show(`Updated ${r.rows_updated} rows for ${isin}`);
       await load();
+      onCountChange?.();
     } catch (e) {
       show(e.response?.data?.error || e.message, false);
     } finally {
@@ -1406,7 +1408,7 @@ function SchemeSearchDropdown({ fundName, value, onChange }) {
 }
 
 // ─── Tab: NAV Mapping ─────────────────────────────────────────────────────────
-function NavTab() {
+function NavTab({ onCountChange }) {
   const [mappings, setMappings]           = useState([]);
   const [loading, setLoading]             = useState(false);
   const [matching, setMatching]           = useState(false);
@@ -1483,6 +1485,7 @@ function NavTab() {
       show('Mapping confirmed');
       setEditRow(null);
       await load();
+      onCountChange?.();
     } catch (e) {
       show(e.response?.data?.error || e.message, false);
     }
@@ -1496,6 +1499,7 @@ function NavTab() {
       show('Mapping removed');
       setRemoveTarget(null);
       await load();
+      onCountChange?.();
     } catch (e) {
       show(e.response?.data?.error || e.message, false);
     } finally {
@@ -2157,9 +2161,11 @@ export default function AdminPage() {
   const [tab, setTab]       = useState('isin');
   const [counts, setCounts] = useState({});
 
-  useEffect(() => {
+  const refreshCounts = useCallback(() => {
     adminGetCounts().then(setCounts).catch(() => {});
   }, []);
+
+  useEffect(() => { refreshCounts(); }, [refreshCounts]);
 
   if (!isLoaded) return null;
   if (user?.primaryEmailAddress?.emailAddress !== ADMIN_EMAIL) {
@@ -2224,12 +2230,12 @@ export default function AdminPage() {
       {/* Tab content */}
       <div>
         {tab === 'upload'     && <UploadTab />}
-        {tab === 'isin'       && <IsinRemapTab />}
-        {tab === 'names'      && <NameNormTab />}
+        {tab === 'isin'       && <IsinRemapTab onCountChange={refreshCounts} />}
+        {tab === 'names'      && <NameNormTab  onCountChange={refreshCounts} />}
         {tab === 'scanner'    && <ScannerTab />}
         {tab === 'funds'      && <FundMgmtTab />}
-        {tab === 'continuity' && <ContinuityTab />}
-        {tab === 'nav'        && <NavTab />}
+        {tab === 'continuity' && <ContinuityTab onCountChange={refreshCounts} />}
+        {tab === 'nav'        && <NavTab onCountChange={refreshCounts} />}
         {tab === 'features'   && <FeatureFlagsTab />}
         {tab === 'cache'      && <CacheTab />}
       </div>
@@ -2240,7 +2246,7 @@ export default function AdminPage() {
 // ─── ContinuityTab ────────────────────────────────────────────────────────────
 const CAL_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function ContinuityTab() {
+function ContinuityTab({ onCountChange: _onCountChange }) {
   const [data, setData]             = useState(null);
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState(null);
