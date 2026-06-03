@@ -1882,6 +1882,208 @@ const CATEGORY_LABELS = {
   general:  'General',
 };
 
+function Toggle({ on, saving, onClick, title, color = 'indigo' }) {
+  const colors = {
+    indigo:  'bg-indigo-600',
+    emerald: 'bg-emerald-500',
+    slate:   'bg-slate-400',
+  };
+  return (
+    <button
+      onClick={onClick}
+      disabled={saving}
+      title={title}
+      style={{ width: 48, height: 26 }}
+      className={`relative rounded-full transition-colors shrink-0 disabled:opacity-50 ${on ? colors[color] : 'bg-slate-200 dark:bg-slate-700'}`}
+    >
+      {saving
+        ? <span className="absolute inset-0 flex items-center justify-center">
+            <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          </span>
+        : <span style={{
+            position: 'absolute', top: 3, left: 3,
+            width: 20, height: 20, borderRadius: '50%',
+            background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+            transition: 'transform 0.2s',
+            transform: on ? 'translateX(22px)' : 'translateX(0)',
+          }}
+          />
+      }
+    </button>
+  );
+}
+
+function UserOverridesPanel({ flags, show }) {
+  const [overrides, setOverrides]   = useState({});
+  const [userId, setUserId]         = useState('');
+  const [loading, setLoading]       = useState(false);
+  const [saving, setSaving]         = useState({});
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await api.get('/features/overrides');
+      setOverrides(r.data.overrides ?? {});
+    } catch (e) { show(e.response?.data?.error || e.message, false); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function setOverride(uid, key, enabled, required_plan) {
+    const saveKey = `${uid}:${key}`;
+    setSaving(s => ({ ...s, [saveKey]: true }));
+    try {
+      await api.put(`/features/overrides/${uid}/${key}`, { enabled, required_plan });
+      setOverrides(prev => {
+        const next = { ...prev };
+        if (!next[uid]) next[uid] = [];
+        const idx = next[uid].findIndex(o => o.feature_key === key);
+        const entry = { feature_key: key, enabled: enabled ? 1 : 0, required_plan };
+        if (idx >= 0) next[uid][idx] = entry; else next[uid] = [...next[uid], entry];
+        return next;
+      });
+      show(`Override saved for ${uid}`);
+    } catch (e) { show(e.response?.data?.error || e.message, false); }
+    finally { setSaving(s => { const n = { ...s }; delete n[saveKey]; return n; }); }
+  }
+
+  async function removeOverride(uid, key) {
+    const saveKey = `${uid}:${key}:del`;
+    setSaving(s => ({ ...s, [saveKey]: true }));
+    try {
+      await api.delete(`/features/overrides/${uid}/${key}`);
+      setOverrides(prev => {
+        const next = { ...prev };
+        next[uid] = (next[uid] ?? []).filter(o => o.feature_key !== key);
+        if (!next[uid].length) delete next[uid];
+        return next;
+      });
+      show(`Override removed`);
+    } catch (e) { show(e.response?.data?.error || e.message, false); }
+    finally { setSaving(s => { const n = { ...s }; delete n[saveKey]; return n; }); }
+  }
+
+  async function addOverride() {
+    if (!userId.trim()) return;
+    // Default: grant all features as free to this user
+    await setOverride(userId.trim(), flags[0]?.key ?? 'feed', true, 'free');
+    setUserId('');
+  }
+
+  const userIds = Object.keys(overrides);
+
+  return (
+    <SectionCard className="p-5">
+      <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
+        <div>
+          <h2 className="font-semibold text-slate-900 dark:text-slate-100">Per-user overrides</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Override global flags for specific users. Takes precedence over global settings.
+          </p>
+        </div>
+        <button onClick={load} disabled={loading}
+          className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-colors">
+          <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} /> Refresh
+        </button>
+      </div>
+
+      {/* Add override for a new user */}
+      <div className="flex gap-2 mb-4">
+        <input
+          value={userId}
+          onChange={e => setUserId(e.target.value)}
+          placeholder="Clerk user ID (user_...)"
+          className="flex-1 text-xs px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400"
+          onKeyDown={e => e.key === 'Enter' && addOverride()}
+        />
+        <button onClick={addOverride}
+          className="text-xs px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors font-medium">
+          Add user
+        </button>
+      </div>
+
+      {loading && !userIds.length ? (
+        <div className="flex justify-center py-8"><Spinner /></div>
+      ) : !userIds.length ? (
+        <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-8">No per-user overrides set.</p>
+      ) : (
+        <div className="space-y-4">
+          {userIds.map(uid => (
+            <div key={uid}>
+              <p className="text-xs font-mono text-slate-400 dark:text-slate-500 mb-1 px-1 truncate">{uid}</p>
+              <div className="divide-y divide-slate-100 dark:divide-slate-700 border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
+                {flags.map(f => {
+                  const ov = overrides[uid]?.find(o => o.feature_key === f.key);
+                  const isEnabled  = ov ? ov.enabled !== 0 : null;
+                  const planOverride = ov?.required_plan ?? null;
+                  const saveKey = `${uid}:${f.key}`;
+                  const isSaving = !!saving[saveKey] || !!saving[`${saveKey}:del`];
+                  return (
+                    <div key={f.key} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                      <span className="flex-1 text-xs text-slate-700 dark:text-slate-300 min-w-0 truncate">{f.label}</span>
+
+                      {/* Enabled override */}
+                      {ov ? (
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                          isEnabled
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-red-50 text-red-600 border-red-200'
+                        }`}>
+                          {isEnabled ? 'On' : 'Off'}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-300 dark:text-slate-600 px-2 py-0.5">inherit</span>
+                      )}
+
+                      {/* Plan override */}
+                      {ov && (
+                        <select
+                          value={planOverride ?? ''}
+                          disabled={isSaving}
+                          onChange={e => setOverride(uid, f.key, isEnabled, e.target.value || null)}
+                          className="text-[10px] px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                        >
+                          <option value="">inherit</option>
+                          <option value="free">Free</option>
+                          <option value="pro">Pro</option>
+                        </select>
+                      )}
+
+                      {/* Toggle enabled override */}
+                      <button
+                        disabled={isSaving}
+                        onClick={() => ov
+                          ? setOverride(uid, f.key, !isEnabled, planOverride)
+                          : setOverride(uid, f.key, true, null)
+                        }
+                        className="text-[10px] px-2 py-0.5 rounded border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                      >
+                        {ov ? (isEnabled ? 'Turn off' : 'Turn on') : 'Override'}
+                      </button>
+
+                      {/* Remove override */}
+                      {ov && (
+                        <button
+                          disabled={isSaving}
+                          onClick={() => removeOverride(uid, f.key)}
+                          className="text-[10px] px-2 py-0.5 rounded border border-red-100 text-red-400 hover:bg-red-50 transition-colors disabled:opacity-50"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </SectionCard>
+  );
+}
+
 function FeatureFlagsTab() {
   const [flags, setFlags]               = useState([]);
   const [paymentsEnabled, setPaymentsEnabled] = useState(false);
@@ -1913,18 +2115,28 @@ function FeatureFlagsTab() {
     finally { setSavingPayments(false); }
   }
 
-  async function toggle(key, currentPlan) {
+  async function toggleEnabled(key, current) {
+    const next = !current;
+    setSaving(s => ({ ...s, [`${key}:enabled`]: true }));
+    try {
+      await api.patch(`/features/${key}`, { enabled: next });
+      setFlags(f => f.map(x => x.key === key ? { ...x, enabled: next ? 1 : 0 } : x));
+      show(`${key} → ${next ? 'enabled' : 'disabled'}`);
+    } catch (e) { show(e.response?.data?.error || e.message, false); }
+    finally { setSaving(s => { const n = { ...s }; delete n[`${key}:enabled`]; return n; }); }
+  }
+
+  async function togglePlan(key, currentPlan) {
     const next = currentPlan === 'free' ? 'pro' : 'free';
-    setSaving(s => ({ ...s, [key]: true }));
+    setSaving(s => ({ ...s, [`${key}:plan`]: true }));
     try {
       await api.patch(`/features/${key}`, { required_plan: next });
       setFlags(f => f.map(x => x.key === key ? { ...x, required_plan: next } : x));
       show(`${key} → ${next}`);
     } catch (e) { show(e.response?.data?.error || e.message, false); }
-    finally { setSaving(s => { const n = { ...s }; delete n[key]; return n; }); }
+    finally { setSaving(s => { const n = { ...s }; delete n[`${key}:plan`]; return n; }); }
   }
 
-  // Group by category
   const grouped = flags.reduce((acc, f) => {
     const cat = f.category || 'general';
     if (!acc[cat]) acc[cat] = [];
@@ -1932,21 +2144,19 @@ function FeatureFlagsTab() {
     return acc;
   }, {});
 
-  const proCount  = flags.filter(f => f.required_plan === 'pro').length;
-  const freeCount = flags.filter(f => f.required_plan === 'free').length;
+  const enabledCount = flags.filter(f => f.enabled !== 0).length;
+  const proCount     = flags.filter(f => f.required_plan === 'pro').length;
 
   return (
     <div className="space-y-5">
       {toast && <Toast {...toast} onClose={hide} />}
 
-      {/* Payments toggle — prominent at the top */}
+      {/* Payments toggle */}
       <SectionCard className="p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              Payments & Billing
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
+            <h2 className="font-semibold text-slate-900 dark:text-slate-100">Payments & Billing</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               {paymentsEnabled
                 ? 'Payments are live — users can upgrade to Pro via Razorpay.'
                 : 'Payments are disabled — the Upgrade button and checkout are hidden from all users.'}
@@ -1956,32 +2166,11 @@ function FeatureFlagsTab() {
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
               paymentsEnabled
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700'
+                : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
             }`}>
               {paymentsEnabled ? 'Live' : 'Disabled'}
             </span>
-            <button
-              onClick={togglePayments}
-              disabled={savingPayments}
-              style={{ width: 48, height: 26 }}
-              className={`relative rounded-full transition-colors shrink-0 disabled:opacity-50 ${
-                paymentsEnabled ? 'bg-emerald-500' : 'bg-slate-200'
-              }`}
-            >
-              {savingPayments
-                ? <span className="absolute inset-0 flex items-center justify-center">
-                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  </span>
-                : <span style={{
-                    position: 'absolute', top: 3, left: 3,
-                    width: 20, height: 20, borderRadius: '50%',
-                    background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                    transition: 'transform 0.2s',
-                    transform: paymentsEnabled ? 'translateX(22px)' : 'translateX(0)',
-                  }}
-                />
-              }
-            </button>
+            <Toggle on={paymentsEnabled} saving={savingPayments} onClick={togglePayments} color="emerald" />
           </div>
         </div>
       </SectionCard>
@@ -1994,21 +2183,21 @@ function FeatureFlagsTab() {
               <Lock className="w-4 h-4 text-indigo-500" />
               Feature Flags
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 mt-0.5">
-              Toggle which features require a Pro subscription. Changes take effect immediately.
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Control visibility and plan requirements per feature. Changes take effect immediately.
             </p>
           </div>
           <button onClick={load} disabled={loading}
-            className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 transition-colors">
+            className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 transition-colors">
             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
         </div>
         <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700">
-            {flags.length} features total
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">
+            {flags.length} total
           </span>
           <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
-            {freeCount} free
+            {enabledCount} enabled
           </span>
           <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-200">
             {proCount} Pro-only
@@ -2026,18 +2215,30 @@ function FeatureFlagsTab() {
                 {CATEGORY_LABELS[cat] || cat}
               </h3>
               <SectionCard>
+                {/* Column headers */}
+                <div className="flex items-center gap-4 px-5 py-2 border-b border-slate-100 dark:border-slate-700">
+                  <div className="w-8 shrink-0" />
+                  <div className="flex-1" />
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 w-16 text-center">Visible</span>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 w-16 text-center">Pro only</span>
+                </div>
                 <div className="divide-y divide-slate-100 dark:divide-slate-700">
                   {catFlags.map(f => {
-                    const isPro = f.required_plan === 'pro';
+                    const isPro    = f.required_plan === 'pro';
+                    const isOn     = f.enabled !== 0;
                     return (
-                      <div key={f.key} className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors">
+                      <div key={f.key} className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${
+                        !isOn ? 'opacity-50' : 'hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900'
+                      }`}>
                         {/* Icon */}
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                          isPro ? 'bg-indigo-50' : 'bg-slate-100'
+                          !isOn ? 'bg-slate-100 dark:bg-slate-800' : isPro ? 'bg-indigo-50' : 'bg-emerald-50'
                         }`}>
-                          {isPro
-                            ? <Lock className="w-3.5 h-3.5 text-indigo-500" />
-                            : <Unlock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                          {!isOn
+                            ? <span className="text-slate-300 dark:text-slate-600 text-xs font-bold">—</span>
+                            : isPro
+                              ? <Lock className="w-3.5 h-3.5 text-indigo-500" />
+                              : <Unlock className="w-3.5 h-3.5 text-emerald-500" />
                           }
                         </div>
 
@@ -2045,44 +2246,36 @@ function FeatureFlagsTab() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{f.label}</span>
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${
-                              isPro
-                                ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            }`}>
-                              {isPro ? 'Pro' : 'Free'}
-                            </span>
+                            {!isOn && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-600">
+                                Hidden
+                              </span>
+                            )}
                           </div>
                           <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">{f.description}</p>
                         </div>
 
-                        {/* Toggle — track: 48×26px, thumb: 20px, inset: 3px, travel: 22px */}
-                        <button
-                          onClick={() => toggle(f.key, f.required_plan)}
-                          disabled={!!saving[f.key]}
-                          style={{ width: 48, height: 26 }}
-                          className={`relative rounded-full transition-colors shrink-0 disabled:opacity-50 ${
-                            isPro ? 'bg-indigo-600' : 'bg-slate-200'
-                          }`}
-                          title={isPro ? 'Click to make Free' : 'Click to make Pro-only'}
-                        >
-                          {saving[f.key]
-                            ? <span className="absolute inset-0 flex items-center justify-center">
-                                <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              </span>
-                            : <span style={{
-                                position: 'absolute',
-                                top: 3, left: 3,
-                                width: 20, height: 20,
-                                borderRadius: '50%',
-                                background: 'white',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                                transition: 'transform 0.2s',
-                                transform: isPro ? 'translateX(22px)' : 'translateX(0)',
-                              }}
-                            />
-                          }
-                        </button>
+                        {/* Visible toggle */}
+                        <div className="w-16 flex justify-center">
+                          <Toggle
+                            on={isOn}
+                            saving={!!saving[`${f.key}:enabled`]}
+                            onClick={() => toggleEnabled(f.key, isOn)}
+                            color="emerald"
+                            title={isOn ? 'Hide from all users' : 'Show to users'}
+                          />
+                        </div>
+
+                        {/* Pro-only toggle */}
+                        <div className="w-16 flex justify-center">
+                          <Toggle
+                            on={isPro}
+                            saving={!!saving[`${f.key}:plan`]}
+                            onClick={() => togglePlan(f.key, f.required_plan)}
+                            color="indigo"
+                            title={isPro ? 'Make free' : 'Require Pro'}
+                          />
+                        </div>
                       </div>
                     );
                   })}
@@ -2092,6 +2285,9 @@ function FeatureFlagsTab() {
           ))}
         </div>
       )}
+
+      {/* Per-user overrides */}
+      <UserOverridesPanel flags={flags} show={show} />
     </div>
   );
 }

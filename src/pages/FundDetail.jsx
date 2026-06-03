@@ -26,10 +26,10 @@ export default function FundDetail() {
   const [trendIndustry, setTrendIndustry] = useState(null);
   const [activeTab, setActiveTab] = useState('holdings'); // 'holdings' | 'charts'
   const [navData, setNavData]     = useState(null);
-  const { flags }  = useFeatureFlags();
-  const { isPro }  = useSubscription();
-  const canNav     = canUseFeature(flags, isPro, 'nav_history');
-  const canTrend   = canUseFeature(flags, isPro, 'stock_trend');
+  const { flags, overrides } = useFeatureFlags();
+  const { isPro }            = useSubscription();
+  const canNav   = canUseFeature(flags, overrides, isPro, 'nav_history');
+  const canTrend = canUseFeature(flags, overrides, isPro, 'stock_trend');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 

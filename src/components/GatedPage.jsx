@@ -12,13 +12,13 @@ import { useSubscription } from '../context/SubscriptionContext.jsx';
 import UpgradePrompt from './UpgradePrompt.jsx';
 
 export default function GatedPage({ featureKey, featureLabel, children }) {
-  const { flags, loading } = useFeatureFlags();
-  const { isPro }          = useSubscription();
+  const { flags, overrides, loading } = useFeatureFlags();
+  const { isPro }                     = useSubscription();
 
   // While flags are loading, render children (avoids flash of upgrade prompt)
   if (loading) return children;
 
-  if (!canUseFeature(flags, isPro, featureKey)) {
+  if (!canUseFeature(flags, overrides, isPro, featureKey)) {
     return <UpgradePrompt feature={featureLabel} />;
   }
 
