@@ -325,6 +325,21 @@ function NavHistoryPanel({ navData }) {
   if (!navData.mapped || !navData.history?.length) {
     return (
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-10 text-center text-slate-400 dark:text-slate-500">
+        <svg viewBox="0 0 200 140" className="mx-auto mb-4 w-40 h-28 opacity-80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Chart frame */}
+          <rect x="16" y="16" width="168" height="100" rx="8" className="fill-slate-100 dark:fill-slate-700" />
+          {/* Grid lines */}
+          <line x1="30" y1="90" x2="170" y2="90" stroke="currentColor" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="4 3" />
+          <line x1="30" y1="70" x2="170" y2="70" stroke="currentColor" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="4 3" />
+          <line x1="30" y1="50" x2="170" y2="50" stroke="currentColor" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="4 3" />
+          {/* Wobbly question-mark line instead of a real chart */}
+          <path d="M30 80 Q50 40 70 75 Q90 110 110 60 Q130 20 150 55 Q165 75 170 70"
+            stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="5 4" />
+          {/* Question mark dot */}
+          <circle cx="100" cy="108" r="3.5" fill="#a78bfa" opacity="0.7" />
+          {/* Question mark arc */}
+          <path d="M94 94 Q94 85 100 83 Q108 80 108 88 Q108 95 100 97" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.7" />
+        </svg>
         <p className="font-medium text-slate-500 dark:text-slate-400 mb-1">No NAV data available</p>
         <p className="text-sm">This fund hasn't been mapped or synced yet. Go to Admin → NAV Mapping to set it up.</p>
       </div>
