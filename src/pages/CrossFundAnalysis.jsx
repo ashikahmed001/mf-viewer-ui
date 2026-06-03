@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useFeatureFlags, canUseFeature } from '../context/FeatureFlagsContext.jsx';
+import { useSubscription } from '../context/SubscriptionContext.jsx';
 import {
   ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine,
@@ -4668,10 +4670,38 @@ function PortfolioBlender({ allFunds }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
+// Maps each tab id to its feature flag key (undefined = always visible)
+const TAB_FEATURE_KEYS = {
+  conviction:     'cross_fund',
+  gems:           'hidden_gems',
+  rising:         'rising_conviction',
+  newentries:     'cross_fund',
+  discovery:      'discovery_chain',
+  overlap:        'overlap_matrix',
+  trend:          'overlap_matrix',
+  sector:         'sector_drift',
+  rotation:       'sector_rotation',
+  churn:          'churn_rates',
+  concentration:  'cross_fund',
+  intelligence:   'cross_fund',
+  timeline:       'entry_exit',
+  diff:           'compare_months',
+  tracker:        'stock_tracker',
+  blender:        'blended_portfolio',
+};
+
 export default function CrossFundAnalysis() {
   const [tab, setTab]           = useState('conviction');
   const [matrixData, setMatrixData] = useState(null);   // shared between overlap + trend tabs
   const [allFunds, setAllFunds] = useState([]);
+  const { flags, overrides }    = useFeatureFlags();
+  const { isPro }               = useSubscription();
+
+  function canShow(tabId) {
+    const key = TAB_FEATURE_KEYS[tabId];
+    if (!key) return true;
+    return canUseFeature(flags, overrides, isPro, key);
+  }
 
   // Fetch matrix data + fund list once; share between tabs
   useEffect(() => {
@@ -4790,7 +4820,16 @@ export default function CrossFundAnalysis() {
       ],
     },
   ];
-  const allTabs = TAB_GROUPS.flatMap(g => g.tabs);
+
+  // Filter out disabled tabs and empty groups
+  const visibleGroups = TAB_GROUPS
+    .map(g => ({ ...g, tabs: g.tabs.filter(t => canShow(t.id)) }))
+    .filter(g => g.tabs.length > 0);
+
+  const allTabs = visibleGroups.flatMap(g => g.tabs);
+
+  // If current tab was hidden, fall back to first visible tab
+  const activeTab = allTabs.find(t => t.id === tab)?.id ?? allTabs[0]?.id ?? tab;
 
   return (
     <div>
@@ -4806,12 +4845,12 @@ export default function CrossFundAnalysis() {
 
       {/* Two-level nav */}
       {(() => {
-        const activeGroup = TAB_GROUPS.find(g => g.tabs.some(t => t.id === tab)) ?? TAB_GROUPS[0];
+        const activeGroup = visibleGroups.find(g => g.tabs.some(t => t.id === activeTab)) ?? visibleGroups[0];
         return (
           <div className="mb-6">
             {/* Category row — underline style, scrollable on mobile */}
             <div className="flex border-b border-slate-200 dark:border-slate-700 gap-0 overflow-x-auto">
-              {TAB_GROUPS.map(group => {
+              {visibleGroups.map(group => {
                 const isActive = group.label === activeGroup.label;
                 return (
                   <button key={group.label}
@@ -4832,7 +4871,7 @@ export default function CrossFundAnalysis() {
               {activeGroup.tabs.map(t => (
                 <button key={t.id} onClick={() => setTab(t.id)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                    tab === t.id
+                    activeTab === t.id
                       ? 'bg-violet-100 text-violet-700'
                       : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 dark:bg-slate-700 hover:text-slate-700 dark:text-slate-300'
                   }`}>
@@ -4859,21 +4898,21 @@ export default function CrossFundAnalysis() {
         );
       })()}
 
-      {tab === 'conviction'   && <HighConviction />}
-      {tab === 'overlap'      && <OverlapMatrix />}
-      {tab === 'trend'        && <OverlapTrend matrixFunds={matrixFunds} shortNames={shortNames} />}
-      {tab === 'sector'       && <SectorDrift allFunds={allFunds} />}
-      {tab === 'gems'         && <HiddenGems />}
-      {tab === 'intelligence' && <StockIntelligence  allFunds={allFunds} />}
-      {tab === 'timeline'     && <EntryExitTimeline allFunds={allFunds} />}
-      {tab === 'diff'         && <MonthlyDiff       allFunds={allFunds} />}
-      {tab === 'tracker'      && <StockTracker      allFunds={allFunds} />}
-      {tab === 'newentries'   && <NewEntries />}
-      {tab === 'churn'        && <FundChurn        allFunds={allFunds} />}
-      {tab === 'rotation'     && <SectorRotationCalendar />}
-      {tab === 'discovery'    && <StockDiscovery />}
-      {tab === 'concentration'&& <ConcentrationScore allFunds={allFunds} />}
-      {tab === 'blender'      && <PortfolioBlender  allFunds={allFunds} />}
+      {activeTab === 'conviction'   && <HighConviction />}
+      {activeTab === 'overlap'      && <OverlapMatrix />}
+      {activeTab === 'trend'        && <OverlapTrend matrixFunds={matrixFunds} shortNames={shortNames} />}
+      {activeTab === 'sector'       && <SectorDrift allFunds={allFunds} />}
+      {activeTab === 'gems'         && <HiddenGems />}
+      {activeTab === 'intelligence' && <StockIntelligence  allFunds={allFunds} />}
+      {activeTab === 'timeline'     && <EntryExitTimeline allFunds={allFunds} />}
+      {activeTab === 'diff'         && <MonthlyDiff       allFunds={allFunds} />}
+      {activeTab === 'tracker'      && <StockTracker      allFunds={allFunds} />}
+      {activeTab === 'newentries'   && <NewEntries />}
+      {activeTab === 'churn'        && <FundChurn        allFunds={allFunds} />}
+      {activeTab === 'rotation'     && <SectorRotationCalendar />}
+      {activeTab === 'discovery'    && <StockDiscovery />}
+      {activeTab === 'concentration'&& <ConcentrationScore allFunds={allFunds} />}
+      {activeTab === 'blender'      && <PortfolioBlender  allFunds={allFunds} />}
     </div>
   );
 }
