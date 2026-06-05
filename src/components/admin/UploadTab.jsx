@@ -670,7 +670,7 @@ export default function UploadTab() {
         </div>
 
         <ExtractionReview
-          key={activeDraft}
+          key={drafts[activeDraft]?.source_file ?? activeDraft}
           draft={drafts[activeDraft]}
           onDiscard={handleDiscard}
           onSaved={handleSaved}
