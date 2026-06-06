@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { getFeed, getFunds } from '../api/client.js';
 import { industryBadgeClass } from '../utils/industryColors.js';
+import CapBadge from '../components/CapBadge.jsx';
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
 
@@ -156,7 +157,10 @@ function ConvergenceCard({ item }) {
         <Zap className="w-3 h-3" /> {item.fund_count} funds
       </span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{item.stock_name}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{item.stock_name}</p>
+          <CapBadge cap={item.market_cap_cat} />
+        </div>
         {item.industry && (
           <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-xs font-medium mt-0.5 ${industryBadgeClass(item.industry)}`}>
             {item.industry}
@@ -187,6 +191,7 @@ function EventRow({ event }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{event.stock_name}</span>
+          <CapBadge cap={event.market_cap_cat} />
           {event.industry && (
             <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(event.industry)}`}>
               {event.industry}

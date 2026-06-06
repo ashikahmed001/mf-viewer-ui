@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { getRisingConviction } from '../api/client.js';
 import { getIndustryColor, industryBadgeClass } from '../utils/industryColors.js';
+import CapBadge from '../components/CapBadge.jsx';
 
 function fmt(n, dec = 2) {
   if (n == null) return '—';
@@ -133,7 +134,10 @@ function StockCard({ stockGroup, maxStreak, isMultiFund, direction }) {
               </span>
             )}
           </div>
-          <p className="font-semibold text-slate-800 dark:text-slate-200 text-sm leading-snug">{stock_name}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="font-semibold text-slate-800 dark:text-slate-200 text-sm leading-snug">{stock_name}</p>
+            <CapBadge cap={entries[0]?.market_cap_cat} />
+          </div>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-mono mt-0.5">{isin}</p>
         </div>
         <div className="flex flex-col items-end gap-1.5 flex-shrink-0">

@@ -24,6 +24,7 @@ import {
   getStockPeers,
 } from '../api/client.js';
 import { getIndustryColor, industryBadgeClass } from '../utils/industryColors.js';
+import CapBadge from '../components/CapBadge.jsx';
 
 function fmt(n, dec = 2) {
   if (n == null) return '—';
@@ -1213,7 +1214,10 @@ function HiddenGems() {
                       <tr key={g.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700">
                         <td className="px-4 py-2.5 text-xs text-slate-400 dark:text-slate-500">{i + 1}</td>
                         <td className="px-4 py-2.5">
-                          <p className="font-medium text-slate-800 dark:text-slate-200">{g.stock_name}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-medium text-slate-800 dark:text-slate-200">{g.stock_name}</p>
+                            <CapBadge cap={g.market_cap_cat} />
+                          </div>
                           <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{g.isin}</p>
                         </td>
                         <td className="px-4 py-2.5">
@@ -3279,7 +3283,10 @@ function HighConviction() {
                       return (
                         <tr key={d.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700">
                           <td className="px-4 py-2.5">
-                            <p className="font-medium text-slate-800 dark:text-slate-200">{d.stock_name}</p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-medium text-slate-800 dark:text-slate-200">{d.stock_name}</p>
+                              <CapBadge cap={d.market_cap_cat} />
+                            </div>
                             <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{d.isin}</p>
                           </td>
                           <td className="px-4 py-2.5">

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronUp, ChevronDown, Search, Filter, X } from 'lucide-react';
 import { industryBadgeClass } from '../utils/industryColors.js';
+import CapBadge from './CapBadge.jsx';
 
 function fmt(n, dec = 2) {
   if (n == null) return '—';
@@ -119,8 +120,11 @@ export default function HoldingsTable({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
               {holdings.map((h, idx) => (
                 <tr key={h.id || idx} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200 max-w-[220px] truncate" title={h.stock_name}>
-                    {h.stock_name}
+                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200 max-w-[220px]" title={h.stock_name}>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="truncate">{h.stock_name}</span>
+                      <CapBadge cap={h.market_cap_cat} />
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">{h.isin}</td>
                   <td className="px-4 py-3">
