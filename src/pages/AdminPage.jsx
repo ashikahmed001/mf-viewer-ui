@@ -210,9 +210,64 @@ function IsinRemapTab({ onCountChange }) {
       {loading ? (
         <div className="flex justify-center py-16"><Spinner /></div>
       ) : issues.length === 0 ? (
-        <div className="text-center py-16 text-slate-400 dark:text-slate-500">
-          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
-          No ISIN conflicts found
+        <div className="flex flex-col items-center gap-3 py-10 text-slate-400 dark:text-slate-500">
+          <svg width="200" height="176" viewBox="0 0 100 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="44" r="38" fill="#F0F4FF" opacity="0.4"/>
+            {/* Snowflake 1 — purple, diamond tips */}
+            <g transform="translate(22,44)">
+              <line x1="0" y1="-18" x2="0" y2="18" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="-15.6" y1="-9" x2="15.6" y2="9" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="15.6" y1="-9" x2="-15.6" y2="9" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M0,-22 L3,-18 L0,-14 L-3,-18 Z" fill="#7F77DD"/>
+              <path d="M0,14 L3,18 L0,22 L-3,18 Z" fill="#7F77DD"/>
+              <path d="M19,11 L15.6,9 L12,11 L15.6,13 Z" fill="#7F77DD"/>
+              <path d="M-19,11 L-15.6,9 L-12,11 L-15.6,13 Z" fill="#7F77DD"/>
+              <line x1="-4" y1="-12" x2="-8" y2="-8" stroke="#7F77DD" strokeWidth="1.2"/>
+              <line x1="4" y1="-12" x2="8" y2="-8" stroke="#7F77DD" strokeWidth="1.2"/>
+              <line x1="4" y1="12" x2="8" y2="8" stroke="#7F77DD" strokeWidth="1.2"/>
+              <line x1="-4" y1="12" x2="-8" y2="8" stroke="#7F77DD" strokeWidth="1.2"/>
+              <circle cx="0" cy="0" r="5" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.2"/>
+            </g>
+            {/* Snowflake 2 — green, circle tips, checkmark center */}
+            <g transform="translate(50,40)">
+              <line x1="0" y1="-20" x2="0" y2="20" stroke="#1D9E75" strokeWidth="2.2" strokeLinecap="round"/>
+              <line x1="-17.3" y1="-10" x2="17.3" y2="10" stroke="#1D9E75" strokeWidth="2.2" strokeLinecap="round"/>
+              <line x1="17.3" y1="-10" x2="-17.3" y2="10" stroke="#1D9E75" strokeWidth="2.2" strokeLinecap="round"/>
+              <circle cx="0" cy="-22" r="3" fill="#1D9E75"/>
+              <circle cx="0" cy="22" r="3" fill="#1D9E75"/>
+              <circle cx="19" cy="11" r="3" fill="#1D9E75"/>
+              <circle cx="-19" cy="11" r="3" fill="#1D9E75"/>
+              <circle cx="19" cy="-11" r="3" fill="#1D9E75"/>
+              <circle cx="-19" cy="-11" r="3" fill="#1D9E75"/>
+              <line x1="-5" y1="-14" x2="-9" y2="-10" stroke="#1D9E75" strokeWidth="1.2"/>
+              <line x1="5" y1="-14" x2="9" y2="-10" stroke="#1D9E75" strokeWidth="1.2"/>
+              <line x1="-5" y1="14" x2="-9" y2="10" stroke="#1D9E75" strokeWidth="1.2"/>
+              <line x1="5" y1="14" x2="9" y2="10" stroke="#1D9E75" strokeWidth="1.2"/>
+              <circle cx="0" cy="0" r="6" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1.5"/>
+              <path d="M-2.5 0 L0 2.5 L4 -3" stroke="#1D9E75" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            </g>
+            {/* Snowflake 3 — amber, square tips */}
+            <g transform="translate(78,44)">
+              <line x1="0" y1="-16" x2="0" y2="16" stroke="#BA7517" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="-13.9" y1="-8" x2="13.9" y2="8" stroke="#BA7517" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="13.9" y1="-8" x2="-13.9" y2="8" stroke="#BA7517" strokeWidth="2" strokeLinecap="round"/>
+              <rect x="-2.5" y="-20" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
+              <rect x="-2.5" y="15" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
+              <rect x="12" y="9" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
+              <rect x="-17" y="9" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
+              <line x1="-3" y1="-11" x2="-7" y2="-7" stroke="#BA7517" strokeWidth="1.2"/>
+              <line x1="3" y1="-11" x2="7" y2="-7" stroke="#BA7517" strokeWidth="1.2"/>
+              <circle cx="0" cy="0" r="5" fill="#FFF3CE" stroke="#BA7517" strokeWidth="1.2"/>
+            </g>
+            <ellipse cx="22" cy="68" rx="14" ry="4" fill="#CECBF6" opacity="0.3"/>
+            <ellipse cx="50" cy="68" rx="14" ry="4" fill="#A8EDDA" opacity="0.3"/>
+            <ellipse cx="78" cy="68" rx="14" ry="4" fill="#FAC775" opacity="0.3"/>
+            <circle cx="10" cy="12" r="2" fill="#FAC775"/>
+            <circle cx="90" cy="10" r="1.8" fill="#CECBF6"/>
+            <circle cx="6" cy="52" r="1.4" fill="#5DCAA5"/>
+            <circle cx="94" cy="54" r="1.4" fill="#7F77DD"/>
+          </svg>
+          <p className="font-semibold text-slate-600 dark:text-slate-300 text-base">No ISIN conflicts found</p>
         </div>
       ) : (
         <div className="space-y-2">
