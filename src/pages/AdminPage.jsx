@@ -15,9 +15,10 @@ import {
   adminGetStocksStatus, adminTriggerStocksSync,
   adminGetBackupStatus, adminTriggerBackup,
   adminListStocks,
+  getAuthHeader,
 } from '../api/client.js';
 import api from '../api/client.js';
-import { AlertTriangle, CheckCircle, RefreshCw, ChevronDown, ChevronRight, Settings, X, Search, Activity, TrendingUp, Lock, Unlock } from 'lucide-react';
+import { AlertTriangle, CheckCircle, RefreshCw, ChevronDown, ChevronRight, Settings, X, Search, Activity, TrendingUp, Lock, Unlock, Download } from 'lucide-react';
 
 const ADMIN_EMAIL = 'ashikahmed001@gmail.com';
 
@@ -2479,10 +2480,11 @@ function CacheTab() {
 
 // ─── Tab: Backup ─────────────────────────────────────────────────────────────
 function BackupTab() {
-  const [status,   setStatus]   = useState(null);
-  const [result,   setResult]   = useState(null);
-  const [loading,  setLoading]  = useState(false);
-  const { toast, show, hide }   = useToast();
+  const [status,      setStatus]      = useState(null);
+  const [result,      setResult]      = useState(null);
+  const [loading,     setLoading]     = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const { toast, show, hide }         = useToast();
 
   useEffect(() => {
     adminGetBackupStatus()
@@ -2505,6 +2507,35 @@ function BackupTab() {
     }
   }
 
+  async function downloadDb() {
+    setDownloading(true);
+    try {
+      const baseURL = import.meta.env.VITE_API_URL || '/api';
+      const authHeader = await getAuthHeader();
+      const res = await fetch(`${baseURL}/admin/backup/download`, {
+        headers: { ...authHeader },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+      const blob     = await res.blob();
+      const filename = res.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1]
+                       || `mf_portfolio_${new Date().toISOString().slice(0,10)}.db`;
+      const url  = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href     = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+      show('Database downloaded');
+    } catch (e) {
+      show(e.message, false);
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       {toast && <Toast {...toast} onClose={hide} />}
@@ -2517,14 +2548,25 @@ function BackupTab() {
               Runs <code className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">PRAGMA wal_checkpoint(TRUNCATE)</code> — flushes all pending writes to the main DB file so Litestream syncs immediately to Cloudflare R2.
             </p>
           </div>
-          <button
-            onClick={triggerBackup}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors shrink-0"
-          >
-            {loading ? <Spinner /> : <RefreshCw className="w-4 h-4" />}
-            {loading ? 'Running…' : 'Backup Now'}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={triggerBackup}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
+            >
+              {loading ? <Spinner /> : <RefreshCw className="w-4 h-4" />}
+              {loading ? 'Running…' : 'Backup Now'}
+            </button>
+            <button
+              onClick={downloadDb}
+              disabled={downloading}
+              title="Checkpoint WAL and download .db file"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
+            >
+              {downloading ? <Spinner /> : <Download className="w-4 h-4" />}
+              {downloading ? 'Downloading…' : 'Download .db'}
+            </button>
+          </div>
         </div>
 
         {status?.last_triggered_at && (
