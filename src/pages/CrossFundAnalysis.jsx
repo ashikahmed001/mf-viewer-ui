@@ -2234,42 +2234,37 @@ function StockTracker({ allFunds }) {
 
       {!selected && (
         <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-12 text-center flex flex-col items-center gap-3">
-          <svg width="220" height="194" viewBox="0 0 100 88" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Card */}
-            <rect x="8" y="8" width="84" height="72" rx="6" fill="white" stroke="#EEEDFE" strokeWidth="1.3"/>
-            {/* Fund row 1 (purple) */}
-            <rect x="18" y="16" width="6" height="8" rx="2" fill="#CECBF6" stroke="#7F77DD" strokeWidth="0.8"/>
-            <rect x="28" y="16" width="22" height="8" rx="2" fill="#7F77DD" opacity="0.7"/>
-            <rect x="54" y="16" width="14" height="8" rx="2" fill="#7F77DD" opacity="0.9"/>
-            <rect x="72" y="16" width="10" height="8" rx="2" fill="#534AB7"/>
-            {/* Fund row 2 (green) */}
-            <rect x="18" y="28" width="6" height="8" rx="2" fill="#A8EDDA" stroke="#1D9E75" strokeWidth="0.8"/>
-            <rect x="36" y="28" width="18" height="8" rx="2" fill="#1D9E75" opacity="0.6"/>
-            <rect x="58" y="28" width="20" height="8" rx="2" fill="#1D9E75" opacity="0.9"/>
-            {/* Fund row 3 (amber) */}
-            <rect x="18" y="40" width="6" height="8" rx="2" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8" opacity="0.5"/>
-            <rect x="24" y="40" width="10" height="8" rx="2" fill="#FAC775" opacity="0.6"/>
-            <rect x="44" y="40" width="24" height="8" rx="2" fill="#BA7517" opacity="0.8"/>
-            <rect x="72" y="40" width="10" height="8" rx="2" fill="#BA7517"/>
-            {/* Fund row 4 (red) */}
-            <rect x="18" y="52" width="6" height="8" rx="2" fill="#FDECEA" stroke="#E05252" strokeWidth="0.8"/>
-            <rect x="32" y="52" width="28" height="8" rx="2" fill="#E05252" opacity="0.7"/>
-            <rect x="66" y="52" width="16" height="8" rx="2" fill="#E05252" opacity="0.5"/>
-            {/* Fund row 5 (blue) */}
-            <rect x="18" y="64" width="6" height="8" rx="2" fill="#E6F1FB" stroke="#378ADD" strokeWidth="0.8"/>
-            <rect x="40" y="64" width="16" height="8" rx="2" fill="#378ADD" opacity="0.6"/>
-            <rect x="60" y="64" width="22" height="8" rx="2" fill="#378ADD" opacity="0.9"/>
-            {/* Time axis */}
-            <line x1="18" y1="76" x2="86" y2="76" stroke="#D3D1C7" strokeWidth="0.8"/>
-            {/* Fund identifier dots */}
-            <circle cx="21" cy="20" r="1.5" fill="#7F77DD"/>
-            <circle cx="21" cy="32" r="1.5" fill="#1D9E75"/>
-            <circle cx="21" cy="44" r="1.5" fill="#BA7517"/>
-            <circle cx="21" cy="56" r="1.5" fill="#E05252"/>
-            <circle cx="21" cy="68" r="1.5" fill="#378ADD"/>
+          <svg width="220" height="200" viewBox="0 0 100 91" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Calendar card */}
+            <rect x="8" y="12" width="84" height="70" rx="7" fill="white" stroke="#EEEDFE" strokeWidth="1.4"/>
+            {/* Header band */}
+            <rect x="8" y="12" width="84" height="18" rx="7" fill="#EEEDFE"/>
+            <rect x="8" y="22" width="84" height="8" fill="#EEEDFE"/>
+            {/* Binding tabs */}
+            <rect x="24" y="8" width="8" height="10" rx="3" fill="#AFA9EC"/>
+            <rect x="68" y="8" width="8" height="10" rx="3" fill="#AFA9EC"/>
+            {/* Day grid row 1 */}
+            <rect x="16" y="36" width="14" height="10" rx="3" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="0.8"/>
+            <rect x="34" y="36" width="14" height="10" rx="3" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="0.8"/>
+            <rect x="52" y="36" width="14" height="10" rx="3" fill="#7F77DD" opacity="0.5"/>
+            <rect x="70" y="36" width="14" height="10" rx="3" fill="#534AB7"/>
+            {/* Day grid row 2 */}
+            <rect x="16" y="50" width="14" height="10" rx="3" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="0.8"/>
+            <rect x="34" y="50" width="14" height="10" rx="3" fill="#1D9E75" opacity="0.5"/>
+            <rect x="52" y="50" width="14" height="10" rx="3" fill="#1D9E75" opacity="0.8"/>
+            <rect x="70" y="50" width="14" height="10" rx="3" fill="#1D9E75"/>
+            {/* Day grid row 3 */}
+            <rect x="16" y="64" width="14" height="10" rx="3" fill="#FFF3CE" stroke="#BA7517" strokeWidth="0.8"/>
+            <rect x="34" y="64" width="14" height="10" rx="3" fill="#FFF3CE" stroke="#BA7517" strokeWidth="0.8"/>
+            <rect x="52" y="64" width="14" height="10" rx="3" fill="#BA7517" opacity="0.45"/>
+            <rect x="70" y="64" width="14" height="10" rx="3" fill="#FAC775" opacity="0.7"/>
+            {/* Arrow at bottom right */}
+            <path d="M82 76 L86 80 L82 84" stroke="#AFA9EC" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            {/* Shadow */}
+            <ellipse cx="50" cy="88" rx="36" ry="4" fill="#D3D1C7" opacity="0.2"/>
             {/* Sparkles */}
-            <circle cx="6" cy="6" r="2" fill="#FAC775"/>
-            <circle cx="94" cy="4" r="1.8" fill="#CECBF6"/>
+            <circle cx="4" cy="8" r="2" fill="#FAC775"/>
+            <circle cx="96" cy="6" r="1.8" fill="#CECBF6"/>
           </svg>
           <p className="font-semibold text-slate-600 dark:text-slate-300 text-base">Fund Allocation Over Time</p>
           <p className="text-sm text-slate-400 dark:text-slate-500">Search for a stock above to see how all funds have allocated to it over time.</p>
