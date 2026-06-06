@@ -57,9 +57,48 @@ function DropZone({ onFiles, disabled }) {
         onChange={e => handle(e.target.files)}
         disabled={disabled}
       />
-      <div className="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/40 rounded-2xl flex items-center justify-center">
-        <Upload className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
-      </div>
+      {/* Portal drop doodle */}
+      <svg width="180" height="144" viewBox="0 0 110 90" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-1">
+        {/* Portal rings */}
+        <ellipse cx="55" cy="72" rx="36" ry="10" className="fill-indigo-100 dark:fill-indigo-900/50 stroke-indigo-400 dark:stroke-indigo-500" strokeWidth="1.4" />
+        <ellipse cx="55" cy="72" rx="26" ry="7" className="fill-indigo-200 dark:fill-indigo-800/60 stroke-indigo-300 dark:stroke-indigo-600" strokeWidth="1" />
+        <ellipse cx="55" cy="72" rx="16" ry="4.5" className="fill-indigo-300 dark:fill-indigo-700 stroke-indigo-400 dark:stroke-indigo-500" strokeWidth="0.8" />
+        <ellipse cx="55" cy="72" rx="8" ry="2.5" className="fill-indigo-500 dark:fill-indigo-400" />
+
+        {/* File falling into portal — slightly rotated */}
+        <g transform="rotate(-10, 55, 40)">
+          <rect x="38" y="8" width="34" height="44" rx="4.5" className="fill-white dark:fill-slate-800 stroke-indigo-400 dark:stroke-indigo-500" strokeWidth="1.4" />
+          {/* Excel tab */}
+          <rect x="38" y="8" width="11.5" height="11.5" rx="2.5" className="fill-emerald-500" />
+          <text x="44" y="18" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="white">X</text>
+          {/* Grid lines */}
+          <line x1="38" y1="26" x2="72" y2="26" className="stroke-slate-200 dark:stroke-slate-600" strokeWidth="0.8" />
+          <line x1="38" y1="34" x2="72" y2="34" className="stroke-slate-200 dark:stroke-slate-600" strokeWidth="0.8" />
+          <line x1="38" y1="42" x2="72" y2="42" className="stroke-slate-200 dark:stroke-slate-600" strokeWidth="0.8" />
+          {/* Data bars */}
+          <rect x="40" y="27" width="16" height="6" rx="2" className="fill-blue-400 dark:fill-blue-500" opacity="0.6" />
+          <rect x="40" y="35" width="10" height="6" rx="2" className="fill-emerald-400 dark:fill-emerald-500" opacity="0.6" />
+          <rect x="40" y="43" width="14" height="6" rx="2" className="fill-indigo-400 dark:fill-indigo-500" opacity="0.6" />
+        </g>
+
+        {/* Speed lines */}
+        <line x1="20" y1="30" x2="30" y2="34" className="stroke-indigo-200 dark:stroke-indigo-700" strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="16" y1="38" x2="28" y2="40" className="stroke-indigo-200 dark:stroke-indigo-700" strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="88" y1="28" x2="78" y2="32" className="stroke-indigo-200 dark:stroke-indigo-700" strokeWidth="1.2" strokeLinecap="round" />
+
+        {/* Orbiting dots around portal */}
+        <circle cx="19" cy="72" r="3" className="fill-indigo-100 dark:fill-indigo-900 stroke-indigo-300 dark:stroke-indigo-600" strokeWidth="1" />
+        <circle cx="91" cy="72" r="3" className="fill-indigo-100 dark:fill-indigo-900 stroke-indigo-300 dark:stroke-indigo-600" strokeWidth="1" />
+        <circle cx="36" cy="62" r="2" className="fill-indigo-200 dark:fill-indigo-700" />
+        <circle cx="74" cy="62" r="2" className="fill-indigo-200 dark:fill-indigo-700" />
+
+        {/* Sparkle dots */}
+        <circle cx="8" cy="16" r="1.8" className="fill-amber-300 dark:fill-amber-500" />
+        <circle cx="100" cy="22" r="1.5" className="fill-emerald-400 dark:fill-emerald-500" />
+        <circle cx="6" cy="54" r="1.2" className="fill-indigo-300 dark:fill-indigo-500" />
+        <circle cx="104" cy="50" r="1.5" className="fill-amber-300 dark:fill-amber-500" />
+      </svg>
+
       <div>
         <p className="font-semibold text-slate-700 dark:text-slate-200">Drop Excel files here</p>
         <p className="text-sm text-slate-400 dark:text-slate-500 mt-0.5">or click to browse · .xlsx / .xls · up to 20 files</p>
