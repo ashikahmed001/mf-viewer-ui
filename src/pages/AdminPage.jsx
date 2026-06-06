@@ -2521,7 +2521,7 @@ function BackupTab() {
       }
       const blob     = await res.blob();
       const filename = res.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1]
-                       || `mf_portfolio_${new Date().toISOString().slice(0,10)}.db`;
+                       || `mf_portfolio_${new Date().toISOString().slice(0,10)}.db.gz`;
       const url  = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href     = url;
@@ -2560,11 +2560,11 @@ function BackupTab() {
             <button
               onClick={downloadDb}
               disabled={downloading}
-              title="Checkpoint WAL and download .db file"
+              title="Checkpoint WAL and download compressed .db.gz file"
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
             >
               {downloading ? <Spinner /> : <Download className="w-4 h-4" />}
-              {downloading ? 'Downloading…' : 'Download .db'}
+              {downloading ? 'Downloading…' : 'Download .db.gz'}
             </button>
           </div>
         </div>
