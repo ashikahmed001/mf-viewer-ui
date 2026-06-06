@@ -12,6 +12,7 @@ import {
   adminGetFundGaps,
   adminGetCacheStats, adminClearCache, adminSetCacheEnabled,
   getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping, syncLatestNav, adminGetCounts, adminFixNameBatch,
+  adminGetStocksStatus, adminTriggerStocksSync,
 } from '../api/client.js';
 import api from '../api/client.js';
 import { AlertTriangle, CheckCircle, RefreshCw, ChevronDown, ChevronRight, Settings, X, Search, Activity, TrendingUp, Lock, Unlock } from 'lucide-react';
@@ -2474,6 +2475,175 @@ function CacheTab() {
   );
 }
 
+// ─── Tab: Stocks ─────────────────────────────────────────────────────────────
+function StocksTab() {
+  const [status,   setStatus]   = useState(null);
+  const [syncing,  setSyncing]  = useState(false);
+  const { toast, show, hide }   = useToast();
+  const pollRef                 = useRef(null);
+
+  async function loadStatus() {
+    try {
+      const data = await adminGetStocksStatus();
+      setStatus(data);
+      return data;
+    } catch (e) {
+      show(e.response?.data?.error || e.message, false);
+      return null;
+    }
+  }
+
+  function startPolling() {
+    if (pollRef.current) return;
+    pollRef.current = setInterval(async () => {
+      const data = await loadStatus();
+      if (data?.sync?.status !== 'running') {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+      }
+    }, 2000);
+  }
+
+  useEffect(() => {
+    loadStatus();
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, []);
+
+  // Resume polling if a sync was already in progress when the tab mounted
+  useEffect(() => {
+    if (status?.sync?.status === 'running') startPolling();
+  }, [status?.sync?.status]);
+
+  async function triggerSync() {
+    setSyncing(true);
+    try {
+      await adminTriggerStocksSync();
+      await loadStatus();
+      startPolling();
+    } catch (e) {
+      show(e.response?.data?.error || e.message, false);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  const sync      = status?.sync;
+  const counts    = status?.db_counts;
+  const isRunning = sync?.status === 'running';
+  const pct       = sync?.total > 0 ? Math.round((sync.progress / sync.total) * 100) : 0;
+
+  const PHASE_LABELS = {
+    fetching:  'Downloading NSE equity master…',
+    upserting: 'Writing stocks to DB…',
+    enriching: 'Fetching market caps from Yahoo Finance…',
+    done:      'Complete',
+  };
+
+  return (
+    <div className="space-y-4">
+      {toast && <Toast {...toast} onClose={hide} />}
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: 'Total Stocks',     value: counts?.total,           color: 'text-slate-900 dark:text-slate-100' },
+          { label: 'NIFTY 50',         value: counts?.nifty50,         color: 'text-blue-600' },
+          { label: 'NIFTY 500',        value: counts?.nifty500,        color: 'text-indigo-600' },
+          { label: 'With Market Cap',  value: counts?.with_market_cap, color: 'text-emerald-600' },
+        ].map(({ label, value, color }) => (
+          <SectionCard key={label} className="p-4">
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{label}</p>
+            <p className={`text-2xl font-bold ${color}`}>
+              {value != null ? value.toLocaleString('en-IN') : '—'}
+            </p>
+          </SectionCard>
+        ))}
+      </div>
+
+      {/* Sync control */}
+      <SectionCard className="p-5">
+        <div className="flex items-start justify-between mb-4 gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Stock Universe Sync</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 max-w-sm">
+              Fetches NSE equity master + NIFTY 50/500 constituents + Yahoo Finance market caps for NIFTY 500 stocks.
+            </p>
+          </div>
+          <button
+            onClick={triggerSync}
+            disabled={isRunning || syncing}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors shrink-0"
+          >
+            {isRunning || syncing ? <Spinner /> : <RefreshCw className="w-4 h-4" />}
+            {isRunning ? 'Syncing…' : 'Sync Now'}
+          </button>
+        </div>
+
+        {status?.last_synced_at && !isRunning && (
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
+            Last synced: {new Date(status.last_synced_at + ' UTC').toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+          </p>
+        )}
+
+        {/* Progress bar */}
+        {isRunning && (
+          <div className="mt-2 space-y-1.5">
+            <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>{PHASE_LABELS[sync.phase] || sync.message}</span>
+              {sync.total > 0 && <span>{sync.progress.toLocaleString()} / {sync.total.toLocaleString()}</span>}
+            </div>
+            <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                style={{ width: `${sync.total > 0 ? pct : 30}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {sync?.status === 'done' && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400">
+            <CheckCircle className="w-4 h-4" />
+            Completed at {new Date(sync.completedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+            {' · '}
+            {sync.counts.total.toLocaleString()} stocks, {sync.counts.with_market_cap.toLocaleString()} with market cap
+          </div>
+        )}
+
+        {sync?.status === 'error' && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-red-500 dark:text-red-400">
+            <AlertTriangle className="w-4 h-4" />
+            {sync.error}
+          </div>
+        )}
+      </SectionCard>
+
+      {/* Data sources */}
+      <SectionCard className="p-5">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">Data Sources</h3>
+        <div className="divide-y divide-slate-100 dark:divide-slate-700">
+          {[
+            { label: 'NSE Equity Master',      source: 'archives.nseindia.com', desc: 'All NSE EQ-series stocks — symbol, ISIN, name, face value' },
+            { label: 'NIFTY 50 Constituents',  source: 'archives.nseindia.com', desc: 'Index membership + sector classification for 50 stocks' },
+            { label: 'NIFTY 500 Constituents', source: 'archives.nseindia.com', desc: 'Index membership + sector classification for 500 stocks' },
+            { label: 'Market Capitalisation',  source: 'Yahoo Finance',          desc: 'Live market cap (₹ crores) for all NIFTY 500 stocks' },
+          ].map(({ label, source, desc }) => (
+            <div key={label} className="flex items-center gap-3 py-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{desc}</p>
+              </div>
+              <span className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded-full shrink-0 font-medium">
+                {source}
+              </span>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
 // ─── Main AdminPage ───────────────────────────────────────────────────────────
 const TABS = [
   { id: 'upload',      label: 'Upload' },
@@ -2483,6 +2653,7 @@ const TABS = [
   { id: 'funds',       label: 'Fund Management' },
   { id: 'continuity',  label: 'Data Continuity' },
   { id: 'nav',         label: 'NAV Mapping' },
+  { id: 'stocks',      label: 'Stocks Universe' },
   { id: 'features',    label: 'Feature Flags' },
   { id: 'cache',       label: 'Cache' },
 ];
@@ -2567,6 +2738,7 @@ export default function AdminPage() {
         {tab === 'funds'      && <FundMgmtTab />}
         {tab === 'continuity' && <ContinuityTab onCountChange={refreshCounts} />}
         {tab === 'nav'        && <NavTab onCountChange={refreshCounts} />}
+        {tab === 'stocks'     && <StocksTab />}
         {tab === 'features'   && <FeatureFlagsTab />}
         {tab === 'cache'      && <CacheTab />}
       </div>
