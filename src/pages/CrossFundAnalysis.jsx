@@ -2233,8 +2233,37 @@ function StockTracker({ allFunds }) {
       )}
 
       {!selected && (
-        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-12 text-center text-slate-400 dark:text-slate-500 text-sm">
-          Search for a stock above to see how all funds have allocated to it over time
+        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-12 text-center flex flex-col items-center gap-3">
+          <svg width="220" height="194" viewBox="0 0 100 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Card frame */}
+            <rect x="8" y="10" width="84" height="62" rx="6" fill="white" stroke="#EEEDFE" strokeWidth="1.3"/>
+            {/* Axes */}
+            <line x1="16" y1="64" x2="84" y2="64" stroke="#D3D1C7" strokeWidth="1"/>
+            <line x1="16" y1="16" x2="16" y2="64" stroke="#D3D1C7" strokeWidth="1"/>
+            {/* Stacked area layer 4 (bottom, blue) */}
+            <path d="M16 64 L28 60 L40 58 L52 55 L64 52 L76 48 L84 46 L84 64 Z" fill="#E6F1FB" stroke="#378ADD" strokeWidth="1"/>
+            {/* Stacked area layer 3 (red/pink) */}
+            <path d="M16 58 L28 54 L40 50 L52 46 L64 43 L76 40 L84 38 L84 46 L76 48 L64 52 L52 55 L40 58 L28 60 L16 64 Z" fill="#FDECEA" stroke="#E05252" strokeWidth="1"/>
+            {/* Stacked area layer 2 (green) */}
+            <path d="M16 50 L28 46 L40 40 L52 36 L64 34 L76 30 L84 28 L84 38 L76 40 L64 43 L52 46 L40 50 L28 54 L16 58 Z" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1"/>
+            {/* Stacked area layer 1 (top, purple) */}
+            <path d="M16 38 L28 34 L40 28 L52 24 L64 22 L76 18 L84 16 L84 28 L76 30 L64 34 L52 36 L40 40 L28 46 L16 50 Z" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1"/>
+            {/* Dot markers along top line */}
+            <circle cx="28" cy="34" r="2.5" fill="#7F77DD"/>
+            <circle cx="40" cy="28" r="2.5" fill="#7F77DD"/>
+            <circle cx="52" cy="24" r="2.5" fill="#7F77DD"/>
+            <circle cx="64" cy="22" r="2.5" fill="#7F77DD"/>
+            <circle cx="76" cy="18" r="2.5" fill="#7F77DD"/>
+            {/* Magnifier hint */}
+            <circle cx="76" cy="18" r="7" fill="none" stroke="#534AB7" strokeWidth="1.2" opacity="0.5"/>
+            {/* Shadow */}
+            <ellipse cx="50" cy="78" rx="34" ry="5" fill="#D3D1C7" opacity="0.25"/>
+            {/* Sparkles */}
+            <circle cx="6" cy="8" r="2" fill="#FAC775"/>
+            <circle cx="94" cy="6" r="1.8" fill="#CECBF6"/>
+          </svg>
+          <p className="font-semibold text-slate-600 dark:text-slate-300 text-base">Fund Allocation Over Time</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">Search for a stock above to see how all funds have allocated to it over time.</p>
         </div>
       )}
     </div>
