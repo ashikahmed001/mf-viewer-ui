@@ -486,33 +486,30 @@ function NameNormTab({ onCountChange }) {
         <div className="flex justify-center py-16"><Spinner /></div>
       ) : issues.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-10 text-slate-400 dark:text-slate-500">
-          {/* Audit passed doodle */}
-          <svg width="150" height="130" viewBox="0 0 100 82" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Clipboard board */}
-            <rect x="18" y="14" width="64" height="62" rx="5" fill="white" stroke="#D3D1C7" strokeWidth="1.3"/>
-            {/* Clipboard clip */}
-            <rect x="36" y="8" width="28" height="12" rx="3" fill="#B4B2A9" stroke="#888780" strokeWidth="1"/>
-            <rect x="42" y="10" width="16" height="6" rx="2" fill="#D3D1C7"/>
-            {/* Ruled lines */}
-            <line x1="26" y1="36" x2="74" y2="36" stroke="#F1EFE8" strokeWidth="1"/>
-            <line x1="26" y1="46" x2="74" y2="46" stroke="#F1EFE8" strokeWidth="1"/>
-            <line x1="26" y1="56" x2="74" y2="56" stroke="#F1EFE8" strokeWidth="1"/>
-            <line x1="26" y1="66" x2="74" y2="66" stroke="#F1EFE8" strokeWidth="1"/>
-            {/* Row 1: checked */}
-            <circle cx="30" cy="41" r="4.5" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1.2"/>
-            <path d="M27.5 41 L29.5 43.5 L33 38.5" stroke="#1D9E75" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            <rect x="38" y="38" width="28" height="3" rx="1.5" fill="#D3D1C7"/>
-            {/* Row 2: checked */}
-            <circle cx="30" cy="51" r="4.5" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1.2"/>
-            <path d="M27.5 51 L29.5 53.5 L33 48.5" stroke="#1D9E75" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            <rect x="38" y="48" width="22" height="3" rx="1.5" fill="#D3D1C7"/>
-            {/* Row 3: checked */}
-            <circle cx="30" cy="61" r="4.5" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1.2"/>
-            <path d="M27.5 61 L29.5 63.5 L33 58.5" stroke="#1D9E75" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            <rect x="38" y="58" width="26" height="3" rx="1.5" fill="#D3D1C7"/>
-            {/* ALL CLEAR stamp */}
-            <rect x="46" y="22" width="26" height="14" rx="3" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1.5" transform="rotate(-8,59,29)"/>
-            <text x="59" y="31" textAnchor="middle" fontSize="6.5" fill="#1D9E75" fontWeight="bold" transform="rotate(-8,59,29)">ALL CLEAR</text>
+          <svg width="180" height="159" viewBox="0 0 100 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Back card (amber) */}
+            <rect x="32" y="22" width="42" height="52" rx="5" fill="#FFF3CE" stroke="#BA7517" strokeWidth="1.2" transform="rotate(12,53,48)"/>
+            {/* Mid card (purple) */}
+            <rect x="30" y="18" width="42" height="52" rx="5" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.2" transform="rotate(-8,51,44)"/>
+            {/* Front card (green, upright) */}
+            <rect x="28" y="14" width="44" height="54" rx="5" fill="white" stroke="#1D9E75" strokeWidth="1.6"/>
+            {/* Card content — check + lines */}
+            <rect x="34" y="22" width="16" height="16" rx="3" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1"/>
+            <path d="M37 30 L40 33 L46 25" stroke="#1D9E75" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            <line x1="34" y1="44" x2="60" y2="44" stroke="#D3D1C7" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="34" y1="51" x2="56" y2="51" stroke="#D3D1C7" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="34" y1="57" x2="58" y2="57" stroke="#D3D1C7" strokeWidth="2" strokeLinecap="round"/>
+            {/* Unique colour dots on each card */}
+            <circle cx="60" cy="22" r="3" fill="#1D9E75"/>
+            <circle cx="66" cy="18" r="3" fill="#7F77DD" opacity="0.8"/>
+            <circle cx="70" cy="26" r="3" fill="#FAC775" opacity="0.9"/>
+            {/* Shadow */}
+            <ellipse cx="50" cy="72" rx="26" ry="5" fill="#D3D1C7" opacity="0.3"/>
+            {/* Sparkles */}
+            <circle cx="10" cy="12" r="2.2" fill="#FAC775"/>
+            <circle cx="90" cy="10" r="1.8" fill="#CECBF6"/>
+            <circle cx="8" cy="56" r="1.5" fill="#5DCAA5"/>
+            <circle cx="92" cy="54" r="1.5" fill="#AFA9EC"/>
           </svg>
           <p className="font-semibold text-slate-600 dark:text-slate-300 text-base">No name conflicts found</p>
         </div>
