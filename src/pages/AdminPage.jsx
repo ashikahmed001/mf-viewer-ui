@@ -2755,10 +2755,13 @@ function StocksBrowseTab() {
               >
                 ← Prev
               </button>
-              {/* Page number buttons — show up to 5 around current */}
-              {Array.from({ length: Math.min(5, pages) }, (_, i) => {
-                const p = Math.min(Math.max(page - 2 + i, 1), pages - Math.min(4, pages - 1) + i);
-                return (
+              {/* Page number buttons — up to 5 centered around current page */}
+              {(() => {
+                const total   = Math.min(5, pages);
+                let start     = Math.max(1, page - 2);
+                const end     = Math.min(pages, start + total - 1);
+                if (end - start + 1 < total) start = Math.max(1, end - total + 1);
+                return Array.from({ length: end - start + 1 }, (_, i) => start + i).map(p => (
                   <button
                     key={p}
                     onClick={() => setPage(p)}
@@ -2770,8 +2773,8 @@ function StocksBrowseTab() {
                   >
                     {p}
                   </button>
-                );
-              })}
+                ));
+              })()}
               <button
                 onClick={() => setPage(p => Math.min(pages, p + 1))}
                 disabled={page === pages}
