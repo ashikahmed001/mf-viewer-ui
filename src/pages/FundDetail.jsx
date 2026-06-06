@@ -325,20 +325,31 @@ function NavHistoryPanel({ navData }) {
   if (!navData.mapped || !navData.history?.length) {
     return (
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-10 text-center text-slate-400 dark:text-slate-500">
-        <svg viewBox="0 0 200 140" className="mx-auto mb-4 w-40 h-28 opacity-80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Chart frame */}
-          <rect x="16" y="16" width="168" height="100" rx="8" className="fill-slate-100 dark:fill-slate-700" />
-          {/* Grid lines */}
-          <line x1="30" y1="90" x2="170" y2="90" stroke="currentColor" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="4 3" />
-          <line x1="30" y1="70" x2="170" y2="70" stroke="currentColor" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="4 3" />
-          <line x1="30" y1="50" x2="170" y2="50" stroke="currentColor" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="4 3" />
-          {/* Wobbly question-mark line instead of a real chart */}
-          <path d="M30 80 Q50 40 70 75 Q90 110 110 60 Q130 20 150 55 Q165 75 170 70"
-            stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="5 4" />
-          {/* Question mark dot */}
-          <circle cx="100" cy="108" r="3.5" fill="#a78bfa" opacity="0.7" />
-          {/* Question mark arc */}
-          <path d="M94 94 Q94 85 100 83 Q108 80 108 88 Q108 95 100 97" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.7" />
+        <svg viewBox="0 0 680 220" className="mx-auto mb-5 w-full max-w-lg" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="140" y="20" width="400" height="160" rx="16" fill="#EEEDFE" className="dark:fill-slate-700" />
+          <line x1="170" y1="150" x2="510" y2="150" stroke="#AFA9EC" strokeWidth="1" strokeDasharray="5 4"/>
+          <line x1="170" y1="110" x2="510" y2="110" stroke="#AFA9EC" strokeWidth="1" strokeDasharray="5 4"/>
+          <line x1="170" y1="70" x2="510" y2="70" stroke="#AFA9EC" strokeWidth="1" strokeDasharray="5 4"/>
+          <circle cx="195" cy="155" r="4" fill="#534AB7"/>
+          <circle cx="250" cy="120" r="4" fill="#534AB7"/>
+          <circle cx="300" cy="138" r="3" fill="#534AB7"/>
+          <circle cx="355" cy="95" r="5" fill="#534AB7"/>
+          <circle cx="405" cy="115" r="3.5" fill="#534AB7"/>
+          <circle cx="460" cy="72" r="4.5" fill="#534AB7"/>
+          <circle cx="505" cy="95" r="3" fill="#534AB7"/>
+          <line x1="195" y1="155" x2="250" y2="120" stroke="#7F77DD" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6"/>
+          <line x1="250" y1="120" x2="300" y2="138" stroke="#7F77DD" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6"/>
+          <line x1="300" y1="138" x2="355" y2="95" stroke="#7F77DD" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6"/>
+          <line x1="355" y1="95" x2="405" y2="115" stroke="#7F77DD" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6"/>
+          <line x1="405" y1="115" x2="460" y2="72" stroke="#7F77DD" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6"/>
+          <line x1="460" y1="72" x2="505" y2="95" stroke="#7F77DD" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6"/>
+          <circle cx="165" cy="65" r="2" fill="#AFA9EC" opacity="0.5"/>
+          <circle cx="220" cy="45" r="1.5" fill="#AFA9EC" opacity="0.4"/>
+          <circle cx="430" cy="50" r="2" fill="#AFA9EC" opacity="0.5"/>
+          <circle cx="530" cy="140" r="1.5" fill="#AFA9EC" opacity="0.4"/>
+          <circle cx="175" cy="105" r="1.5" fill="#AFA9EC" opacity="0.35"/>
+          <path d="M355 95 Q355 70 355 58" stroke="#7F77DD" strokeWidth="1.5" strokeDasharray="3 4" opacity="0.4" strokeLinecap="round"/>
+          <path d="M348 62 L355 58 L362 62" stroke="#7F77DD" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
         </svg>
         <p className="font-medium text-slate-500 dark:text-slate-400 mb-1">No NAV data available</p>
         <p className="text-sm">This fund hasn't been mapped or synced yet. Go to Admin → NAV Mapping to set it up.</p>
