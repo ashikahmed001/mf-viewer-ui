@@ -4230,12 +4230,58 @@ function StockIntelligence({ allFunds }) {
 
       {/* ── Empty state ── */}
       {!selected && !loading && (
-        <div className="text-center py-20">
-          <div className="w-16 h-16 bg-violet-50 border border-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Brain className="w-8 h-8 text-violet-300" />
-          </div>
-          <p className="text-slate-600 dark:text-slate-400 font-medium">Stock Intelligence Report</p>
-          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Search for any stock to see its conviction score, fund adoption trend, holding breakdown, and sector peers.</p>
+        <div className="text-center py-16 flex flex-col items-center gap-3">
+          <svg width="240" height="211" viewBox="0 0 100 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Pedestal */}
+            <rect x="36" y="74" width="28" height="6" rx="2" fill="#D3D1C7" stroke="#B4B2A9" strokeWidth="1"/>
+            <rect x="30" y="80" width="40" height="6" rx="3" fill="#B4B2A9" stroke="#888780" strokeWidth="1"/>
+            {/* Crystal ball glow aura */}
+            <circle cx="50" cy="46" r="28" fill="#EEEDFE" opacity="0.4"/>
+            <circle cx="50" cy="46" r="24" fill="#CECBF6" opacity="0.35"/>
+            {/* Crystal ball sphere */}
+            <circle cx="50" cy="46" r="22" fill="white" stroke="#AFA9EC" strokeWidth="1.4"/>
+            <circle cx="50" cy="46" r="22" fill="url(#ballGrad)" opacity="0.7"/>
+            <defs>
+              <radialGradient id="ballGrad" cx="38%" cy="35%" r="65%">
+                <stop offset="0%" stopColor="#EEEDFE"/>
+                <stop offset="60%" stopColor="#CECBF6"/>
+                <stop offset="100%" stopColor="#7F77DD" stopOpacity="0.5"/>
+              </radialGradient>
+            </defs>
+            {/* Chart rising inside ball */}
+            <clipPath id="ballClip"><circle cx="50" cy="46" r="21"/></clipPath>
+            <g clipPath="url(#ballClip)">
+              <polyline points="30,60 35,54 40,56 45,46 50,50 55,40 60,44 65,34 70,38 74,60" stroke="#534AB7" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.85"/>
+              {/* Fill under chart */}
+              <path d="M30 60 L35 54 L40 56 L45 46 L50 50 L55 40 L60 44 L65 34 L70 38 L74 60 Z" fill="#7F77DD" opacity="0.12"/>
+              {/* Upward arrow at chart tip */}
+              <path d="M72 34 L76 28 L80 34" stroke="#534AB7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.8"/>
+              <line x1="76" y1="28" x2="76" y2="42" stroke="#534AB7" strokeWidth="1.5" strokeLinecap="round" opacity="0.8"/>
+              {/* Conviction score badge */}
+              <rect x="30" y="28" width="22" height="12" rx="3" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="0.8" opacity="0.9"/>
+              <text x="41" y="35" textAnchor="middle" fontSize="5" fill="#085041" fontWeight="bold" opacity="0.9">SCORE: 87</text>
+              {/* Floating sparkles inside ball */}
+              <circle cx="64" cy="54" r="1.5" fill="#FAC775" opacity="0.8"/>
+              <circle cx="36" cy="38" r="1.2" fill="#FAC775" opacity="0.7"/>
+            </g>
+            {/* Ball shine highlight */}
+            <ellipse cx="42" cy="34" rx="7" ry="4.5" fill="white" opacity="0.45" transform="rotate(-25,42,34)"/>
+            <circle cx="38" cy="31" r="2.5" fill="white" opacity="0.35"/>
+            {/* Stars / sparkles around ball */}
+            <circle cx="10" cy="14" r="2" fill="#FAC775"/>
+            <circle cx="8" cy="22" r="1.2" fill="#CECBF6"/>
+            <circle cx="90" cy="10" r="1.8" fill="#FAC775"/>
+            <circle cx="92" cy="22" r="1.2" fill="#CECBF6"/>
+            <circle cx="16" cy="56" r="1.5" fill="#AFA9EC"/>
+            <circle cx="86" cy="60" r="1.5" fill="#AFA9EC"/>
+            {/* Mystical orbit rings around ball */}
+            <ellipse cx="50" cy="68" rx="26" ry="5" fill="none" stroke="#AFA9EC" strokeWidth="0.8" strokeDasharray="3 2" opacity="0.5"/>
+            <ellipse cx="50" cy="46" rx="30" ry="8" fill="none" stroke="#AFA9EC" strokeWidth="0.6" strokeDasharray="2 2" opacity="0.3" transform="rotate(-30,50,46)"/>
+            {/* Orbiting dot */}
+            <circle cx="78" cy="46" r="2.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
+          </svg>
+          <p className="font-semibold text-slate-600 dark:text-slate-300 text-base">Stock Intelligence Report</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">Search for any stock to see its conviction score, fund adoption trend, holding breakdown, and sector peers.</p>
         </div>
       )}
 
