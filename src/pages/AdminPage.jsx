@@ -13,6 +13,8 @@ import {
   adminGetCacheStats, adminClearCache, adminSetCacheEnabled,
   getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping, syncLatestNav, adminGetCounts, adminFixNameBatch,
   adminGetStocksStatus, adminTriggerStocksSync,
+  adminGetBackupStatus, adminTriggerBackup,
+  adminListStocks,
 } from '../api/client.js';
 import api from '../api/client.js';
 import { AlertTriangle, CheckCircle, RefreshCw, ChevronDown, ChevronRight, Settings, X, Search, Activity, TrendingUp, Lock, Unlock } from 'lucide-react';
@@ -2475,8 +2477,345 @@ function CacheTab() {
   );
 }
 
+// ─── Tab: Backup ─────────────────────────────────────────────────────────────
+function BackupTab() {
+  const [status,   setStatus]   = useState(null);
+  const [result,   setResult]   = useState(null);
+  const [loading,  setLoading]  = useState(false);
+  const { toast, show, hide }   = useToast();
+
+  useEffect(() => {
+    adminGetBackupStatus()
+      .then(setStatus)
+      .catch(e => show(e.response?.data?.error || e.message, false));
+  }, []);
+
+  async function triggerBackup() {
+    setLoading(true);
+    setResult(null);
+    try {
+      const data = await adminTriggerBackup();
+      setResult(data);
+      setStatus({ last_triggered_at: data.triggered_at });
+      show('WAL checkpoint complete — Litestream is syncing to R2');
+    } catch (e) {
+      show(e.response?.data?.error || e.message, false);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {toast && <Toast {...toast} onClose={hide} />}
+
+      <SectionCard className="p-5">
+        <div className="flex items-start justify-between gap-4 mb-5">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">On-Demand Backup</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 max-w-sm">
+              Runs <code className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">PRAGMA wal_checkpoint(TRUNCATE)</code> — flushes all pending writes to the main DB file so Litestream syncs immediately to Cloudflare R2.
+            </p>
+          </div>
+          <button
+            onClick={triggerBackup}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors shrink-0"
+          >
+            {loading ? <Spinner /> : <RefreshCw className="w-4 h-4" />}
+            {loading ? 'Running…' : 'Backup Now'}
+          </button>
+        </div>
+
+        {status?.last_triggered_at && (
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-4">
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+            Last triggered: {new Date(status.last_triggered_at + ' UTC').toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+          </div>
+        )}
+
+        {result && (
+          <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 space-y-2">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Checkpoint Result</p>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'WAL Frames',    value: result.log,          desc: 'Total frames in WAL' },
+                { label: 'Checkpointed',  value: result.checkpointed, desc: 'Frames written to DB' },
+                { label: 'Busy',          value: result.busy === 0 ? 'No' : 'Yes', desc: result.busy === 0 ? 'No locks — clean sync' : 'WAL was locked' },
+              ].map(({ label, value, desc }) => (
+                <div key={label} className="text-center">
+                  <p className={`text-xl font-bold ${label === 'Busy' && result.busy ? 'text-amber-500' : 'text-slate-900 dark:text-slate-100'}`}>{value}</p>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">{label}</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </SectionCard>
+
+      <SectionCard className="p-5">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">How it works</h3>
+        <ol className="space-y-2.5 text-sm text-slate-600 dark:text-slate-300">
+          {[
+            'You click Backup Now → backend flushes the SQLite WAL file into the main .db file',
+            'Litestream detects the checkpoint and immediately uploads the updated segments to Cloudflare R2',
+            'To restore: run litestream restore with your R2 credentials to get a .db file',
+            'Open the restored .db file in DB Browser for SQLite',
+          ].map((step, i) => (
+            <li key={i} className="flex gap-3">
+              <span className="shrink-0 w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
+      </SectionCard>
+    </div>
+  );
+}
+
+// ─── Stocks: Browse sub-tab ───────────────────────────────────────────────────
+const CAP_FILTERS = [
+  { value: '',      label: 'All caps' },
+  { value: 'large', label: 'Large cap', color: 'text-emerald-600' },
+  { value: 'mid',   label: 'Mid cap',   color: 'text-blue-600' },
+  { value: 'small', label: 'Small cap', color: 'text-amber-600' },
+  { value: 'micro', label: 'Micro cap', color: 'text-slate-500 dark:text-slate-400' },
+];
+const INDEX_FILTERS = [
+  { value: '',         label: 'All' },
+  { value: 'nifty50',  label: 'NIFTY 50' },
+  { value: 'nifty500', label: 'NIFTY 500' },
+];
+const CAP_COLORS = {
+  large: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  mid:   'bg-blue-50 text-blue-700 border-blue-200',
+  small: 'bg-amber-50 text-amber-700 border-amber-200',
+  micro: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600',
+};
+
+function StocksBrowseTab() {
+  const [data,    setData]    = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [q,       setQ]       = useState('');
+  const [cap,     setCap]     = useState('');
+  const [index,   setIndex]   = useState('');
+  const [page,    setPage]    = useState(1);
+  const searchRef             = useRef(null);
+  const debounceRef           = useRef(null);
+
+  async function load(params) {
+    setLoading(true);
+    try {
+      const result = await adminListStocks(params);
+      setData(result);
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
+  }
+
+  // Debounced search
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setPage(1);
+      load({ q, cap, index, page: 1, limit: 50 });
+    }, 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [q, cap, index]);
+
+  useEffect(() => {
+    load({ q, cap, index, page, limit: 50 });
+  }, [page]);
+
+  function fmtCap(crores) {
+    if (crores == null) return '—';
+    if (crores >= 100000) return `₹${(crores / 100000).toFixed(1)}L Cr`;
+    if (crores >= 1000)   return `₹${(crores / 1000).toFixed(1)}K Cr`;
+    return `₹${crores.toLocaleString('en-IN')} Cr`;
+  }
+
+  const rows  = data?.rows  ?? [];
+  const total = data?.total ?? 0;
+  const pages = data?.pages ?? 1;
+
+  return (
+    <div className="space-y-3">
+      {/* Search + filters */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+          <input
+            ref={searchRef}
+            value={q}
+            onChange={e => setQ(e.target.value)}
+            placeholder="Search symbol or company name…"
+            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          />
+        </div>
+
+        {/* Market cap chips */}
+        <div className="flex gap-1 flex-wrap">
+          {CAP_FILTERS.map(f => (
+            <button
+              key={f.value}
+              onClick={() => { setCap(f.value); setPage(1); }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors whitespace-nowrap ${
+                cap === f.value
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Index chips */}
+        <div className="flex gap-1">
+          {INDEX_FILTERS.map(f => (
+            <button
+              key={f.value}
+              onClick={() => { setIndex(f.value); setPage(1); }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors whitespace-nowrap ${
+                index === f.value
+                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100'
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Results count */}
+      {data && (
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          {total.toLocaleString('en-IN')} stocks{q || cap || index ? ' matched' : ''}
+        </p>
+      )}
+
+      {/* Table */}
+      <SectionCard>
+        {loading && rows.length === 0 ? (
+          <div className="flex justify-center py-16"><Spinner /></div>
+        ) : rows.length === 0 ? (
+          <div className="text-center py-16 text-slate-400 dark:text-slate-500 text-sm">No stocks found</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-700">
+                  {['Symbol', 'Company', 'Sector', 'Market Cap', 'Category', 'Index'].map(h => (
+                    <th key={h} className="text-left text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 py-3 whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
+                {rows.map(row => (
+                  <tr key={row.isin} className={`hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${loading ? 'opacity-50' : ''}`}>
+                    <td className="px-4 py-3 font-mono text-xs font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">{row.symbol_nse}</td>
+                    <td className="px-4 py-3 max-w-[200px]">
+                      <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{row.name}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{row.isin}</p>
+                    </td>
+                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs max-w-[140px] truncate">{row.sector || '—'}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300 font-medium whitespace-nowrap">{fmtCap(row.market_cap)}</td>
+                    <td className="px-4 py-3">
+                      {row.market_cap_cat ? (
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border capitalize ${CAP_COLORS[row.market_cap_cat]}`}>
+                          {row.market_cap_cat}
+                        </span>
+                      ) : <span className="text-slate-300 dark:text-slate-600">—</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-1 flex-wrap">
+                        {row.is_nifty50  ? <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">N50</span>  : null}
+                        {row.is_nifty500 ? <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">N500</span> : null}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-700">
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              Page {page} of {pages}
+            </p>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300"
+              >
+                ← Prev
+              </button>
+              {/* Page number buttons — show up to 5 around current */}
+              {Array.from({ length: Math.min(5, pages) }, (_, i) => {
+                const p = Math.min(Math.max(page - 2 + i, 1), pages - Math.min(4, pages - 1) + i);
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${
+                      p === page
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => setPage(p => Math.min(pages, p + 1))}
+                disabled={page === pages}
+                className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
+      </SectionCard>
+    </div>
+  );
+}
+
 // ─── Tab: Stocks ─────────────────────────────────────────────────────────────
 function StocksTab() {
+  const [subTab, setSubTab] = useState('sync');
+
+  return (
+    <div className="space-y-4">
+      {/* Sub-tab bar */}
+      <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-xl w-fit">
+        {[{ id: 'sync', label: 'Sync' }, { id: 'browse', label: 'Browse' }].map(t => (
+          <button
+            key={t.id}
+            onClick={() => setSubTab(t.id)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              subTab === t.id
+                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {subTab === 'sync'   && <StocksSyncPanel />}
+      {subTab === 'browse' && <StocksBrowseTab />}
+    </div>
+  );
+}
+
+function StocksSyncPanel() {
   const [status,   setStatus]   = useState(null);
   const [syncing,  setSyncing]  = useState(false);
   const { toast, show, hide }   = useToast();
@@ -2654,6 +2993,7 @@ const TABS = [
   { id: 'continuity',  label: 'Data Continuity' },
   { id: 'nav',         label: 'NAV Mapping' },
   { id: 'stocks',      label: 'Stocks Universe' },
+  { id: 'backup',      label: 'Backup' },
   { id: 'features',    label: 'Feature Flags' },
   { id: 'cache',       label: 'Cache' },
 ];
@@ -2739,6 +3079,7 @@ export default function AdminPage() {
         {tab === 'continuity' && <ContinuityTab onCountChange={refreshCounts} />}
         {tab === 'nav'        && <NavTab onCountChange={refreshCounts} />}
         {tab === 'stocks'     && <StocksTab />}
+        {tab === 'backup'     && <BackupTab />}
         {tab === 'features'   && <FeatureFlagsTab />}
         {tab === 'cache'      && <CacheTab />}
       </div>

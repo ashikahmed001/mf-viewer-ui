@@ -254,5 +254,12 @@ export const adminGetCounts = () => api.get('/admin/counts').then(r => r.data);
 export const adminFixNameBatch = (fixes) => api.post('/admin/name-fix-batch', { fixes }, { timeout: 60000 }).then(r => r.data);
 
 // ─── Stocks Sync ──────────────────────────────────────────────────────────────
-export const adminGetStocksStatus  = () => api.get('/admin/stocks/status').then(r => r.data);
+export const adminGetStocksStatus   = () => api.get('/admin/stocks/status').then(r => r.data);
 export const adminTriggerStocksSync = () => api.post('/admin/stocks/sync').then(r => r.data);
+
+// ─── Backup ───────────────────────────────────────────────────────────────────
+export const adminGetBackupStatus  = () => api.get('/admin/backup/status').then(r => r.data);
+export const adminTriggerBackup    = () => api.post('/admin/backup/now').then(r => r.data);
+
+// ─── Stocks List ──────────────────────────────────────────────────────────────
+export const adminListStocks = (params) => api.get('/admin/stocks', { params }).then(r => r.data);
