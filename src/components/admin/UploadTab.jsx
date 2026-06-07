@@ -710,31 +710,73 @@ export default function UploadTab() {
 
   // ── Review phase ────────────────────────────────────────────────────────────
   if (phase === 'review' && drafts.length > 0) {
+    const draftLabel = (d, i) => d.fund_name?.trim() || `File ${i + 1}`;
     return (
       <div>
-        <div className="flex items-center justify-between mb-5">
-          <div>
+        <div className="flex items-start justify-between gap-4 mb-5">
+          <div className="min-w-0">
             <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">Review Extraction</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Verify and edit the extracted data before saving to the database.
             </p>
           </div>
+
+          {/* ≤3 drafts: compact tab pills  |  >3 drafts: prev/next + dropdown */}
           {drafts.length > 1 && (
-            <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-xl">
-              {drafts.map((d, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveDraft(i)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-                    activeDraft === i
-                      ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                  }`}
-                >
-                  {d.fund_name?.split(' ').slice(0, 2).join(' ') || `File ${i + 1}`}
-                </button>
-              ))}
-            </div>
+            drafts.length <= 3
+              ? (
+                <div className="flex shrink-0 gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-xl">
+                  {drafts.map((d, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveDraft(i)}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
+                        activeDraft === i
+                          ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      {draftLabel(d, i)}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex shrink-0 items-center gap-2">
+                  {/* Prev */}
+                  <button
+                    onClick={() => setActiveDraft(i => Math.max(0, i - 1))}
+                    disabled={activeDraft === 0}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </button>
+
+                  {/* Dropdown */}
+                  <select
+                    value={activeDraft}
+                    onChange={e => setActiveDraft(Number(e.target.value))}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer max-w-[200px] truncate"
+                  >
+                    {drafts.map((d, i) => (
+                      <option key={i} value={i}>{i + 1}. {draftLabel(d, i)}</option>
+                    ))}
+                  </select>
+
+                  {/* Next */}
+                  <button
+                    onClick={() => setActiveDraft(i => Math.min(drafts.length - 1, i + 1))}
+                    disabled={activeDraft === drafts.length - 1}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </button>
+
+                  {/* Counter badge */}
+                  <span className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                    {activeDraft + 1} / {drafts.length}
+                  </span>
+                </div>
+              )
           )}
         </div>
 
