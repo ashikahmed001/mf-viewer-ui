@@ -212,52 +212,56 @@ function IsinRemapTab({ onCountChange }) {
       ) : issues.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-10 text-slate-400 dark:text-slate-500">
           <svg width="200" height="176" viewBox="0 0 100 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <style>{`
+                @keyframes adm-spin1 { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+                @keyframes adm-spin2 { from{transform:rotate(0deg)} to{transform:rotate(-360deg)} }
+                @keyframes adm-spin3 { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+                .adm-sf1 { transform-origin:22px 44px; animation:adm-spin1 8s linear infinite; }
+                .adm-sf2 { transform-origin:50px 40px; animation:adm-spin2 12s linear infinite; }
+                .adm-sf3 { transform-origin:78px 44px; animation:adm-spin3 10s linear infinite; }
+              `}</style>
+            </defs>
             <circle cx="50" cy="44" r="38" fill="#F0F4FF" opacity="0.4"/>
-            {/* Snowflake 1 — purple, diamond tips */}
-            <g transform="translate(22,44)">
-              <line x1="0" y1="-18" x2="0" y2="18" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="-15.6" y1="-9" x2="15.6" y2="9" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="15.6" y1="-9" x2="-15.6" y2="9" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M0,-22 L3,-18 L0,-14 L-3,-18 Z" fill="#7F77DD"/>
-              <path d="M0,14 L3,18 L0,22 L-3,18 Z" fill="#7F77DD"/>
-              <path d="M19,11 L15.6,9 L12,11 L15.6,13 Z" fill="#7F77DD"/>
-              <path d="M-19,11 L-15.6,9 L-12,11 L-15.6,13 Z" fill="#7F77DD"/>
-              <line x1="-4" y1="-12" x2="-8" y2="-8" stroke="#7F77DD" strokeWidth="1.2"/>
-              <line x1="4" y1="-12" x2="8" y2="-8" stroke="#7F77DD" strokeWidth="1.2"/>
-              <line x1="4" y1="12" x2="8" y2="8" stroke="#7F77DD" strokeWidth="1.2"/>
-              <line x1="-4" y1="12" x2="-8" y2="8" stroke="#7F77DD" strokeWidth="1.2"/>
-              <circle cx="0" cy="0" r="5" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.2"/>
+            {/* Snowflake 1 — purple, spinning */}
+            <g className="adm-sf1">
+              <line x1="22" y1="26" x2="22" y2="62" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="6.4" y1="35" x2="37.6" y2="53" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="37.6" y1="35" x2="6.4" y2="53" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M22,22 L25,26 L22,30 L19,26 Z" fill="#7F77DD"/>
+              <path d="M22,58 L25,62 L22,66 L19,62 Z" fill="#7F77DD"/>
+              <path d="M41,55 L37.6,53 L34,55 L37.6,57 Z" fill="#7F77DD"/>
+              <path d="M3,55 L6.4,53 L3,51 L6.4,57 Z" fill="#7F77DD"/>
+              <line x1="18" y1="32" x2="14" y2="36" stroke="#7F77DD" strokeWidth="1.2"/>
+              <line x1="26" y1="32" x2="30" y2="36" stroke="#7F77DD" strokeWidth="1.2"/>
+              <line x1="26" y1="56" x2="30" y2="52" stroke="#7F77DD" strokeWidth="1.2"/>
+              <line x1="18" y1="56" x2="14" y2="52" stroke="#7F77DD" strokeWidth="1.2"/>
+              <circle cx="22" cy="44" r="5" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.2"/>
             </g>
-            {/* Snowflake 2 — green, circle tips, checkmark center */}
-            <g transform="translate(50,40)">
-              <line x1="0" y1="-20" x2="0" y2="20" stroke="#1D9E75" strokeWidth="2.2" strokeLinecap="round"/>
-              <line x1="-17.3" y1="-10" x2="17.3" y2="10" stroke="#1D9E75" strokeWidth="2.2" strokeLinecap="round"/>
-              <line x1="17.3" y1="-10" x2="-17.3" y2="10" stroke="#1D9E75" strokeWidth="2.2" strokeLinecap="round"/>
-              <circle cx="0" cy="-22" r="3" fill="#1D9E75"/>
-              <circle cx="0" cy="22" r="3" fill="#1D9E75"/>
-              <circle cx="19" cy="11" r="3" fill="#1D9E75"/>
-              <circle cx="-19" cy="11" r="3" fill="#1D9E75"/>
-              <circle cx="19" cy="-11" r="3" fill="#1D9E75"/>
-              <circle cx="-19" cy="-11" r="3" fill="#1D9E75"/>
-              <line x1="-5" y1="-14" x2="-9" y2="-10" stroke="#1D9E75" strokeWidth="1.2"/>
-              <line x1="5" y1="-14" x2="9" y2="-10" stroke="#1D9E75" strokeWidth="1.2"/>
-              <line x1="-5" y1="14" x2="-9" y2="10" stroke="#1D9E75" strokeWidth="1.2"/>
-              <line x1="5" y1="14" x2="9" y2="10" stroke="#1D9E75" strokeWidth="1.2"/>
-              <circle cx="0" cy="0" r="6" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1.5"/>
-              <path d="M-2.5 0 L0 2.5 L4 -3" stroke="#1D9E75" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            {/* Snowflake 2 — green, counter-spinning */}
+            <g className="adm-sf2">
+              <line x1="50" y1="20" x2="50" y2="60" stroke="#1D9E75" strokeWidth="2.2" strokeLinecap="round"/>
+              <line x1="32.7" y1="30" x2="67.3" y2="50" stroke="#1D9E75" strokeWidth="2.2" strokeLinecap="round"/>
+              <line x1="67.3" y1="30" x2="32.7" y2="50" stroke="#1D9E75" strokeWidth="2.2" strokeLinecap="round"/>
+              <circle cx="50" cy="18" r="3" fill="#1D9E75"/>
+              <circle cx="50" cy="62" r="3" fill="#1D9E75"/>
+              <circle cx="69" cy="51" r="3" fill="#1D9E75"/>
+              <circle cx="31" cy="51" r="3" fill="#1D9E75"/>
+              <circle cx="69" cy="29" r="3" fill="#1D9E75"/>
+              <circle cx="31" cy="29" r="3" fill="#1D9E75"/>
+              <circle cx="50" cy="40" r="6" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1.5"/>
+              <path d="M47.5 40 L50 42.5 L54 37" stroke="#1D9E75" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             </g>
-            {/* Snowflake 3 — amber, square tips */}
-            <g transform="translate(78,44)">
-              <line x1="0" y1="-16" x2="0" y2="16" stroke="#BA7517" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="-13.9" y1="-8" x2="13.9" y2="8" stroke="#BA7517" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="13.9" y1="-8" x2="-13.9" y2="8" stroke="#BA7517" strokeWidth="2" strokeLinecap="round"/>
-              <rect x="-2.5" y="-20" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
-              <rect x="-2.5" y="15" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
-              <rect x="12" y="9" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
-              <rect x="-17" y="9" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
-              <line x1="-3" y1="-11" x2="-7" y2="-7" stroke="#BA7517" strokeWidth="1.2"/>
-              <line x1="3" y1="-11" x2="7" y2="-7" stroke="#BA7517" strokeWidth="1.2"/>
-              <circle cx="0" cy="0" r="5" fill="#FFF3CE" stroke="#BA7517" strokeWidth="1.2"/>
+            {/* Snowflake 3 — amber, spinning */}
+            <g className="adm-sf3">
+              <line x1="78" y1="28" x2="78" y2="60" stroke="#BA7517" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="64.1" y1="36" x2="91.9" y2="52" stroke="#BA7517" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="91.9" y1="36" x2="64.1" y2="52" stroke="#BA7517" strokeWidth="2" strokeLinecap="round"/>
+              <rect x="75.5" y="24" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
+              <rect x="75.5" y="59" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
+              <rect x="90" y="53" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
+              <rect x="63" y="53" width="5" height="5" rx="0.5" fill="#FAC775" stroke="#BA7517" strokeWidth="0.8"/>
+              <circle cx="78" cy="44" r="5" fill="#FFF3CE" stroke="#BA7517" strokeWidth="1.2"/>
             </g>
             <ellipse cx="22" cy="68" rx="14" ry="4" fill="#CECBF6" opacity="0.3"/>
             <ellipse cx="50" cy="68" rx="14" ry="4" fill="#A8EDDA" opacity="0.3"/>
@@ -487,25 +491,36 @@ function NameNormTab({ onCountChange }) {
       ) : issues.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-10 text-slate-400 dark:text-slate-500">
           <svg width="180" height="159" viewBox="0 0 100 88" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Back card (amber) */}
-            <rect x="32" y="22" width="42" height="52" rx="5" fill="#FFF3CE" stroke="#BA7517" strokeWidth="1.2" transform="rotate(12,53,48)"/>
-            {/* Mid card (purple) */}
-            <rect x="30" y="18" width="42" height="52" rx="5" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.2" transform="rotate(-8,51,44)"/>
-            {/* Front card (green, upright) */}
-            <rect x="28" y="14" width="44" height="54" rx="5" fill="white" stroke="#1D9E75" strokeWidth="1.6"/>
-            {/* Card content — check + lines */}
-            <rect x="34" y="22" width="16" height="16" rx="3" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1"/>
-            <path d="M37 30 L40 33 L46 25" stroke="#1D9E75" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            <line x1="34" y1="44" x2="60" y2="44" stroke="#D3D1C7" strokeWidth="2.5" strokeLinecap="round"/>
-            <line x1="34" y1="51" x2="56" y2="51" stroke="#D3D1C7" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="34" y1="57" x2="58" y2="57" stroke="#D3D1C7" strokeWidth="2" strokeLinecap="round"/>
-            {/* Unique colour dots on each card */}
-            <circle cx="60" cy="22" r="3" fill="#1D9E75"/>
-            <circle cx="66" cy="18" r="3" fill="#7F77DD" opacity="0.8"/>
-            <circle cx="70" cy="26" r="3" fill="#FAC775" opacity="0.9"/>
-            {/* Shadow */}
+            <defs>
+              <style>{`
+                @keyframes adm-card-back { 0%,100%{transform:rotate(12deg) translateY(0px)} 50%{transform:rotate(14deg) translateY(-2px)} }
+                @keyframes adm-card-mid  { 0%,100%{transform:rotate(-8deg) translateY(0px)} 50%{transform:rotate(-10deg) translateY(-3px)} }
+                @keyframes adm-card-front{ 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-4px)} }
+                @keyframes adm-check     { 0%,100%{opacity:0.6} 50%{opacity:1} }
+                .adm-cb { transform-origin:53px 48px; animation:adm-card-back  3s ease-in-out infinite; }
+                .adm-cm { transform-origin:51px 44px; animation:adm-card-mid   3s ease-in-out infinite 0.15s; }
+                .adm-cf { transform-origin:50px 41px; animation:adm-card-front 3s ease-in-out infinite 0.3s; }
+                .adm-check { animation:adm-check 2s ease-in-out infinite; }
+              `}</style>
+            </defs>
+            <g className="adm-cb">
+              <rect x="32" y="22" width="42" height="52" rx="5" fill="#FFF3CE" stroke="#BA7517" strokeWidth="1.2"/>
+            </g>
+            <g className="adm-cm">
+              <rect x="30" y="18" width="42" height="52" rx="5" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.2"/>
+            </g>
+            <g className="adm-cf">
+              <rect x="28" y="14" width="44" height="54" rx="5" fill="white" stroke="#1D9E75" strokeWidth="1.6"/>
+              <rect x="34" y="22" width="16" height="16" rx="3" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="1"/>
+              <path className="adm-check" d="M37 30 L40 33 L46 25" stroke="#1D9E75" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <line x1="34" y1="44" x2="60" y2="44" stroke="#D3D1C7" strokeWidth="2.5" strokeLinecap="round"/>
+              <line x1="34" y1="51" x2="56" y2="51" stroke="#D3D1C7" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="34" y1="57" x2="58" y2="57" stroke="#D3D1C7" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="60" cy="22" r="3" fill="#1D9E75"/>
+              <circle cx="66" cy="18" r="3" fill="#7F77DD" opacity="0.8"/>
+              <circle cx="70" cy="26" r="3" fill="#FAC775" opacity="0.9"/>
+            </g>
             <ellipse cx="50" cy="72" rx="26" ry="5" fill="#D3D1C7" opacity="0.3"/>
-            {/* Sparkles */}
             <circle cx="10" cy="12" r="2.2" fill="#FAC775"/>
             <circle cx="90" cy="10" r="1.8" fill="#CECBF6"/>
             <circle cx="8" cy="56" r="1.5" fill="#5DCAA5"/>
@@ -647,36 +662,56 @@ function ScannerTab() {
       {!scanned && !loading && (
         <div className="flex flex-col items-center gap-3 py-10 text-slate-400 dark:text-slate-500">
           <svg width="160" height="140" viewBox="0 0 100 88" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Stars */}
-            <circle cx="6" cy="8" r="1.2" fill="#D3D1C7"/><circle cx="94" cy="6" r="1" fill="#FAC775"/>
-            <circle cx="14" cy="18" r="0.8" fill="#B4B2A9"/><circle cx="88" cy="20" r="1.3" fill="#D3D1C7"/>
-            <circle cx="4" cy="44" r="1" fill="#D3D1C7"/><circle cx="96" cy="40" r="0.8" fill="#B4B2A9"/>
-            {/* UFO glow */}
-            <ellipse cx="50" cy="34" rx="28" ry="6" fill="#CECBF6" opacity="0.3"/>
-            {/* UFO dome */}
-            <path d="M38 28 Q50 14 62 28 Z" fill="#E6F1FB" stroke="#378ADD" strokeWidth="1.2"/>
-            {/* Dome windows */}
-            <circle cx="44" cy="24" r="2.5" fill="#B5D4F4" stroke="#378ADD" strokeWidth="0.8"/>
-            <circle cx="50" cy="21" r="2.5" fill="#B5D4F4" stroke="#378ADD" strokeWidth="0.8"/>
-            <circle cx="56" cy="24" r="2.5" fill="#B5D4F4" stroke="#378ADD" strokeWidth="0.8"/>
-            {/* UFO disc */}
-            <ellipse cx="50" cy="32" rx="28" ry="8" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.4"/>
-            <ellipse cx="50" cy="31" rx="20" ry="5" fill="#CECBF6" opacity="0.5"/>
-            {/* Rim lights */}
-            <circle cx="28" cy="32" r="2" fill="#FAC775"/>
-            <circle cx="36" cy="36" r="2" fill="#5DCAA5"/>
-            <circle cx="50" cy="38" r="2" fill="#FAC775"/>
-            <circle cx="64" cy="36" r="2" fill="#5DCAA5"/>
-            <circle cx="72" cy="32" r="2" fill="#FAC775"/>
-            {/* Tractor beam */}
-            <path d="M38 38 L24 72 L76 72 L62 38 Z" fill="#FAC775" opacity="0.12"/>
-            <line x1="38" y1="38" x2="24" y2="72" stroke="#FAC775" strokeWidth="0.8" strokeDasharray="3 2"/>
-            <line x1="62" y1="38" x2="76" y2="72" stroke="#FAC775" strokeWidth="0.8" strokeDasharray="3 2"/>
-            {/* Candidate dots floating up in beam */}
-            <circle cx="50" cy="60" r="4" fill="#7F77DD" opacity="0.5"/>
-            <circle cx="44" cy="50" r="3" fill="#AFA9EC" opacity="0.4"/>
-            <circle cx="56" cy="55" r="3.5" fill="#7F77DD" opacity="0.3"/>
-            {/* Planet surface */}
+            <defs>
+              <style>{`
+                @keyframes adm-ufo-hover { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-5px)} }
+                @keyframes adm-beam      { 0%,100%{opacity:0.08} 50%{opacity:0.22} }
+                @keyframes adm-rim1      { 0%,33%{opacity:1} 34%,100%{opacity:0.2} }
+                @keyframes adm-rim2      { 0%,33%{opacity:0.2} 34%,66%{opacity:1} 67%,100%{opacity:0.2} }
+                @keyframes adm-rim3      { 0%,66%{opacity:0.2} 67%,100%{opacity:1} }
+                @keyframes adm-dot1      { 0%{transform:translateY(0px);opacity:0.5} 100%{transform:translateY(-18px);opacity:0} }
+                @keyframes adm-dot2      { 0%{transform:translateY(0px);opacity:0.4} 100%{transform:translateY(-16px);opacity:0} }
+                @keyframes adm-dot3      { 0%{transform:translateY(0px);opacity:0.3} 100%{transform:translateY(-14px);opacity:0} }
+                .adm-ufo   { transform-origin:50px 32px; animation:adm-ufo-hover 3s ease-in-out infinite; }
+                .adm-beam  { animation:adm-beam 2s ease-in-out infinite; }
+                .adm-rl1   { animation:adm-rim1 1.5s linear infinite; }
+                .adm-rl2   { animation:adm-rim2 1.5s linear infinite; }
+                .adm-rl3   { animation:adm-rim3 1.5s linear infinite; }
+                .adm-d1    { animation:adm-dot1 2s ease-in infinite 0s; }
+                .adm-d2    { animation:adm-dot2 2s ease-in infinite 0.6s; }
+                .adm-d3    { animation:adm-dot3 2s ease-in infinite 1.2s; }
+              `}</style>
+            </defs>
+            <circle cx="6" cy="8" r="1.2" fill="#D3D1C7"/>
+            <circle cx="94" cy="6" r="1" fill="#FAC775"/>
+            <circle cx="14" cy="18" r="0.8" fill="#B4B2A9"/>
+            <circle cx="88" cy="20" r="1.3" fill="#D3D1C7"/>
+            <circle cx="4" cy="44" r="1" fill="#D3D1C7"/>
+            <circle cx="96" cy="40" r="0.8" fill="#B4B2A9"/>
+            {/* Tractor beam — behind UFO, pulses */}
+            <path className="adm-beam" d="M38 38 L24 72 L76 72 L62 38 Z" fill="#FAC775"/>
+            <line x1="38" y1="38" x2="24" y2="72" stroke="#FAC775" strokeWidth="0.8" strokeDasharray="3 2" opacity="0.4"/>
+            <line x1="62" y1="38" x2="76" y2="72" stroke="#FAC775" strokeWidth="0.8" strokeDasharray="3 2" opacity="0.4"/>
+            {/* Floating candidate dots */}
+            <circle className="adm-d1" cx="50" cy="62" r="4" fill="#7F77DD"/>
+            <circle className="adm-d2" cx="44" cy="56" r="3" fill="#AFA9EC"/>
+            <circle className="adm-d3" cx="57" cy="59" r="3.5" fill="#7F77DD"/>
+            {/* UFO — hovers */}
+            <g className="adm-ufo">
+              <ellipse cx="50" cy="34" rx="28" ry="6" fill="#CECBF6" opacity="0.3"/>
+              <path d="M38 28 Q50 14 62 28 Z" fill="#E6F1FB" stroke="#378ADD" strokeWidth="1.2"/>
+              <circle cx="44" cy="24" r="2.5" fill="#B5D4F4" stroke="#378ADD" strokeWidth="0.8"/>
+              <circle cx="50" cy="21" r="2.5" fill="#B5D4F4" stroke="#378ADD" strokeWidth="0.8"/>
+              <circle cx="56" cy="24" r="2.5" fill="#B5D4F4" stroke="#378ADD" strokeWidth="0.8"/>
+              <ellipse cx="50" cy="32" rx="28" ry="8" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.4"/>
+              <ellipse cx="50" cy="31" rx="20" ry="5" fill="#CECBF6" opacity="0.5"/>
+              {/* Rim lights — cycling */}
+              <circle className="adm-rl1" cx="28" cy="32" r="2" fill="#FAC775"/>
+              <circle className="adm-rl2" cx="36" cy="36" r="2" fill="#5DCAA5"/>
+              <circle className="adm-rl3" cx="50" cy="38" r="2" fill="#FAC775"/>
+              <circle className="adm-rl1" cx="64" cy="36" r="2" fill="#5DCAA5"/>
+              <circle className="adm-rl2" cx="72" cy="32" r="2" fill="#FAC775"/>
+            </g>
             <path d="M16 76 Q50 68 84 76" stroke="#5DCAA5" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
             <path d="M10 82 Q50 74 90 82" stroke="#9FE1CB" strokeWidth="1" fill="none" strokeLinecap="round"/>
           </svg>
