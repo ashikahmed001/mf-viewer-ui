@@ -57,46 +57,73 @@ function DropZone({ onFiles, disabled }) {
         onChange={e => handle(e.target.files)}
         disabled={disabled}
       />
-      {/* Portal drop doodle */}
+      {/* Portal drop doodle — animated */}
       <svg width="180" height="144" viewBox="0 0 110 90" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-1">
-        {/* Portal rings */}
-        <ellipse cx="55" cy="72" rx="36" ry="10" className="fill-indigo-100 dark:fill-indigo-900/50 stroke-indigo-400 dark:stroke-indigo-500" strokeWidth="1.4" />
-        <ellipse cx="55" cy="72" rx="26" ry="7" className="fill-indigo-200 dark:fill-indigo-800/60 stroke-indigo-300 dark:stroke-indigo-600" strokeWidth="1" />
-        <ellipse cx="55" cy="72" rx="16" ry="4.5" className="fill-indigo-300 dark:fill-indigo-700 stroke-indigo-400 dark:stroke-indigo-500" strokeWidth="0.8" />
-        <ellipse cx="55" cy="72" rx="8" ry="2.5" className="fill-indigo-500 dark:fill-indigo-400" />
+        <defs>
+          <style>{`
+            @keyframes up-fall  { 0%,100%{transform:translateY(0px)}            50%{transform:translateY(5px)} }
+            @keyframes up-ring  { 0%,100%{transform:scale(1)}                   50%{transform:scale(1.07)} }
+            @keyframes up-spark { 0%,100%{opacity:0.35;transform:scale(1)}      50%{opacity:1;transform:scale(1.6)} }
+            @keyframes up-speed { 0%,100%{opacity:0.15}                         50%{opacity:0.85} }
+            @keyframes up-orb   { 0%,100%{opacity:0.35;transform:scale(1)}      50%{opacity:1;transform:scale(1.35)} }
+            .up-file { transform-origin:55px 40px; animation:up-fall  2.6s ease-in-out infinite; }
+            .up-r1   { transform-origin:55px 72px; animation:up-ring  2s   ease-in-out infinite; }
+            .up-r2   { transform-origin:55px 72px; animation:up-ring  2s   ease-in-out infinite 0.18s; }
+            .up-r3   { transform-origin:55px 72px; animation:up-ring  2s   ease-in-out infinite 0.36s; }
+            .up-sp1  { animation:up-speed 1.7s ease-in-out infinite; }
+            .up-sp2  { animation:up-speed 1.7s ease-in-out infinite 0.22s; }
+            .up-sp3  { animation:up-speed 1.7s ease-in-out infinite 0.44s; }
+            .up-ob1  { transform-origin:19px 72px;  animation:up-orb 2.6s ease-in-out infinite; }
+            .up-ob2  { transform-origin:91px 72px;  animation:up-orb 2.6s ease-in-out infinite 0.65s; }
+            .up-ob3  { transform-origin:36px 62px;  animation:up-orb 2.6s ease-in-out infinite 1.3s; }
+            .up-ob4  { transform-origin:74px 62px;  animation:up-orb 2.6s ease-in-out infinite 1.95s; }
+            .up-s1   { transform-origin:8px 16px;   animation:up-spark 2.4s ease-in-out infinite; }
+            .up-s2   { transform-origin:100px 22px; animation:up-spark 2.4s ease-in-out infinite 0.6s; }
+            .up-s3   { transform-origin:6px 54px;   animation:up-spark 2.4s ease-in-out infinite 1.2s; }
+            .up-s4   { transform-origin:104px 50px; animation:up-spark 2.4s ease-in-out infinite 1.8s; }
+          `}</style>
+        </defs>
 
-        {/* File falling into portal — slightly rotated */}
-        <g transform="rotate(-10, 55, 40)">
-          <rect x="38" y="8" width="34" height="44" rx="4.5" className="fill-white dark:fill-slate-800 stroke-indigo-400 dark:stroke-indigo-500" strokeWidth="1.4" />
-          {/* Excel tab */}
-          <rect x="38" y="8" width="11.5" height="11.5" rx="2.5" className="fill-emerald-500" />
-          <text x="44" y="18" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="white">X</text>
-          {/* Grid lines */}
-          <line x1="38" y1="26" x2="72" y2="26" className="stroke-slate-200 dark:stroke-slate-600" strokeWidth="0.8" />
-          <line x1="38" y1="34" x2="72" y2="34" className="stroke-slate-200 dark:stroke-slate-600" strokeWidth="0.8" />
-          <line x1="38" y1="42" x2="72" y2="42" className="stroke-slate-200 dark:stroke-slate-600" strokeWidth="0.8" />
-          {/* Data bars */}
-          <rect x="40" y="27" width="16" height="6" rx="2" className="fill-blue-400 dark:fill-blue-500" opacity="0.6" />
-          <rect x="40" y="35" width="10" height="6" rx="2" className="fill-emerald-400 dark:fill-emerald-500" opacity="0.6" />
-          <rect x="40" y="43" width="14" height="6" rx="2" className="fill-indigo-400 dark:fill-indigo-500" opacity="0.6" />
+        {/* Portal rings — ripple outward in sequence */}
+        <ellipse cx="55" cy="72" rx="36" ry="10"  className="up-r1 fill-indigo-100 dark:fill-indigo-900/50 stroke-indigo-400 dark:stroke-indigo-500" strokeWidth="1.4" />
+        <ellipse cx="55" cy="72" rx="26" ry="7"   className="up-r2 fill-indigo-200 dark:fill-indigo-800/60 stroke-indigo-300 dark:stroke-indigo-600" strokeWidth="1" />
+        <ellipse cx="55" cy="72" rx="16" ry="4.5" className="up-r3 fill-indigo-300 dark:fill-indigo-700 stroke-indigo-400 dark:stroke-indigo-500" strokeWidth="0.8" />
+        <ellipse cx="55" cy="72" rx="8"  ry="2.5" className="fill-indigo-500 dark:fill-indigo-400" />
+
+        {/* File bobbing into portal */}
+        <g className="up-file">
+          <g transform="rotate(-10, 55, 40)">
+            <rect x="38" y="8" width="34" height="44" rx="4.5" className="fill-white dark:fill-slate-800 stroke-indigo-400 dark:stroke-indigo-500" strokeWidth="1.4" />
+            {/* Excel tab */}
+            <rect x="38" y="8" width="11.5" height="11.5" rx="2.5" className="fill-emerald-500" />
+            <text x="44" y="18" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="white">X</text>
+            {/* Grid lines */}
+            <line x1="38" y1="26" x2="72" y2="26" className="stroke-slate-200 dark:stroke-slate-600" strokeWidth="0.8" />
+            <line x1="38" y1="34" x2="72" y2="34" className="stroke-slate-200 dark:stroke-slate-600" strokeWidth="0.8" />
+            <line x1="38" y1="42" x2="72" y2="42" className="stroke-slate-200 dark:stroke-slate-600" strokeWidth="0.8" />
+            {/* Data bars */}
+            <rect x="40" y="27" width="16" height="6" rx="2" className="fill-blue-400 dark:fill-blue-500" opacity="0.6" />
+            <rect x="40" y="35" width="10" height="6" rx="2" className="fill-emerald-400 dark:fill-emerald-500" opacity="0.6" />
+            <rect x="40" y="43" width="14" height="6" rx="2" className="fill-indigo-400 dark:fill-indigo-500" opacity="0.6" />
+          </g>
         </g>
 
-        {/* Speed lines */}
-        <line x1="20" y1="30" x2="30" y2="34" className="stroke-indigo-200 dark:stroke-indigo-700" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="16" y1="38" x2="28" y2="40" className="stroke-indigo-200 dark:stroke-indigo-700" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="88" y1="28" x2="78" y2="32" className="stroke-indigo-200 dark:stroke-indigo-700" strokeWidth="1.2" strokeLinecap="round" />
+        {/* Speed lines — flash staggered */}
+        <line x1="20" y1="30" x2="30" y2="34" className="up-sp1 stroke-indigo-200 dark:stroke-indigo-700" strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="16" y1="38" x2="28" y2="40" className="up-sp2 stroke-indigo-200 dark:stroke-indigo-700" strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="88" y1="28" x2="78" y2="32" className="up-sp3 stroke-indigo-200 dark:stroke-indigo-700" strokeWidth="1.2" strokeLinecap="round" />
 
-        {/* Orbiting dots around portal */}
-        <circle cx="19" cy="72" r="3" className="fill-indigo-100 dark:fill-indigo-900 stroke-indigo-300 dark:stroke-indigo-600" strokeWidth="1" />
-        <circle cx="91" cy="72" r="3" className="fill-indigo-100 dark:fill-indigo-900 stroke-indigo-300 dark:stroke-indigo-600" strokeWidth="1" />
-        <circle cx="36" cy="62" r="2" className="fill-indigo-200 dark:fill-indigo-700" />
-        <circle cx="74" cy="62" r="2" className="fill-indigo-200 dark:fill-indigo-700" />
+        {/* Orbiting dots — pulse staggered */}
+        <circle cx="19" cy="72" r="3" className="up-ob1 fill-indigo-100 dark:fill-indigo-900 stroke-indigo-300 dark:stroke-indigo-600" strokeWidth="1" />
+        <circle cx="91" cy="72" r="3" className="up-ob2 fill-indigo-100 dark:fill-indigo-900 stroke-indigo-300 dark:stroke-indigo-600" strokeWidth="1" />
+        <circle cx="36" cy="62" r="2" className="up-ob3 fill-indigo-200 dark:fill-indigo-700" />
+        <circle cx="74" cy="62" r="2" className="up-ob4 fill-indigo-200 dark:fill-indigo-700" />
 
-        {/* Sparkle dots */}
-        <circle cx="8" cy="16" r="1.8" className="fill-amber-300 dark:fill-amber-500" />
-        <circle cx="100" cy="22" r="1.5" className="fill-emerald-400 dark:fill-emerald-500" />
-        <circle cx="6" cy="54" r="1.2" className="fill-indigo-300 dark:fill-indigo-500" />
-        <circle cx="104" cy="50" r="1.5" className="fill-amber-300 dark:fill-amber-500" />
+        {/* Sparkle dots — twinkle staggered */}
+        <circle cx="8"   cy="16" r="1.8" className="up-s1 fill-amber-300 dark:fill-amber-500" />
+        <circle cx="100" cy="22" r="1.5" className="up-s2 fill-emerald-400 dark:fill-emerald-500" />
+        <circle cx="6"   cy="54" r="1.2" className="up-s3 fill-indigo-300 dark:fill-indigo-500" />
+        <circle cx="104" cy="50" r="1.5" className="up-s4 fill-amber-300 dark:fill-amber-500" />
       </svg>
 
       <div>
