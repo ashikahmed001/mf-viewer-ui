@@ -2235,34 +2235,47 @@ function StockTracker({ allFunds }) {
       {!selected && (
         <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-12 text-center flex flex-col items-center gap-3">
           <svg width="220" height="200" viewBox="0 0 100 91" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <style>{`
+                @keyframes cal-cell1 { 0%,100%{opacity:0.4} 50%{opacity:1} }
+                @keyframes cal-cell2 { 0%,100%{opacity:0.4} 50%{opacity:1} }
+                @keyframes cal-cell3 { 0%,100%{opacity:0.4} 50%{opacity:1} }
+                @keyframes cal-arrow { 0%,100%{transform:translateX(0)} 50%{transform:translateX(3px)} }
+                .cal-r1a { animation:cal-cell1 2.4s ease-in-out infinite 0s; }
+                .cal-r1b { animation:cal-cell1 2.4s ease-in-out infinite 0.3s; }
+                .cal-r2a { animation:cal-cell2 2.4s ease-in-out infinite 0.6s; }
+                .cal-r2b { animation:cal-cell2 2.4s ease-in-out infinite 0.9s; }
+                .cal-r3a { animation:cal-cell3 2.4s ease-in-out infinite 1.2s; }
+                .cal-r3b { animation:cal-cell3 2.4s ease-in-out infinite 1.5s; }
+                .cal-arrow { transform-origin:84px 80px; animation:cal-arrow 1.8s ease-in-out infinite; }
+              `}</style>
+            </defs>
             {/* Calendar card */}
             <rect x="8" y="12" width="84" height="70" rx="7" fill="white" stroke="#EEEDFE" strokeWidth="1.4"/>
-            {/* Header band */}
             <rect x="8" y="12" width="84" height="18" rx="7" fill="#EEEDFE"/>
             <rect x="8" y="22" width="84" height="8" fill="#EEEDFE"/>
-            {/* Binding tabs */}
             <rect x="24" y="8" width="8" height="10" rx="3" fill="#AFA9EC"/>
             <rect x="68" y="8" width="8" height="10" rx="3" fill="#AFA9EC"/>
-            {/* Day grid row 1 */}
+            {/* Row 1 */}
             <rect x="16" y="36" width="14" height="10" rx="3" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="0.8"/>
             <rect x="34" y="36" width="14" height="10" rx="3" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="0.8"/>
-            <rect x="52" y="36" width="14" height="10" rx="3" fill="#7F77DD" opacity="0.5"/>
-            <rect x="70" y="36" width="14" height="10" rx="3" fill="#534AB7"/>
-            {/* Day grid row 2 */}
+            <rect className="cal-r1a" x="52" y="36" width="14" height="10" rx="3" fill="#7F77DD"/>
+            <rect className="cal-r1b" x="70" y="36" width="14" height="10" rx="3" fill="#534AB7"/>
+            {/* Row 2 */}
             <rect x="16" y="50" width="14" height="10" rx="3" fill="#E1F5EE" stroke="#1D9E75" strokeWidth="0.8"/>
-            <rect x="34" y="50" width="14" height="10" rx="3" fill="#1D9E75" opacity="0.5"/>
-            <rect x="52" y="50" width="14" height="10" rx="3" fill="#1D9E75" opacity="0.8"/>
+            <rect className="cal-r2a" x="34" y="50" width="14" height="10" rx="3" fill="#1D9E75"/>
+            <rect className="cal-r2b" x="52" y="50" width="14" height="10" rx="3" fill="#1D9E75"/>
             <rect x="70" y="50" width="14" height="10" rx="3" fill="#1D9E75"/>
-            {/* Day grid row 3 */}
+            {/* Row 3 */}
             <rect x="16" y="64" width="14" height="10" rx="3" fill="#FFF3CE" stroke="#BA7517" strokeWidth="0.8"/>
             <rect x="34" y="64" width="14" height="10" rx="3" fill="#FFF3CE" stroke="#BA7517" strokeWidth="0.8"/>
-            <rect x="52" y="64" width="14" height="10" rx="3" fill="#BA7517" opacity="0.45"/>
-            <rect x="70" y="64" width="14" height="10" rx="3" fill="#FAC775" opacity="0.7"/>
-            {/* Arrow at bottom right */}
-            <path d="M82 76 L86 80 L82 84" stroke="#AFA9EC" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-            {/* Shadow */}
+            <rect className="cal-r3a" x="52" y="64" width="14" height="10" rx="3" fill="#BA7517"/>
+            <rect className="cal-r3b" x="70" y="64" width="14" height="10" rx="3" fill="#FAC775"/>
+            {/* Animated arrow */}
+            <g className="cal-arrow">
+              <path d="M82 76 L86 80 L82 84" stroke="#AFA9EC" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            </g>
             <ellipse cx="50" cy="88" rx="36" ry="4" fill="#D3D1C7" opacity="0.2"/>
-            {/* Sparkles */}
             <circle cx="4" cy="8" r="2" fill="#FAC775"/>
             <circle cx="96" cy="6" r="1.8" fill="#CECBF6"/>
           </svg>
@@ -4265,19 +4278,48 @@ function StockIntelligence({ allFunds }) {
       {!selected && !loading && (
         <div className="text-center py-16 flex flex-col items-center gap-3">
           <svg width="240" height="211" viewBox="0 0 100 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <style>{`
+                @keyframes chip-node { 0%,100%{opacity:0.5} 50%{opacity:1} }
+                @keyframes chip-pin  { 0%,100%{opacity:0.4;transform:scaleX(0.7)} 50%{opacity:1;transform:scaleX(1)} }
+                @keyframes chip-data { 0%{opacity:0;transform:translateY(4px)} 40%,60%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-4px)} }
+                .cn1 { animation:chip-node 1.8s ease-in-out infinite 0s; }
+                .cn2 { animation:chip-node 1.8s ease-in-out infinite 0.2s; }
+                .cn3 { animation:chip-node 1.8s ease-in-out infinite 0.4s; }
+                .cn4 { animation:chip-node 1.8s ease-in-out infinite 0.6s; }
+                .cn5 { animation:chip-node 1.8s ease-in-out infinite 0.8s; }
+                .cn6 { animation:chip-node 1.8s ease-in-out infinite 1.0s; }
+                .cn7 { animation:chip-node 1.8s ease-in-out infinite 1.2s; }
+                .cn8 { animation:chip-node 1.8s ease-in-out infinite 1.4s; }
+                .cn9 { animation:chip-node 1.8s ease-in-out infinite 1.6s; }
+                .cp1 { transform-origin:23px 28px; animation:chip-pin 2s ease-in-out infinite 0s; }
+                .cp2 { transform-origin:23px 34px; animation:chip-pin 2s ease-in-out infinite 0.25s; }
+                .cp3 { transform-origin:23px 42px; animation:chip-pin 2s ease-in-out infinite 0.5s; }
+                .cp4 { transform-origin:23px 50px; animation:chip-pin 2s ease-in-out infinite 0.75s; }
+                .cp5 { transform-origin:23px 58px; animation:chip-pin 2s ease-in-out infinite 1s; }
+                .cp6 { transform-origin:77px 28px; animation:chip-pin 2s ease-in-out infinite 0.1s; }
+                .cp7 { transform-origin:77px 34px; animation:chip-pin 2s ease-in-out infinite 0.35s; }
+                .cp8 { transform-origin:77px 42px; animation:chip-pin 2s ease-in-out infinite 0.6s; }
+                .cp9 { transform-origin:77px 50px; animation:chip-pin 2s ease-in-out infinite 0.85s; }
+                .cp10{ transform-origin:77px 58px; animation:chip-pin 2s ease-in-out infinite 1.1s; }
+                .cd1 { animation:chip-data 2.4s ease-in-out infinite 0s; }
+                .cd2 { animation:chip-data 2.4s ease-in-out infinite 0.6s; }
+                .cd3 { animation:chip-data 2.4s ease-in-out infinite 1.2s; }
+              `}</style>
+            </defs>
             {/* CPU chip body */}
             <rect x="28" y="22" width="44" height="40" rx="5" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.5"/>
             <rect x="33" y="27" width="34" height="30" rx="3" fill="#CECBF6" stroke="#AFA9EC" strokeWidth="1"/>
-            {/* Inner grid nodes */}
-            <circle cx="40" cy="34" r="2.8" fill="#534AB7"/>
-            <circle cx="50" cy="34" r="2.8" fill="#534AB7"/>
-            <circle cx="60" cy="34" r="2.8" fill="#534AB7"/>
-            <circle cx="40" cy="42" r="2.8" fill="#7F77DD"/>
-            <circle cx="50" cy="42" r="2.8" fill="#534AB7"/>
-            <circle cx="60" cy="42" r="2.8" fill="#7F77DD"/>
-            <circle cx="40" cy="50" r="2.8" fill="#534AB7"/>
-            <circle cx="50" cy="50" r="2.8" fill="#7F77DD"/>
-            <circle cx="60" cy="50" r="2.8" fill="#534AB7"/>
+            {/* Inner grid nodes — animated */}
+            <circle className="cn1" cx="40" cy="34" r="2.8" fill="#534AB7"/>
+            <circle className="cn2" cx="50" cy="34" r="2.8" fill="#534AB7"/>
+            <circle className="cn3" cx="60" cy="34" r="2.8" fill="#534AB7"/>
+            <circle className="cn4" cx="40" cy="42" r="2.8" fill="#7F77DD"/>
+            <circle className="cn5" cx="50" cy="42" r="2.8" fill="#534AB7"/>
+            <circle className="cn6" cx="60" cy="42" r="2.8" fill="#7F77DD"/>
+            <circle className="cn7" cx="40" cy="50" r="2.8" fill="#534AB7"/>
+            <circle className="cn8" cx="50" cy="50" r="2.8" fill="#7F77DD"/>
+            <circle className="cn9" cx="60" cy="50" r="2.8" fill="#534AB7"/>
             {/* Grid connections */}
             <line x1="40" y1="34" x2="50" y2="34" stroke="#AFA9EC" strokeWidth="0.9"/>
             <line x1="50" y1="34" x2="60" y2="34" stroke="#AFA9EC" strokeWidth="0.9"/>
@@ -4289,33 +4331,31 @@ function StockIntelligence({ allFunds }) {
             <line x1="40" y1="42" x2="40" y2="50" stroke="#AFA9EC" strokeWidth="0.9"/>
             <line x1="50" y1="42" x2="50" y2="50" stroke="#AFA9EC" strokeWidth="0.9"/>
             <line x1="60" y1="42" x2="60" y2="50" stroke="#AFA9EC" strokeWidth="0.9"/>
-            {/* Left pins */}
-            <line x1="18" y1="28" x2="28" y2="28" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="18" y1="34" x2="28" y2="34" stroke="#FAC775" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="18" y1="42" x2="28" y2="42" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="18" y1="50" x2="28" y2="50" stroke="#E05252" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="18" y1="58" x2="28" y2="58" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
-            {/* Right pins */}
-            <line x1="72" y1="28" x2="82" y2="28" stroke="#FAC775" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="72" y1="34" x2="82" y2="34" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="72" y1="42" x2="82" y2="42" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="72" y1="50" x2="82" y2="50" stroke="#E05252" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="72" y1="58" x2="82" y2="58" stroke="#AFA9EC" strokeWidth="2" strokeLinecap="round"/>
-            {/* Top data streams */}
+            {/* Left pins — animated */}
+            <line className="cp1" x1="18" y1="28" x2="28" y2="28" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
+            <line className="cp2" x1="18" y1="34" x2="28" y2="34" stroke="#FAC775" strokeWidth="2" strokeLinecap="round"/>
+            <line className="cp3" x1="18" y1="42" x2="28" y2="42" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round"/>
+            <line className="cp4" x1="18" y1="50" x2="28" y2="50" stroke="#E05252" strokeWidth="2" strokeLinecap="round"/>
+            <line className="cp5" x1="18" y1="58" x2="28" y2="58" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
+            {/* Right pins — animated */}
+            <line className="cp6" x1="72" y1="28" x2="82" y2="28" stroke="#FAC775" strokeWidth="2" strokeLinecap="round"/>
+            <line className="cp7" x1="72" y1="34" x2="82" y2="34" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
+            <line className="cp8" x1="72" y1="42" x2="82" y2="42" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round"/>
+            <line className="cp9" x1="72" y1="50" x2="82" y2="50" stroke="#E05252" strokeWidth="2" strokeLinecap="round"/>
+            <line className="cp10" x1="72" y1="58" x2="82" y2="58" stroke="#AFA9EC" strokeWidth="2" strokeLinecap="round"/>
+            {/* Top data streams — animated upward */}
             <line x1="38" y1="22" x2="38" y2="12" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
             <line x1="50" y1="22" x2="50" y2="8" stroke="#534AB7" strokeWidth="2" strokeLinecap="round"/>
             <line x1="62" y1="22" x2="62" y2="12" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
-            <circle cx="38" cy="10" r="3.2" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.2"/>
-            <circle cx="50" cy="6" r="4.2" fill="#EEEDFE" stroke="#534AB7" strokeWidth="1.5"/>
-            <circle cx="50" cy="6" r="2" fill="#534AB7"/>
-            <circle cx="62" cy="10" r="3.2" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.2"/>
+            <circle className="cd1" cx="38" cy="10" r="3.2" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.2"/>
+            <circle className="cd2" cx="50" cy="6" r="4.2" fill="#EEEDFE" stroke="#534AB7" strokeWidth="1.5"/>
+            <circle className="cd2" cx="50" cy="6" r="2" fill="#534AB7"/>
+            <circle className="cd3" cx="62" cy="10" r="3.2" fill="#EEEDFE" stroke="#7F77DD" strokeWidth="1.2"/>
             {/* Bottom data streams */}
             <line x1="38" y1="62" x2="38" y2="72" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
             <line x1="50" y1="62" x2="50" y2="76" stroke="#534AB7" strokeWidth="2" strokeLinecap="round"/>
             <line x1="62" y1="62" x2="62" y2="72" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round"/>
-            {/* Base shadow */}
             <ellipse cx="50" cy="82" rx="30" ry="4" fill="#D3D1C7" opacity="0.25"/>
-            {/* Sparkles */}
             <circle cx="8" cy="14" r="2.2" fill="#FAC775"/>
             <circle cx="92" cy="12" r="1.8" fill="#CECBF6"/>
             <circle cx="6" cy="60" r="1.5" fill="#5DCAA5"/>

@@ -913,28 +913,43 @@ export default function Compare() {
         <div className="text-center py-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl flex flex-col items-center gap-3">
           {/* Still growing doodle */}
           <svg width="160" height="140" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <style>{`
+                @keyframes sg-sway  { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+                @keyframes sg-ghost { 0%,100%{opacity:0.2} 50%{opacity:0.7} }
+                @keyframes sg-sun   { 0%,100%{transform:scale(1) rotate(0deg)} 50%{transform:scale(1.08) rotate(15deg)} }
+                @keyframes sg-qmark { 0%,100%{opacity:0.3} 50%{opacity:1} }
+                .sg-stem  { transform-origin:50px 54px; animation:sg-sway  3.5s ease-in-out infinite; }
+                .sg-ghost { animation:sg-ghost 2.5s ease-in-out infinite; }
+                .sg-sun   { transform-origin:82px 14px; animation:sg-sun   4s ease-in-out infinite; }
+                .sg-qmark { animation:sg-qmark 2.5s ease-in-out infinite; }
+              `}</style>
+            </defs>
             {/* Pot */}
             <path d="M34 60 L38 72 L62 72 L66 60 Z" fill="#BA7517" stroke="#854F0B" strokeWidth="1"/>
             <rect x="30" y="55" width="40" height="7" rx="3" fill="#EF9F27" stroke="#BA7517" strokeWidth="1"/>
-            {/* Soil */}
             <ellipse cx="50" cy="55" rx="18" ry="3" fill="#854F0B" opacity="0.35"/>
-            {/* Stem */}
-            <path d="M50 54 L50 28" stroke="#639922" strokeWidth="2.5" strokeLinecap="round"/>
-            {/* Real leaf (month 1) */}
-            <path d="M50 38 Q36 28 34 16 Q47 21 50 38Z" fill="#639922"/>
-            <path d="M50 38 Q36 28 34 16" stroke="#3B6D11" strokeWidth="0.8" fill="none"/>
-            {/* Ghost leaf (missing month 2) */}
-            <path d="M50 28 Q64 18 66 6 Q53 11 50 28Z" fill="none" stroke="#C0DD97" strokeWidth="1.2" strokeDasharray="2.5 2"/>
-            <text x="68" y="8" fontSize="9" fill="#C0DD97" fontStyle="italic">?</text>
-            {/* month 1 of 2 label */}
+            {/* Swaying stem + real leaf */}
+            <g className="sg-stem">
+              <path d="M50 54 L50 28" stroke="#639922" strokeWidth="2.5" strokeLinecap="round"/>
+              <path d="M50 38 Q36 28 34 16 Q47 21 50 38Z" fill="#639922"/>
+              <path d="M50 38 Q36 28 34 16" stroke="#3B6D11" strokeWidth="0.8" fill="none"/>
+            </g>
+            {/* Ghost leaf — pulsing */}
+            <g className="sg-ghost">
+              <path d="M50 28 Q64 18 66 6 Q53 11 50 28Z" fill="none" stroke="#C0DD97" strokeWidth="1.2" strokeDasharray="2.5 2"/>
+            </g>
+            <text className="sg-qmark" x="68" y="8" fontSize="9" fill="#C0DD97" fontStyle="italic">?</text>
             <text x="50" y="78" fontSize="6.5" textAnchor="middle" fill="#888780">month 1 of 2</text>
-            {/* Sun */}
-            <circle cx="82" cy="14" r="6.5" fill="#FAC775" opacity="0.75"/>
-            <line x1="82" y1="4" x2="82" y2="1" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
-            <line x1="92" y1="14" x2="95" y2="14" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
-            <line x1="89" y1="7" x2="92" y2="4" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
-            <line x1="75" y1="7" x2="72" y2="4" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
-            <line x1="72" y1="14" x2="69" y2="14" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
+            {/* Sun — slow pulse */}
+            <g className="sg-sun">
+              <circle cx="82" cy="14" r="6.5" fill="#FAC775" opacity="0.75"/>
+              <line x1="82" y1="4" x2="82" y2="1" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="92" y1="14" x2="95" y2="14" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="89" y1="7" x2="92" y2="4" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="75" y1="7" x2="72" y2="4" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="72" y1="14" x2="69" y2="14" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
+            </g>
           </svg>
           <p className="font-semibold text-slate-600 dark:text-slate-300 text-base">Need at least 2 months of data</p>
           <p className="text-sm text-slate-400 dark:text-slate-500">This fund has only {extractions.length} extraction{extractions.length !== 1 ? 's' : ''} available</p>
