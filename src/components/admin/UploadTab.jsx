@@ -536,17 +536,17 @@ function ExtractionReview({ draft, onDiscard, onSaved }) {
       <div className="h-20" />
 
       {/* Floating action bar */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-3 py-3 bg-slate-900 dark:bg-slate-950 border border-slate-700 dark:border-slate-600 rounded-2xl shadow-2xl">
         <button
           onClick={onDiscard}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium transition-colors"
         >
           <RotateCcw className="w-4 h-4" /> Discard
         </button>
         <button
           onClick={() => handleConfirm(false)}
           disabled={saving || !data.fund_name || !data.report_month || data.holdings.length === 0}
-          className="flex items-center gap-2 px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors shadow-sm"
+          className="flex items-center gap-2 px-6 py-2 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 text-slate-900 text-sm font-semibold transition-colors"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {saving ? 'Saving…' : `Confirm & Save (${data.holdings.length} holdings)`}
