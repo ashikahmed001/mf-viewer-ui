@@ -743,6 +743,33 @@ export default function Compare() {
                 color="green"
                 icon={<TrendingUp className="w-4 h-4" />}
                 empty="No new entries this month"
+                doodle={
+                  <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Pot */}
+                    <path d="M30 58 L33 70 L47 70 L50 58 Z" fill="#BA7517" stroke="#854F0B" strokeWidth="0.9"/>
+                    <rect x="27" y="53" width="26" height="6" rx="2.5" fill="#EF9F27" stroke="#BA7517" strokeWidth="0.9"/>
+                    {/* Soil */}
+                    <ellipse cx="40" cy="53" rx="12" ry="2.2" fill="#854F0B" opacity="0.3"/>
+                    {/* Stem */}
+                    <path d="M40 52 L40 30" stroke="#4A8B1A" strokeWidth="2.2" strokeLinecap="round"/>
+                    {/* Main leaf left */}
+                    <path d="M40 40 Q28 30 26 18 Q38 22 40 40Z" fill="#5FAF22"/>
+                    <path d="M40 40 Q28 30 26 18" stroke="#3B6D11" strokeWidth="0.7" fill="none"/>
+                    {/* Main leaf right */}
+                    <path d="M40 32 Q52 22 54 10 Q42 14 40 32Z" fill="#7DC444"/>
+                    <path d="M40 32 Q52 22 54 10" stroke="#3B6D11" strokeWidth="0.7" fill="none"/>
+                    {/* Small new bud on tip */}
+                    <circle cx="40" cy="29" r="3.5" fill="#A8EDDA" stroke="#1D9E75" strokeWidth="1"/>
+                    <circle cx="40" cy="29" r="1.5" fill="#1D9E75"/>
+                    {/* Sparkle dots */}
+                    <circle cx="14" cy="14" r="2.2" fill="#FAC775"/>
+                    <circle cx="66" cy="10" r="1.8" fill="#CECBF6"/>
+                    <circle cx="68" cy="44" r="1.5" fill="#A8EDDA"/>
+                    <circle cx="10" cy="46" r="1.4" fill="#CECBF6"/>
+                    {/* Shadow */}
+                    <ellipse cx="40" cy="74" rx="16" ry="2.5" fill="#D3D1C7" opacity="0.22"/>
+                  </svg>
+                }
               >
                 {result.newHoldings.map(h => (
                   <HoldingRow key={h.isin} h={h} variant="new" scale={scale} />
@@ -755,6 +782,32 @@ export default function Compare() {
                 color="red"
                 icon={<TrendingDown className="w-4 h-4" />}
                 empty="No exits this month"
+                doodle={
+                  <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="2" fill="#FAC775"/>
+                    <circle cx="70" cy="10" r="1.8" fill="#CECBF6"/>
+                    <circle cx="72" cy="42" r="1.6" fill="#F5A8A8"/>
+                    {/* Housing */}
+                    <rect x="28" y="12" width="24" height="48" rx="9" fill="#2A2A2A" stroke="#555" strokeWidth="1.3"/>
+                    {/* Red light — on, glowing */}
+                    <circle cx="40" cy="24" r="8" fill="#E05252"/>
+                    <circle cx="40" cy="24" r="10" fill="#E05252" opacity="0.18"/>
+                    <circle cx="40" cy="24" r="6" fill="#FF7070"/>
+                    <circle cx="37" cy="21" r="2.5" fill="white" opacity="0.28"/>
+                    {/* Amber light — off */}
+                    <circle cx="40" cy="40" r="8" fill="#555"/>
+                    <circle cx="40" cy="40" r="6" fill="#444"/>
+                    {/* Green light — off */}
+                    <circle cx="40" cy="56" r="8" fill="#555"/>
+                    <circle cx="40" cy="56" r="6" fill="#444"/>
+                    {/* Post */}
+                    <line x1="40" y1="60" x2="40" y2="70" stroke="#666" strokeWidth="3" strokeLinecap="round"/>
+                    {/* Base */}
+                    <rect x="30" y="68" width="20" height="5" rx="2.5" fill="#555"/>
+                    {/* Glow on ground */}
+                    <ellipse cx="40" cy="74" rx="14" ry="2.5" fill="#E05252" opacity="0.12"/>
+                  </svg>
+                }
               >
                 {result.exitedHoldings.map(h => (
                   <HoldingRow key={h.isin} h={h} variant="exited" scale={scale} />
@@ -768,6 +821,32 @@ export default function Compare() {
                 color="blue"
                 icon={<Minus className="w-4 h-4" />}
                 empty="No weight changes detected"
+                doodle={
+                  <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Stars */}
+                    <circle cx="10" cy="10" r="1.8" fill="#FAC775"/>
+                    <circle cx="70" cy="8" r="1.5" fill="#CECBF6"/>
+                    <circle cx="72" cy="50" r="1.4" fill="#AFA9EC"/>
+                    {/* Lock body */}
+                    <rect x="22" y="38" width="36" height="28" rx="5" fill="#E6F1FB" stroke="#378ADD" strokeWidth="1.5"/>
+                    {/* Lock shackle */}
+                    <path d="M30 38 L30 28 Q30 18 40 18 Q50 18 50 28 L50 38" fill="none" stroke="#378ADD" strokeWidth="2.5" strokeLinecap="round"/>
+                    {/* Inner shackle fill (closed feel) */}
+                    <path d="M33 38 L33 28 Q33 22 40 22 Q47 22 47 28 L47 38" fill="none" stroke="#B3D4F5" strokeWidth="1" strokeLinecap="round"/>
+                    {/* Keyhole */}
+                    <circle cx="40" cy="52" r="6" fill="#B3D4F5" stroke="#378ADD" strokeWidth="1"/>
+                    <rect x="38" y="52" width="4" height="7" rx="1.5" fill="#378ADD"/>
+                    {/* Weight scale ticks on sides (locked weight idea) */}
+                    <line x1="12" y1="52" x2="18" y2="52" stroke="#B3D4F5" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="12" y1="46" x2="17" y2="46" stroke="#B3D4F5" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+                    <line x1="12" y1="58" x2="17" y2="58" stroke="#B3D4F5" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+                    <line x1="62" y1="52" x2="68" y2="52" stroke="#B3D4F5" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="63" y1="46" x2="68" y2="46" stroke="#B3D4F5" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+                    <line x1="63" y1="58" x2="68" y2="58" stroke="#B3D4F5" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+                    {/* Shadow */}
+                    <ellipse cx="40" cy="70" rx="20" ry="3" fill="#D3D1C7" opacity="0.22"/>
+                  </svg>
+                }
               >
                 {result.weightChanges.map(h => (
                   <HoldingRow key={h.isin} h={h} variant="changed" scale={scale} />
@@ -781,6 +860,31 @@ export default function Compare() {
                 color="amber"
                 icon={<Activity className="w-4 h-4" />}
                 empty="No significant drift (< 0.3%)"
+                doodle={
+                  <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Stars */}
+                    <circle cx="10" cy="10" r="1.8" fill="#FAC775"/>
+                    <circle cx="70" cy="8" r="1.5" fill="#CECBF6"/>
+                    <circle cx="72" cy="48" r="1.4" fill="#AFA9EC"/>
+                    <circle cx="8" cy="50" r="1.3" fill="#CECBF6"/>
+                    {/* Anchor ring */}
+                    <circle cx="40" cy="24" r="8" fill="none" stroke="#BA7517" strokeWidth="2"/>
+                    <circle cx="40" cy="24" r="3.5" fill="#FFF3CE" stroke="#BA7517" strokeWidth="1.5"/>
+                    {/* Anchor shaft */}
+                    <line x1="40" y1="32" x2="40" y2="62" stroke="#BA7517" strokeWidth="2.5" strokeLinecap="round"/>
+                    {/* Crossbar */}
+                    <line x1="26" y1="22" x2="54" y2="22" stroke="#BA7517" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="26" cy="22" r="2.5" fill="#FAC775" stroke="#BA7517" strokeWidth="1"/>
+                    <circle cx="54" cy="22" r="2.5" fill="#FAC775" stroke="#BA7517" strokeWidth="1"/>
+                    {/* Flukes */}
+                    <path d="M40 62 Q26 62 24 52 L30 54 L28 58 Q34 62 40 62Z" fill="#FFF3CE" stroke="#BA7517" strokeWidth="1.2"/>
+                    <path d="M40 62 Q54 62 56 52 L50 54 L52 58 Q46 62 40 62Z" fill="#FFF3CE" stroke="#BA7517" strokeWidth="1.2"/>
+                    {/* Chain (dashed, going off to side = held firm) */}
+                    <path d="M40 24 Q18 20 10 28" stroke="#FAC775" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeDasharray="3 2" opacity="0.6"/>
+                    {/* Shadow */}
+                    <ellipse cx="40" cy="72" rx="18" ry="3" fill="#D3D1C7" opacity="0.22"/>
+                  </svg>
+                }
               >
                 {drifters2.map(h => (
                   <HoldingRow key={h.isin} h={h} variant="drifted" scale={scale} />
@@ -828,7 +932,7 @@ export default function Compare() {
 
 // ─── CompareColumn ────────────────────────────────────────────────────────────
 
-function CompareColumn({ title, subtitle, count, color, icon, children, empty }) {
+function CompareColumn({ title, subtitle, count, color, icon, children, empty, doodle }) {
   const colorMap = {
     green: { header: 'bg-green-50 border-green-200',   badge: 'bg-green-100 text-green-700',   title: 'text-green-800' },
     red:   { header: 'bg-red-50 border-red-200',       badge: 'bg-red-100 text-red-700',       title: 'text-red-800' },
@@ -850,7 +954,10 @@ function CompareColumn({ title, subtitle, count, color, icon, children, empty })
       </div>
       <div className="divide-y divide-slate-100 max-h-[420px] overflow-y-auto">
         {count === 0
-          ? <div className="text-center py-8 text-slate-400 text-sm">{empty}</div>
+          ? <div className="text-center py-6 text-slate-400 text-sm flex flex-col items-center gap-2">
+              {doodle}
+              {empty}
+            </div>
           : children}
       </div>
     </div>
