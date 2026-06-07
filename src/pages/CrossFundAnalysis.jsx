@@ -532,7 +532,10 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                   <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                     {(monthSel.unique_a ?? []).map(h => (
                       <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700">
-                        <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
+                          <CapBadge cap={h.market_cap_cat} />
+                        </div>
                         <div className="flex items-center justify-between mt-0.5">
                           {h.industry
                             ? <span className={`inline-flex items-center px-1 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
@@ -556,7 +559,10 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                   <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                     {monthSel.shared_holdings.map(h => (
                       <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700">
-                        <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
+                          <CapBadge cap={h.market_cap_cat} />
+                        </div>
                         <div className="flex items-center justify-between mt-0.5">
                           {h.industry
                             ? <span className={`inline-flex items-center px-1 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
@@ -584,7 +590,10 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                   <div className="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                     {(monthSel.unique_b ?? []).map(h => (
                       <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700">
-                        <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
+                          <CapBadge cap={h.market_cap_cat} />
+                        </div>
                         <div className="flex items-center justify-between mt-0.5">
                           {h.industry
                             ? <span className={`inline-flex items-center px-1 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(h.industry)}`} style={{ fontSize: 10 }}>{h.industry}</span>
@@ -1900,7 +1909,10 @@ function MonthlyDiff({ allFunds }) {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-slate-800 dark:text-slate-200">{row.stock_name}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="font-semibold text-slate-800 dark:text-slate-200">{row.stock_name}</p>
+                          <CapBadge cap={row.market_cap_cat} />
+                        </div>
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{row.industry}</p>
                       </td>
                       <td className="px-4 py-3 text-right tabular-nums text-slate-500 dark:text-slate-400">
@@ -2096,7 +2108,10 @@ function StockTracker({ allFunds }) {
                 <button key={r.isin} onClick={() => { skipSearch.current = true; setSelected(r); setQuery(r.stock_name); setResults([]); }}
                   className="w-full flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 text-left transition-colors">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{r.stock_name}</p>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{r.stock_name}</p>
+                      <CapBadge cap={r.market_cap_cat} />
+                    </div>
                     <p className="text-xs text-slate-400 dark:text-slate-500">{r.industry} · {r.isin}</p>
                   </div>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-violet-50 text-violet-700 flex-shrink-0">
@@ -2116,7 +2131,10 @@ function StockTracker({ allFunds }) {
           {/* Header */}
           <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
             <div>
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-200">{selected?.stock_name}</h2>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base font-bold text-slate-800 dark:text-slate-200">{selected?.stock_name}</h2>
+                <CapBadge cap={selected?.market_cap_cat} />
+              </div>
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{selected?.industry} · {selected?.isin}</p>
             </div>
             <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
@@ -3158,7 +3176,10 @@ function BubbleTooltip({ active, payload }) {
   const color = getIndustryColor(d.industry).hex;
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-4 text-sm max-w-[260px] z-50">
-      <p className="font-bold text-slate-800 dark:text-slate-200 mb-0.5 leading-snug">{d.stock_name}</p>
+      <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+        <p className="font-bold text-slate-800 dark:text-slate-200 leading-snug">{d.stock_name}</p>
+        <CapBadge cap={d.market_cap_cat} />
+      </div>
       {d.industry && (
         <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-xs font-medium mb-2 ${industryBadgeClass(d.industry)}`}>
           {d.industry}
@@ -3443,7 +3464,10 @@ function NewEntries() {
                 {rows.map(r => (
                   <tr key={r.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-slate-800 dark:text-slate-200">{r.stock_name}</p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="font-semibold text-slate-800 dark:text-slate-200">{r.stock_name}</p>
+                        <CapBadge cap={r.market_cap_cat} />
+                      </div>
                       <p className="text-xs text-slate-400 dark:text-slate-500">{r.isin}</p>
                     </td>
                     <td className="px-4 py-3">
@@ -3835,7 +3859,10 @@ function StockDiscovery() {
                 return (
                   <tr key={s.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700">
                     <td className="px-4 py-2 sticky left-0 bg-white dark:bg-slate-800 z-10">
-                      <p className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[180px]" title={s.stock_name}>{s.stock_name}</p>
+                      <div className="flex items-center gap-1.5 flex-wrap max-w-[180px]">
+                        <p className="font-semibold text-slate-800 dark:text-slate-200 truncate" title={s.stock_name}>{s.stock_name}</p>
+                        <CapBadge cap={s.market_cap_cat} />
+                      </div>
                       <p className="text-slate-400 dark:text-slate-500 truncate">{s.industry}</p>
                     </td>
                     <td className="px-3 py-2 text-center">
@@ -4261,7 +4288,10 @@ function StockIntelligence({ allFunds }) {
                 onMouseDown={() => { skipSearch.current = true; setSelected(r); setQuery(r.stock_name); setResults([]); }}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-violet-50 text-left transition-colors border-b border-slate-50 last:border-0">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{r.stock_name}</p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{r.stock_name}</p>
+                    <CapBadge cap={r.market_cap_cat} />
+                  </div>
                   <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{r.isin}</p>
                 </div>
                 {r.industry && (
@@ -4379,7 +4409,10 @@ function StockIntelligence({ allFunds }) {
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{selected.stock_name}</h2>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{selected.stock_name}</h2>
+                  <CapBadge cap={selected.market_cap_cat} />
+                </div>
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <span className="text-xs text-slate-400 dark:text-slate-500 font-mono bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">{selected.isin}</span>
                   {selected.industry && (
@@ -4560,7 +4593,10 @@ function StockIntelligence({ allFunds }) {
                     className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-violet-200 hover:bg-violet-50 text-left transition-colors group">
                     <span className="text-xs font-bold text-slate-300 group-hover:text-violet-400 w-5 flex-shrink-0">#{i+1}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{p.stock_name}</p>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{p.stock_name}</p>
+                        <CapBadge cap={p.market_cap_cat} />
+                      </div>
                       <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{p.isin.slice(0,12)}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
@@ -4771,7 +4807,10 @@ function PortfolioBlender({ allFunds }) {
                     <div key={r.isin} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700">
                       <span className="text-xs text-slate-300 w-5 tabular-nums shrink-0">{i + 1}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{r.stock_name}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{r.stock_name}</p>
+                          <CapBadge cap={r.market_cap_cat} />
+                        </div>
                         <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{r.industry}</p>
                         {/* Per-fund breakdown */}
                         <div className="flex flex-wrap gap-x-3 mt-0.5">

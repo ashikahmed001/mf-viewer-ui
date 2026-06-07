@@ -276,7 +276,10 @@ function TableView({ flatRows, maxStreak, direction }) {
               return (
                 <tr key={`${entry.fund_id}-${entry.isin}-${i}`} className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-slate-800 dark:text-slate-200 leading-snug">{entry.stock_name}</p>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="font-medium text-slate-800 dark:text-slate-200 leading-snug">{entry.stock_name}</p>
+                      <CapBadge cap={entry.market_cap_cat} />
+                    </div>
                     <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{entry.isin}</p>
                   </td>
                   <td className="px-4 py-3">
