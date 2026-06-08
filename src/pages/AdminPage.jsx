@@ -1609,12 +1609,27 @@ function SchemeSearchDropdown({ fundName, value, onChange, allSchemes }) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  function scoreScheme(ref, schemeName) {
+    const norm  = s => s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+    const rWords = new Set(norm(ref));
+    const sWords = norm(schemeName);
+    let hits = 0;
+    for (const w of sWords) if (rWords.has(w)) hits++;
+    let score = hits / Math.max(rWords.size, 1);
+    const lo = schemeName.toLowerCase();
+    if (lo.includes('growth') && !lo.includes('idcw')) score += 0.15;
+    if (lo.includes('direct')) score += 0.05;
+    if (lo.includes('idcw') || lo.includes('dividend')) score -= 0.3;
+    return score;
+  }
+
   function clientSearch(q, schemes) {
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
     if (!words.length) return [];
+    const ref = fundName || q;
     const scored = schemes
       .filter(s => words.every(w => s.scheme_name.toLowerCase().includes(w)))
-      .map(s => ({ ...s, score: nameSimilarity(fundName || q, s.scheme_name) }))
+      .map(s => ({ ...s, score: scoreScheme(ref, s.scheme_name) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 12);
     return scored;
