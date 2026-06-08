@@ -1595,8 +1595,10 @@ function SchemeSearchDropdown({ fundName, value, onChange }) {
   const [results, setResults]     = useState([]);
   const [loading, setLoading]     = useState(false);
   const [open, setOpen]           = useState(false);
+  const [touched, setTouched]     = useState(false);  // has user ever focused?
   const debounceRef               = useRef(null);
   const containerRef              = useRef(null);
+  const cacheRef                  = useRef({});        // query → results cache
 
   // Close on outside click
   useEffect(() => {
@@ -1607,28 +1609,42 @@ function SchemeSearchDropdown({ fundName, value, onChange }) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  // Fetch on mount with fund name
-  useEffect(() => {
-    if (fundName) doSearch(fundName);
-  }, []);
-
   function doSearch(q) {
-    if (!q.trim()) return;
+    const trimmed = q.trim();
+    if (!trimmed) { setResults([]); setOpen(false); return; }
+
+    // Cache hit — instant
+    if (cacheRef.current[trimmed]) {
+      setResults(cacheRef.current[trimmed]);
+      setOpen(true);
+      return;
+    }
+
     setLoading(true);
     setOpen(true);
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
-        const data = await searchNavSchemes(q, fundName);
+        const data = await searchNavSchemes(trimmed, fundName);
+        cacheRef.current[trimmed] = data;
         setResults(data);
       } catch { setResults([]); }
       finally { setLoading(false); }
-    }, 300);
+    }, 350);
   }
 
   function handleInput(e) {
     setQuery(e.target.value);
     doSearch(e.target.value);
+  }
+
+  function handleFocus() {
+    if (!touched) {
+      setTouched(true);
+      doSearch(query);   // first focus triggers the initial search
+    } else if (results.length) {
+      setOpen(true);
+    }
   }
 
   function select(scheme) {
@@ -1654,7 +1670,7 @@ function SchemeSearchDropdown({ fundName, value, onChange }) {
         <input
           value={query}
           onChange={handleInput}
-          onFocus={() => { if (results.length) setOpen(true); }}
+          onFocus={handleFocus}
           placeholder="Search scheme name…"
           className="flex-1 text-xs outline-none bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400"
         />
