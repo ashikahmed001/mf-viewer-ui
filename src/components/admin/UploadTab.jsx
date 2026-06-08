@@ -138,16 +138,25 @@ function DropZone({ onFiles, disabled }) {
 function FileCard({ item, onRemove }) {
   const statusIcon = {
     pending:    <FileSpreadsheet className="w-5 h-5 text-slate-400" />,
+    queued:     <svg className="w-5 h-5 text-slate-300 dark:text-slate-500" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5"/><path d="M10 6v4l2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
     extracting: <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />,
     done:       <CheckCircle className="w-5 h-5 text-emerald-500" />,
     error:      <AlertTriangle className="w-5 h-5 text-red-500" />,
   }[item.status] ?? null;
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
+    <div className={`flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 border rounded-xl shadow-sm transition-colors ${
+      item.status === 'extracting' ? 'border-indigo-200 dark:border-indigo-800' :
+      item.status === 'done'       ? 'border-emerald-200 dark:border-emerald-900' :
+      item.status === 'error'      ? 'border-red-200 dark:border-red-900' :
+      'border-slate-200 dark:border-slate-700'
+    }`}>
       {statusIcon}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{item.name}</p>
+        {item.status === 'queued' && (
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">In queue…</p>
+        )}
         {item.status === 'extracting' && (
           <p className="text-xs text-indigo-500 mt-0.5">Extracting… {item.elapsed}s</p>
         )}
@@ -622,9 +631,8 @@ export default function UploadTab() {
         updateFile(item.id, { status: 'error', error: err.response?.data?.error || err.message });
       }
     } else {
-      // Batch path: SSE stream
-      pending.forEach(f => updateFile(f.id, { status: 'extracting', elapsed: 0 }));
-      pending.forEach(f => startTimer(f.id));
+      // Batch path: SSE stream — mark all queued, only flip to extracting when server starts each one
+      pending.forEach(f => updateFile(f.id, { status: 'queued' }));
 
       const completed = [];
       const fileMap = Object.fromEntries(pending.map(f => [f.name, f.id]));
@@ -634,7 +642,7 @@ export default function UploadTab() {
         {
           onProgress: ({ file }) => {
             const id = fileMap[file];
-            if (id) updateFile(id, { status: 'extracting' });
+            if (id) { updateFile(id, { status: 'extracting', elapsed: 0 }); startTimer(id); }
           },
           onResult: ({ file, status, result, error }) => {
             const id = fileMap[file];
@@ -702,9 +710,10 @@ export default function UploadTab() {
     handleDiscard();
   }
 
-  const pendingCount   = files.filter(f => f.status === 'pending').length;
+  const pendingCount    = files.filter(f => f.status === 'pending').length;
+  const queuedCount     = files.filter(f => f.status === 'queued').length;
   const extractingCount = files.filter(f => f.status === 'extracting').length;
-  const doneCount      = files.filter(f => f.status === 'done').length;
+  const doneCount       = files.filter(f => f.status === 'done').length;
 
   // ── Review phase ────────────────────────────────────────────────────────────
   if (phase === 'review' && drafts.length > 0) {
@@ -813,8 +822,9 @@ export default function UploadTab() {
       {files.length > 0 && (
         <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
           <span>{files.length} file{files.length !== 1 ? 's' : ''} selected</span>
-          {doneCount > 0      && <span className="text-emerald-600 font-medium">{doneCount} done</span>}
-          {extractingCount > 0 && <span className="text-indigo-600 font-medium animate-pulse">{extractingCount} extracting…</span>}
+          {doneCount > 0       && <span className="text-emerald-600 font-medium">{doneCount} done</span>}
+          {extractingCount > 0 && <span className="text-indigo-600 font-medium animate-pulse">1 extracting…</span>}
+          {queuedCount > 0     && <span className="text-slate-400 dark:text-slate-500">{queuedCount} in queue</span>}
         </div>
       )}
 
