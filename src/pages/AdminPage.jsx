@@ -11,7 +11,7 @@ import {
   adminBulkDeleteFunds, adminBulkDeleteExtractions,
   adminGetFundGaps,
   adminGetCacheStats, adminClearCache, adminSetCacheEnabled,
-  getNavMappings, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping, syncLatestNav, adminGetCounts, adminFixNameBatch,
+  getNavMappings, getAllNavSchemes, autoMatchNav, confirmNavMapping, syncNavFund, syncAllNav, searchNavSchemes, removeNavMapping, syncLatestNav, adminGetCounts, adminFixNameBatch,
   adminGetStocksStatus, adminTriggerStocksSync,
   adminGetBackupStatus, adminTriggerBackup,
   adminListStocks,
@@ -1590,15 +1590,15 @@ function FundMgmtTab() {
 }
 
 // ─── Scheme Search Dropdown ───────────────────────────────────────────────────
-function SchemeSearchDropdown({ fundName, value, onChange }) {
+function SchemeSearchDropdown({ fundName, value, onChange, allSchemes }) {
   const [query, setQuery]         = useState(value?.scheme_name || fundName || '');
   const [results, setResults]     = useState([]);
   const [loading, setLoading]     = useState(false);
   const [open, setOpen]           = useState(false);
-  const [touched, setTouched]     = useState(false);  // has user ever focused?
+  const [touched, setTouched]     = useState(false);
   const debounceRef               = useRef(null);
   const containerRef              = useRef(null);
-  const cacheRef                  = useRef({});        // query → results cache
+  const cacheRef                  = useRef({});
 
   // Close on outside click
   useEffect(() => {
@@ -1609,17 +1609,35 @@ function SchemeSearchDropdown({ fundName, value, onChange }) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  function clientSearch(q, schemes) {
+    const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+    const scored = schemes
+      .filter(s => words.every(w => s.scheme_name.toLowerCase().includes(w)))
+      .map(s => ({ ...s, score: nameSimilarity(fundName || q, s.scheme_name) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 12);
+    return scored;
+  }
+
   function doSearch(q) {
     const trimmed = q.trim();
     if (!trimmed) { setResults([]); setOpen(false); return; }
 
-    // Cache hit — instant
+    // ── Client-side search (instant) if full list is loaded ──
+    if (allSchemes) {
+      const hits = clientSearch(trimmed, allSchemes);
+      setResults(hits);
+      setOpen(true);
+      return;
+    }
+
+    // ── Fallback: API search with cache ──
     if (cacheRef.current[trimmed]) {
       setResults(cacheRef.current[trimmed]);
       setOpen(true);
       return;
     }
-
     setLoading(true);
     setOpen(true);
     clearTimeout(debounceRef.current);
@@ -1641,7 +1659,7 @@ function SchemeSearchDropdown({ fundName, value, onChange }) {
   function handleFocus() {
     if (!touched) {
       setTouched(true);
-      doSearch(query);   // first focus triggers the initial search
+      doSearch(query);
     } else if (results.length) {
       setOpen(true);
     }
@@ -1724,6 +1742,7 @@ function NavTab({ onCountChange }) {
   const [removeTarget, setRemoveTarget]   = useState(null); // { id, name }
   const [removing, setRemoving]           = useState(false);
   const [search, setSearch]               = useState('');
+  const [allSchemes, setAllSchemes]       = useState(null);  // full AMFI list for client-side search
   const { show, toast, hide }             = useToast();
 
   const load = useCallback(async () => {
@@ -1734,6 +1753,13 @@ function NavTab({ onCountChange }) {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // Pre-fetch the full AMFI scheme list once so SchemeSearchDropdown can filter client-side
+  useEffect(() => {
+    getAllNavSchemes()
+      .then(setAllSchemes)
+      .catch(() => {}); // silent — will fall back to API search
+  }, []);
 
   async function fetchLatest() {
     setSyncingLatest(true);
@@ -1961,6 +1987,7 @@ function NavTab({ onCountChange }) {
                           fundName={m.name}
                           value={{ scheme_code: editRow.scheme_code, scheme_name: editRow.scheme_name }}
                           onChange={({ scheme_code, scheme_name }) => setEditRow(r => ({ ...r, scheme_code, scheme_name }))}
+                          allSchemes={allSchemes}
                         />
                       ) : m.scheme_name ? (
                         <div>

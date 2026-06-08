@@ -185,6 +185,7 @@ export const verifyPayment         = (payload)       => api.post('/billing/verif
 
 // ─── NAV ─────────────────────────────────────────────────────────────────────
 export const getNavMappings    = ()                                  => api.get('/nav/mappings').then(r => r.data);
+export const getAllNavSchemes   = ()                                  => api.get('/nav/schemes/all', { timeout: 30000 }).then(r => r.data);
 export const searchNavSchemes  = (q, fund_name)                      => api.get('/nav/search', { params: { q, fund_name } }).then(r => r.data);
 export const autoMatchNav      = ()                                  => api.post('/nav/auto-match', {}, { timeout: 60000 }).then(r => r.data);
 export const confirmNavMapping = (fundId, scheme_code, scheme_name)  => api.post(`/nav/confirm/${fundId}`, { scheme_code, scheme_name }).then(r => r.data);
