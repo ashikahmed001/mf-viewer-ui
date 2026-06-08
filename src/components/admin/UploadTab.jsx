@@ -435,10 +435,8 @@ function ExtractionReview({ draft, onDiscard, onSaved }) {
     try {
       const res = await importExtraction(data, replace);
       setToast({ type: 'success', msg: `Saved! ${res.holding_count} holdings for "${res.fund_name}"` });
-      setTimeout(() => {
-        setToast(null);
-        onSaved?.(res);
-      }, 4000);
+      setTimeout(() => setToast(null), 3000);
+      onSaved?.(res); // advance to next draft immediately
     } catch (err) {
       if (err.response?.status === 409) {
         const info = err.response.data;
