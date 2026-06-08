@@ -717,7 +717,12 @@ export default function UploadTab() {
 
   // ── Review phase ────────────────────────────────────────────────────────────
   if (phase === 'review' && drafts.length > 0) {
-    const draftLabel = (d, i) => d.fund_name?.trim() || `File ${i + 1}`;
+    const draftLabel = (d, i) => {
+      const month = d.report_month ? fmtMonth(d.report_month) : null;
+      const name  = d.fund_name?.trim();
+      if (month && name) return `${month}`;   // month alone is most distinguishing
+      return month || name || `File ${i + 1}`;
+    };
     return (
       <div>
         <div className="flex items-start justify-between gap-4 mb-5">
