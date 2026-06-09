@@ -1126,11 +1126,13 @@ function HiddenGems() {
     .filter(d => d.pct >= minPct)
     .sort((a, b) => sortBy === 'pct' ? b.pct - a.pct : a.stock_name?.localeCompare(b.stock_name));
 
-  // Group by fund for the summary strip
+  // Group by fund for the summary strip — track latest report_month for sorting
   const byFund = new Map();
   for (const d of filtered) {
-    if (!byFund.has(d.fund_id)) byFund.set(d.fund_id, { fund_name: d.fund_name, count: 0 });
-    byFund.get(d.fund_id).count++;
+    if (!byFund.has(d.fund_id)) byFund.set(d.fund_id, { fund_name: d.fund_name, count: 0, latest_month: '' });
+    const entry = byFund.get(d.fund_id);
+    entry.count++;
+    if ((d.report_month || '') > entry.latest_month) entry.latest_month = d.report_month || '';
   }
 
   return (
@@ -1193,7 +1195,9 @@ function HiddenGems() {
       </div>
 
       {/* Per-fund breakdown */}
-      {[...byFund.entries()].sort((a, b) => b[1].count - a[1].count).map(([fundId, info]) => {
+      {[...byFund.entries()]
+        .sort((a, b) => b[1].latest_month.localeCompare(a[1].latest_month) || b[1].count - a[1].count)
+        .map(([fundId, info]) => {
         const gems = filtered.filter(d => d.fund_id === fundId);
         return (
           <div key={fundId} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden mb-4">
