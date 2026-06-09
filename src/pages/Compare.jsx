@@ -911,65 +911,42 @@ export default function Compare() {
 
       {!result && !timelineResult && !loading && extractions.length < 2 && (
         <div className="text-center py-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl flex flex-col items-center gap-3">
-          {/* Puzzle pieces doodle — piece 1 placed, piece 2 floating in */}
+          {/* Bar charts doodle — month 1 solid bars, month 2 ghost bars */}
           <svg width="180" height="120" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <style>{`
-                @keyframes pz-float { 0%,100%{transform:translateX(0px)} 50%{transform:translateX(-8px)} }
-                @keyframes pz-slot  { 0%,100%{opacity:0.2} 50%{opacity:0.5} }
-                @keyframes pz-arrow { 0%,100%{opacity:0.35;transform:translateX(0px)} 50%{opacity:0.9;transform:translateX(-2px)} }
-                .pz-float { animation:pz-float 2.4s ease-in-out infinite; }
-                .pz-slot  { animation:pz-slot  2.4s ease-in-out infinite; }
-                .pz-arrow { animation:pz-arrow 2.4s ease-in-out infinite; }
+                @keyframes bc-ghost { 0%,100%{opacity:0.18} 50%{opacity:0.5} }
+                @keyframes bc-glow  { 0%,100%{opacity:1} 50%{opacity:0.75} }
+                .bc-ghost { animation: bc-ghost 2.4s ease-in-out infinite; }
+                .bc-glow  { animation: bc-glow  2.4s ease-in-out infinite; }
               `}</style>
             </defs>
 
-            {/* ── Piece 1 (placed, solid, left side) ── */}
-            {/* Square with tab protruding DOWN from bottom edge */}
-            <path d="
-              M18 12
-              L62 12
-              L62 44
-              L71 44 Q78 44 78 51 Q78 58 71 58 L62 58
-              L62 68
-              L18 68
-              Z"
-              fill="#6366f1" stroke="#4338ca" strokeWidth="0.8"/>
-            {/* inner highlight */}
-            <path d="M23 17 L57 17 L57 63" fill="none" stroke="#a5b4fc" strokeWidth="0.7" strokeLinecap="round" opacity="0.45"/>
+            {/* Axes */}
+            <line x1="14" y1="8" x2="14" y2="66" stroke="#cbd5e1" strokeWidth="1.2" strokeLinecap="round"/>
+            <line x1="14" y1="66" x2="106" y2="66" stroke="#cbd5e1" strokeWidth="1.2" strokeLinecap="round"/>
 
-            {/* ── Slot for piece 2 (ghost, right side) ── */}
-            <g className="pz-slot">
-              <path d="
-                M62 12
-                L102 12
-                L102 68
-                L62 68
-                L62 58
-                L53 58 Q46 58 46 51 Q46 44 53 44 L62 44
-                Z"
-                fill="none" stroke="#818cf8" strokeWidth="1.2" strokeDasharray="3.5 2.5"/>
+            {/* Month 1 label */}
+            <text x="34" y="75" textAnchor="middle" fontFamily="system-ui,sans-serif" fontSize="6" fill="#6366f1" fontWeight="700">M1</text>
+            {/* Month 2 label */}
+            <text x="80" y="75" textAnchor="middle" fontFamily="system-ui,sans-serif" fontSize="6" fill="#94a3b8" fontWeight="600">M2?</text>
+
+            {/* Month 1 bars — solid, coloured */}
+            <g className="bc-glow">
+              <rect x="18" y="42" width="9" height="24" rx="1.5" fill="#818cf8"/>
+              <rect x="30" y="28" width="9" height="38" rx="1.5" fill="#6366f1"/>
+              <rect x="42" y="34" width="9" height="32" rx="1.5" fill="#4338ca"/>
             </g>
 
-            {/* ── Floating piece 2 (right, drifting in from the right) ── */}
-            <g className="pz-float">
-              <path d="
-                M72 12
-                L112 12
-                L112 68
-                L72 68
-                L72 58
-                L63 58 Q56 58 56 51 Q56 44 63 44 L72 44
-                Z"
-                fill="#a5b4fc" stroke="#818cf8" strokeWidth="0.8"/>
-              <path d="M77 17 L107 17 L107 63" fill="none" stroke="#e0e7ff" strokeWidth="0.7" strokeLinecap="round" opacity="0.5"/>
+            {/* Month 2 bars — dashed ghost, pulsing */}
+            <g className="bc-ghost">
+              <rect x="64" y="20" width="9" height="46" rx="1.5" fill="none" stroke="#818cf8" strokeWidth="1.2" strokeDasharray="3 2"/>
+              <rect x="76" y="32" width="9" height="34" rx="1.5" fill="none" stroke="#818cf8" strokeWidth="1.2" strokeDasharray="3 2"/>
+              <rect x="88" y="26" width="9" height="40" rx="1.5" fill="none" stroke="#818cf8" strokeWidth="1.2" strokeDasharray="3 2"/>
             </g>
 
-            {/* ── Arrow pointing left (floating piece needs to slide left) ── */}
-            <g className="pz-arrow">
-              <line x1="70" y1="40" x2="64" y2="40" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round"/>
-              <polyline points="67,37 63,40 67,43" fill="none" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-            </g>
+            {/* Divider between months */}
+            <line x1="57" y1="14" x2="57" y2="66" stroke="#e2e8f0" strokeWidth="0.8" strokeDasharray="2.5 2"/>
           </svg>
           <p className="font-semibold text-slate-600 dark:text-slate-300 text-base">Need at least 2 months of data</p>
           <p className="text-sm text-slate-400 dark:text-slate-500">This fund has only {extractions.length} extraction{extractions.length !== 1 ? 's' : ''} available</p>
