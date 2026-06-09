@@ -1744,11 +1744,11 @@ function EntryExitTimeline({ allFunds }) {
 // ─── Monthly Diff ─────────────────────────────────────────────────────────────
 
 const DIFF_COLORS = {
-  new:       { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700', label: 'New entry',  icon: '●' },
-  exit:      { bg: 'bg-red-50',     border: 'border-red-200',     text: 'text-red-700',     badge: 'bg-red-100 text-red-700',     label: 'Exited',     icon: '○' },
-  increased: { bg: 'bg-indigo-50',    border: 'border-indigo-100',    text: 'text-indigo-700',    badge: 'bg-indigo-100 text-indigo-700',   label: 'Increased',  icon: '▲' },
-  decreased: { bg: 'bg-orange-50',  border: 'border-orange-100',  text: 'text-orange-700',  badge: 'bg-orange-100 text-orange-700', label: 'Decreased', icon: '▼' },
-  unchanged: { bg: '',              border: 'border-slate-100',   text: 'text-slate-400 dark:text-slate-500',   badge: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400', label: 'Unchanged',  icon: '—' },
+  new:       { bg: 'bg-emerald-50 dark:bg-emerald-950/40', border: 'border-emerald-200 dark:border-emerald-800', text: 'text-emerald-700 dark:text-emerald-400', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300', label: 'New entry',  icon: '●' },
+  exit:      { bg: 'bg-red-50 dark:bg-red-950/40',         border: 'border-red-200 dark:border-red-800',         text: 'text-red-700 dark:text-red-400',         badge: 'bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-300',         label: 'Exited',     icon: '○' },
+  increased: { bg: 'bg-indigo-50 dark:bg-indigo-950/40',   border: 'border-indigo-100 dark:border-indigo-800',   text: 'text-indigo-700 dark:text-indigo-400',   badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300',   label: 'Increased',  icon: '▲' },
+  decreased: { bg: 'bg-orange-50 dark:bg-orange-950/40',   border: 'border-orange-100 dark:border-orange-800',   text: 'text-orange-700 dark:text-orange-400',   badge: 'bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-300', label: 'Decreased', icon: '▼' },
+  unchanged: { bg: '',                                      border: 'border-slate-100 dark:border-slate-700',     text: 'text-slate-400 dark:text-slate-500',     badge: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400',         label: 'Unchanged',  icon: '—' },
 };
 
 function MonthlyDiff({ allFunds }) {
@@ -2118,7 +2118,7 @@ function StockTracker({ allFunds }) {
                     </div>
                     <p className="text-xs text-slate-400 dark:text-slate-500">{r.industry} · {r.isin}</p>
                   </div>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-violet-50 text-violet-700 flex-shrink-0">
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 flex-shrink-0">
                     {r.fund_count} fund{r.fund_count !== 1 ? 's' : ''} ever
                   </span>
                 </button>

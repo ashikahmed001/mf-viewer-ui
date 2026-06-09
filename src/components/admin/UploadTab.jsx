@@ -583,8 +583,16 @@ export default function UploadTab() {
   }, []);
 
   function addFiles(newFiles) {
-    const items = newFiles.map(f => ({ id: crypto.randomUUID(), name: f.name, file: f, status: 'pending' }));
-    setFiles(prev => [...prev, ...items]);
+    setFiles(prev => {
+      const existing = new Set(prev.map(f => f.name));
+      const fresh = [...newFiles].filter(f => !existing.has(f.name));
+      if (fresh.length < newFiles.length) {
+        const skipped = newFiles.length - fresh.length;
+        console.warn(`[UploadTab] Skipped ${skipped} duplicate file(s) — filename already in queue`);
+      }
+      const items = fresh.map(f => ({ id: crypto.randomUUID(), name: f.name, file: f, status: 'pending' }));
+      return [...prev, ...items];
+    });
   }
 
   function removeFile(id) {

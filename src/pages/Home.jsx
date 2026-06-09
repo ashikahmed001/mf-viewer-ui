@@ -9,6 +9,28 @@ function fmtMonth(dateStr) {
   return d.toLocaleDateString('en-IN', { year: 'numeric', month: 'short' });
 }
 
+// Deterministic color per month — same month always gets the same color
+const MONTH_COLORS = [
+  'bg-indigo-50  text-indigo-600  border-indigo-100',   // Jan
+  'bg-rose-50    text-rose-600    border-rose-100',      // Feb
+  'bg-emerald-50 text-emerald-600 border-emerald-100',  // Mar
+  'bg-amber-50   text-amber-600   border-amber-100',    // Apr
+  'bg-violet-50  text-violet-600  border-violet-100',   // May
+  'bg-sky-50     text-sky-600     border-sky-100',      // Jun
+  'bg-orange-50  text-orange-600  border-orange-100',   // Jul
+  'bg-teal-50    text-teal-600    border-teal-100',     // Aug
+  'bg-pink-50    text-pink-600    border-pink-100',     // Sep
+  'bg-cyan-50    text-cyan-600    border-cyan-100',     // Oct
+  'bg-lime-50    text-lime-600    border-lime-100',     // Nov
+  'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100', // Dec
+];
+
+function monthBadgeClass(dateStr) {
+  if (!dateStr) return MONTH_COLORS[0];
+  const month = new Date(dateStr).getMonth(); // 0–11
+  return MONTH_COLORS[month];
+}
+
 export default function Home() {
   const [funds, setFunds] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +120,7 @@ export default function Home() {
                     <Calendar className="w-3.5 h-3.5" />
                     {fund.extraction_count || 0} month{fund.extraction_count !== 1 ? 's' : ''}
                   </span>
-                  <span className="bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-full px-2 py-0.5 font-medium">
+                  <span className={`border rounded-full px-2 py-0.5 font-medium ${monthBadgeClass(fund.last_month)}`}>
                     {fmtMonth(fund.last_month)}
                   </span>
                 </div>

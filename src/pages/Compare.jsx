@@ -268,19 +268,19 @@ function TransitionCard({ transition, scale, defaultOpen }) {
   const totalChanges = transition.newHoldings.length + transition.exitedHoldings.length + transition.weightChanges.length + drifters.length;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm">
       {/* Header */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors text-left"
+        className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
       >
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 font-semibold text-slate-800 text-sm">
-            <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold">
+          <div className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-200 text-sm">
+            <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 rounded-lg text-xs font-bold">
               {fmtMonth(transition.fromMonth)}
             </span>
-            <span className="text-slate-400">→</span>
-            <span className="px-2.5 py-1 bg-violet-50 text-violet-700 border border-violet-200 rounded-lg text-xs font-bold">
+            <span className="text-slate-400 dark:text-slate-500">→</span>
+            <span className="px-2.5 py-1 bg-violet-50 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-700 rounded-lg text-xs font-bold">
               {fmtMonth(transition.toMonth)}
             </span>
           </div>
@@ -288,32 +288,32 @@ function TransitionCard({ transition, scale, defaultOpen }) {
           {/* Summary pills */}
           <div className="flex items-center gap-1.5 ml-2">
             {transition.newHoldings.length > 0 && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">
                 +{transition.newHoldings.length} in
               </span>
             )}
             {transition.exitedHoldings.length > 0 && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400">
                 −{transition.exitedHoldings.length} out
               </span>
             )}
             {transition.weightChanges.length > 0 && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400">
                 {transition.weightChanges.length} changed
               </span>
             )}
             {drifters.length > 0 && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">
                 {drifters.length} drifted
               </span>
             )}
             {totalChanges === 0 && (
-              <span className="text-xs text-slate-400">No changes</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">No changes</span>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-slate-400 shrink-0">
+        <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500 shrink-0">
           {totalChanges > 0 && (
             <span className="text-xs">{totalChanges} change{totalChanges !== 1 ? 's' : ''}</span>
           )}
@@ -323,20 +323,20 @@ function TransitionCard({ transition, scale, defaultOpen }) {
 
       {/* Expanded body */}
       {open && totalChanges > 0 && (
-        <div className="border-t border-slate-100">
-          <div className="grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+        <div className="border-t border-slate-100 dark:border-slate-700">
+          <div className="grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-slate-700">
             {/* New entries */}
             <div>
-              <div className="px-4 py-2 bg-green-50 border-b border-green-100">
-                <span className="text-xs font-semibold text-green-700 flex items-center gap-1.5">
+              <div className="px-4 py-2 bg-green-50 dark:bg-green-900/20 border-b border-green-100 dark:border-green-900/40">
+                <span className="text-xs font-semibold text-green-700 dark:text-green-400 flex items-center gap-1.5">
                   <TrendingUp className="w-3.5 h-3.5" />
                   New Entries
-                  <span className="ml-auto bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-bold">{transition.newHoldings.length}</span>
+                  <span className="ml-auto bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full font-bold">{transition.newHoldings.length}</span>
                 </span>
               </div>
-              <div className="divide-y divide-slate-50 max-h-60 overflow-y-auto">
+              <div className="divide-y divide-slate-50 dark:divide-slate-700/50 max-h-60 overflow-y-auto">
                 {transition.newHoldings.length === 0 ? (
-                  <div className="px-4 py-3 text-xs text-slate-400 text-center">None</div>
+                  <div className="px-4 py-3 text-xs text-slate-400 dark:text-slate-500 text-center">None</div>
                 ) : transition.newHoldings.map(h => (
                   <MiniHoldingRow key={h.isin} h={h} variant="new" scale={scale} />
                 ))}
@@ -345,16 +345,16 @@ function TransitionCard({ transition, scale, defaultOpen }) {
 
             {/* Exits */}
             <div>
-              <div className="px-4 py-2 bg-red-50 border-b border-red-100">
-                <span className="text-xs font-semibold text-red-700 flex items-center gap-1.5">
+              <div className="px-4 py-2 bg-red-50 dark:bg-red-900/20 border-b border-red-100 dark:border-red-900/40">
+                <span className="text-xs font-semibold text-red-700 dark:text-red-400 flex items-center gap-1.5">
                   <TrendingDown className="w-3.5 h-3.5" />
                   Exits
-                  <span className="ml-auto bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-bold">{transition.exitedHoldings.length}</span>
+                  <span className="ml-auto bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 px-1.5 py-0.5 rounded-full font-bold">{transition.exitedHoldings.length}</span>
                 </span>
               </div>
-              <div className="divide-y divide-slate-50 max-h-60 overflow-y-auto">
+              <div className="divide-y divide-slate-50 dark:divide-slate-700/50 max-h-60 overflow-y-auto">
                 {transition.exitedHoldings.length === 0 ? (
-                  <div className="px-4 py-3 text-xs text-slate-400 text-center">None</div>
+                  <div className="px-4 py-3 text-xs text-slate-400 dark:text-slate-500 text-center">None</div>
                 ) : transition.exitedHoldings.map(h => (
                   <MiniHoldingRow key={h.isin} h={h} variant="exited" scale={scale} />
                 ))}
@@ -363,16 +363,16 @@ function TransitionCard({ transition, scale, defaultOpen }) {
 
             {/* Weight changes */}
             <div>
-              <div className="px-4 py-2 bg-indigo-50 border-b border-indigo-100">
-                <span className="text-xs font-semibold text-indigo-700 flex items-center gap-1.5">
+              <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-900/40">
+                <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
                   <Minus className="w-3.5 h-3.5" />
                   Weight Changes
-                  <span className="ml-auto bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full font-bold">{transition.weightChanges.length}</span>
+                  <span className="ml-auto bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 px-1.5 py-0.5 rounded-full font-bold">{transition.weightChanges.length}</span>
                 </span>
               </div>
-              <div className="divide-y divide-slate-50 max-h-60 overflow-y-auto">
+              <div className="divide-y divide-slate-50 dark:divide-slate-700/50 max-h-60 overflow-y-auto">
                 {transition.weightChanges.length === 0 ? (
-                  <div className="px-4 py-3 text-xs text-slate-400 text-center">None</div>
+                  <div className="px-4 py-3 text-xs text-slate-400 dark:text-slate-500 text-center">None</div>
                 ) : transition.weightChanges.map(h => (
                   <MiniHoldingRow key={h.isin + h.action} h={h} variant="changed" scale={scale} />
                 ))}
@@ -381,16 +381,16 @@ function TransitionCard({ transition, scale, defaultOpen }) {
 
             {/* NAV Drift */}
             <div>
-              <div className="px-4 py-2 bg-amber-50 border-b border-amber-100">
-                <span className="text-xs font-semibold text-amber-700 flex items-center gap-1.5">
+              <div className="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-900/40">
+                <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                   <Activity className="w-3.5 h-3.5" />
                   NAV Drift
-                  <span className="ml-auto bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold">{drifters.length}</span>
+                  <span className="ml-auto bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-bold">{drifters.length}</span>
                 </span>
               </div>
-              <div className="divide-y divide-slate-50 max-h-60 overflow-y-auto">
+              <div className="divide-y divide-slate-50 dark:divide-slate-700/50 max-h-60 overflow-y-auto">
                 {drifters.length === 0 ? (
-                  <div className="px-4 py-3 text-xs text-slate-400 text-center">None ≥ 0.3%</div>
+                  <div className="px-4 py-3 text-xs text-slate-400 dark:text-slate-500 text-center">None ≥ 0.3%</div>
                 ) : drifters.map(h => (
                   <MiniHoldingRow key={h.isin} h={h} variant="drifted" scale={scale} />
                 ))}
@@ -401,7 +401,7 @@ function TransitionCard({ transition, scale, defaultOpen }) {
       )}
 
       {open && totalChanges === 0 && (
-        <div className="border-t border-slate-100 px-4 py-6 text-center text-sm text-slate-400">
+        <div className="border-t border-slate-100 dark:border-slate-700 px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
           No changes detected between these two months
         </div>
       )}
@@ -415,9 +415,9 @@ function MiniHoldingRow({ h, variant, scale }) {
   const navDeltaScaled = (h.nav_delta || 0) * scale;
 
   return (
-    <div className="px-4 py-2.5 hover:bg-slate-50 transition-colors">
+    <div className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
       <div className="flex items-start justify-between gap-2">
-        <span className="text-xs font-medium text-slate-800 leading-snug line-clamp-1 flex-1" title={h.stock_name}>
+        <span className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug line-clamp-1 flex-1" title={h.stock_name}>
           {h.stock_name}
         </span>
         {variant === 'changed' && (
@@ -1002,9 +1002,9 @@ function HoldingRow({ h, variant, scale }) {
   const navDeltaScaled = (h.nav_delta    || 0) * scale;
 
   return (
-    <div className="p-3 hover:bg-slate-50 transition-colors">
+    <div className="p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
       <div className="flex items-start justify-between gap-1">
-        <span className="font-medium text-slate-800 text-sm leading-snug" title={h.stock_name}>
+        <span className="font-medium text-slate-800 dark:text-slate-200 text-sm leading-snug" title={h.stock_name}>
           {h.stock_name}
         </span>
       </div>
