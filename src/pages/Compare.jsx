@@ -911,44 +911,43 @@ export default function Compare() {
 
       {!result && !timelineResult && !loading && extractions.length < 2 && (
         <div className="text-center py-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl flex flex-col items-center gap-3">
-          {/* Still growing doodle */}
-          <svg width="160" height="140" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Puzzle pieces doodle — piece 1 placed, piece 2 floating down */}
+          <svg width="160" height="130" viewBox="0 0 100 82" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <style>{`
-                @keyframes sg-sway  { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
-                @keyframes sg-ghost { 0%,100%{opacity:0.2} 50%{opacity:0.7} }
-                @keyframes sg-sun   { 0%,100%{transform:scale(1) rotate(0deg)} 50%{transform:scale(1.08) rotate(15deg)} }
-                @keyframes sg-qmark { 0%,100%{opacity:0.3} 50%{opacity:1} }
-                .sg-stem  { transform-origin:50px 54px; animation:sg-sway  3.5s ease-in-out infinite; }
-                .sg-ghost { animation:sg-ghost 2.5s ease-in-out infinite; }
-                .sg-sun   { transform-origin:82px 14px; animation:sg-sun   4s ease-in-out infinite; }
-                .sg-qmark { animation:sg-qmark 2.5s ease-in-out infinite; }
+                @keyframes pz-float { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-7px)} }
+                @keyframes pz-slot  { 0%,100%{opacity:0.2} 50%{opacity:0.55} }
+                @keyframes pz-arrow { 0%,100%{opacity:0.3;transform:translateY(0px)} 50%{opacity:0.8;transform:translateY(2px)} }
+                .pz-float { animation:pz-float 2.4s ease-in-out infinite; }
+                .pz-slot  { animation:pz-slot  2.4s ease-in-out infinite; }
+                .pz-arrow { transform-origin:50px 36px; animation:pz-arrow 2.4s ease-in-out infinite; }
               `}</style>
             </defs>
-            {/* Pot */}
-            <path d="M34 60 L38 72 L62 72 L66 60 Z" fill="#BA7517" stroke="#854F0B" strokeWidth="1"/>
-            <rect x="30" y="55" width="40" height="7" rx="3" fill="#EF9F27" stroke="#BA7517" strokeWidth="1"/>
-            <ellipse cx="50" cy="55" rx="18" ry="3" fill="#854F0B" opacity="0.35"/>
-            {/* Swaying stem + real leaf */}
-            <g className="sg-stem">
-              <path d="M50 54 L50 28" stroke="#639922" strokeWidth="2.5" strokeLinecap="round"/>
-              <path d="M50 38 Q36 28 34 16 Q47 21 50 38Z" fill="#639922"/>
-              <path d="M50 38 Q36 28 34 16" stroke="#3B6D11" strokeWidth="0.8" fill="none"/>
+
+            {/* ── Piece 1 (placed, solid) — bottom-left ── */}
+            {/* shape: rect with a tab bump on right and a notch on top-right */}
+            <path d="M18 42 L18 72 L48 72 L48 58 Q56 58 56 50 Q56 42 48 42 Z"
+              fill="#6366f1" stroke="#4338ca" strokeWidth="0.8"/>
+            {/* subtle inner shine */}
+            <path d="M22 46 L22 68 L44 68" fill="none" stroke="#a5b4fc" strokeWidth="0.6" strokeLinecap="round" opacity="0.5"/>
+
+            {/* ── Slot for piece 2 (ghost, pulsing) — bottom-right ── */}
+            <g className="pz-slot">
+              <path d="M52 42 L52 72 L82 72 L82 58 Q74 58 74 50 Q74 42 82 42 L82 42 Q82 42 68 42 Q60 36 52 42 Z"
+                fill="none" stroke="#a5b4fc" strokeWidth="1" strokeDasharray="3 2"/>
             </g>
-            {/* Ghost leaf — pulsing */}
-            <g className="sg-ghost">
-              <path d="M50 28 Q64 18 66 6 Q53 11 50 28Z" fill="none" stroke="#C0DD97" strokeWidth="1.2" strokeDasharray="2.5 2"/>
+
+            {/* ── Floating piece 2 ── */}
+            <g className="pz-float">
+              <path d="M52 8 L52 38 L82 38 L82 24 Q74 24 74 16 Q74 8 82 8 L82 8 Q82 8 68 8 Q60 2 52 8 Z"
+                fill="#a5b4fc" stroke="#818cf8" strokeWidth="0.8"/>
+              <path d="M56 12 L56 34 L78 34" fill="none" stroke="#e0e7ff" strokeWidth="0.6" strokeLinecap="round" opacity="0.6"/>
             </g>
-            <text className="sg-qmark" x="68" y="8" fontSize="9" fill="#C0DD97" fontStyle="italic">?</text>
-            <text x="50" y="78" fontSize="6.5" textAnchor="middle" fill="#888780">month 1 of 2</text>
-            {/* Sun — slow pulse */}
-            <g className="sg-sun">
-              <circle cx="82" cy="14" r="6.5" fill="#FAC775" opacity="0.75"/>
-              <line x1="82" y1="4" x2="82" y2="1" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="92" y1="14" x2="95" y2="14" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="89" y1="7" x2="92" y2="4" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="75" y1="7" x2="72" y2="4" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="72" y1="14" x2="69" y2="14" stroke="#FAC775" strokeWidth="1.5" strokeLinecap="round"/>
+
+            {/* ── Animated arrow hinting piece 2 should drop ── */}
+            <g className="pz-arrow">
+              <line x1="67" y1="38" x2="67" y2="41" stroke="#818cf8" strokeWidth="1" strokeLinecap="round"/>
+              <polyline points="65,40 67,43 69,40" fill="none" stroke="#818cf8" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
             </g>
           </svg>
           <p className="font-semibold text-slate-600 dark:text-slate-300 text-base">Need at least 2 months of data</p>
