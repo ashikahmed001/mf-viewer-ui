@@ -995,7 +995,7 @@ function CompareColumn({ title, subtitle, count, color, icon, children, empty, d
 function HoldingRow({ h, variant, scale }) {
   const pct            = (h.pct_nav      || 0) * scale;
   const prevPct        = (h.prev_pct_nav || 0) * scale;
-  const delta          = (h.delta        || 0) * scale;
+  const delta          = (h.nav_delta    || 0) * scale;
   const navDeltaScaled = (h.nav_delta    || 0) * scale;
 
   return (
@@ -1021,7 +1021,7 @@ function HoldingRow({ h, variant, scale }) {
                   ? 'bg-purple-50 text-purple-700 border-purple-200'
                   : 'bg-orange-50 text-orange-700 border-orange-200'
               }`}>
-                {h.action === 'added' ? '▲ Added' : h.action === 'isin_changed' ? '⟳ ISIN Changed' : '▼ Trimmed'}
+                {h.action === 'added' ? '▲ Increased' : h.action === 'isin_changed' ? '⟳ ISIN Changed' : '▼ Trimmed'}
               </span>
 
               {h.action === 'isin_changed' ? (
