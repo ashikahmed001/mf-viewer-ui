@@ -3,6 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, TrendingDown, Minus, GitCompare, ChevronDown, ChevronRight, Activity } from 'lucide-react';
 import { getFund, getFundExtractions, compareFundMonths, getHoldingsSummary, getMultiMonthRange } from '../api/client.js';
 import { industryBadgeClass } from '../utils/industryColors.js';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, ReferenceLine, Cell, LabelList,
+} from 'recharts';
 
 // ─── Month Range Slider ───────────────────────────────────────────────────────
 function MonthRangeSlider({ extractions, month1, month2, onMonth1Change, onMonth2Change }) {
@@ -736,6 +740,14 @@ export default function Compare() {
               </span>
             </div>
 
+            {/* Waterfall chart */}
+            <CompareWaterfall
+              result={result}
+              scale={scale}
+              month1Label={fmtMonth(ext1Meta?.report_month)}
+              month2Label={fmtMonth(ext2Meta?.report_month)}
+            />
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
               <CompareColumn
                 title="New Entries"
@@ -986,6 +998,166 @@ function CompareColumn({ title, subtitle, count, color, icon, children, empty, d
             </div>
           : children}
       </div>
+    </div>
+  );
+}
+
+// ─── CompareWaterfall ─────────────────────────────────────────────────────────
+
+function CompareWaterfall({ result, scale, month1Label, month2Label }) {
+  const MAX_BARS = 22;
+
+  const bars = useMemo(() => {
+    const items = [
+      ...result.newHoldings.map(h => ({
+        name:     (h.stock_name || h.isin || '').replace(/\s+limited$/i, '').replace(/\s+ltd\.?$/i, ''),
+        fullName: h.stock_name,
+        delta:    parseFloat(((h.pct_nav || 0) * scale).toFixed(3)),
+        type:     'new',
+        industry: h.industry,
+        prev:     0,
+        next:     parseFloat(((h.pct_nav || 0) * scale).toFixed(3)),
+      })),
+      ...result.exitedHoldings.map(h => ({
+        name:     (h.stock_name || h.isin || '').replace(/\s+limited$/i, '').replace(/\s+ltd\.?$/i, ''),
+        fullName: h.stock_name,
+        delta:    parseFloat((-((h.pct_nav || 0) * scale)).toFixed(3)),
+        type:     'exit',
+        industry: h.industry,
+        prev:     parseFloat(((h.pct_nav || 0) * scale).toFixed(3)),
+        next:     0,
+      })),
+      ...result.weightChanges.map(h => ({
+        name:     (h.stock_name || h.isin || '').replace(/\s+limited$/i, '').replace(/\s+ltd\.?$/i, ''),
+        fullName: h.stock_name,
+        delta:    parseFloat(((h.nav_delta || 0) * scale).toFixed(3)),
+        type:     h.action, // 'added' | 'trimmed'
+        industry: h.industry,
+        prev:     parseFloat(((h.prev_pct_nav || 0) * scale).toFixed(3)),
+        next:     parseFloat(((h.pct_nav || 0) * scale).toFixed(3)),
+      })),
+    ]
+      .filter(b => Math.abs(b.delta) >= 0.01)
+      .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+      .slice(0, MAX_BARS);
+
+    // Positive first, then negative — cleaner visual
+    return [
+      ...items.filter(b => b.delta > 0).sort((a, b) => b.delta - a.delta),
+      ...items.filter(b => b.delta < 0).sort((a, b) => a.delta - b.delta),
+    ];
+  }, [result, scale]);
+
+  if (!bars.length) return null;
+
+  const maxAbs = Math.max(...bars.map(b => Math.abs(b.delta)), 0.1);
+  const domain = [-(maxAbs * 1.15), maxAbs * 1.15];
+
+  const TYPE_COLOR = {
+    new:     '#10b981', // emerald
+    exit:    '#ef4444', // red
+    added:   '#6366f1', // indigo
+    trimmed: '#f97316', // orange
+  };
+  const TYPE_LABEL = { new: 'New Entry', exit: 'Exited', added: 'Increased', trimmed: 'Trimmed' };
+
+  const CustomTooltip = ({ active, payload }) => {
+    if (!active || !payload?.[0]) return null;
+    const d = payload[0].payload;
+    const sign = d.delta > 0 ? '+' : '';
+    return (
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-3 text-xs max-w-[210px]">
+        <p className="font-semibold text-slate-800 dark:text-slate-200 mb-1 leading-tight">{d.fullName || d.name}</p>
+        {d.industry && <p className="text-slate-400 dark:text-slate-500 mb-2">{d.industry}</p>}
+        <div className="flex justify-between gap-4">
+          <span className="text-slate-500 dark:text-slate-400">Change</span>
+          <span className="font-bold tabular-nums" style={{ color: TYPE_COLOR[d.type] }}>
+            {sign}{d.delta.toFixed(2)}%
+          </span>
+        </div>
+        {d.prev > 0 && (
+          <div className="flex justify-between gap-4 mt-0.5">
+            <span className="text-slate-400 dark:text-slate-500">{month1Label}</span>
+            <span className="tabular-nums text-slate-600 dark:text-slate-400">{d.prev.toFixed(2)}%</span>
+          </div>
+        )}
+        {d.next > 0 && (
+          <div className="flex justify-between gap-4 mt-0.5">
+            <span className="text-slate-400 dark:text-slate-500">{month2Label}</span>
+            <span className="tabular-nums text-slate-600 dark:text-slate-400">{d.next.toFixed(2)}%</span>
+          </div>
+        )}
+        <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-700">
+          <span className="font-semibold" style={{ color: TYPE_COLOR[d.type] }}>{TYPE_LABEL[d.type]}</span>
+        </div>
+      </div>
+    );
+  };
+
+  const barHeight = 30;
+  const chartHeight = Math.max(260, bars.length * barHeight + 60);
+
+  return (
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-5">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Weight Impact Waterfall</h3>
+        <span className="text-xs text-slate-400 dark:text-slate-500">
+          {month1Label} → {month2Label} · top {bars.length} by impact
+        </span>
+      </div>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
+        Each bar = change in % of NAV · sorted by absolute impact
+      </p>
+
+      {/* Legend */}
+      <div className="flex items-center gap-4 flex-wrap mb-4">
+        {Object.entries(TYPE_LABEL).map(([type, label]) => (
+          <span key={type} className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ backgroundColor: TYPE_COLOR[type] }} />
+            {label}
+          </span>
+        ))}
+      </div>
+
+      <ResponsiveContainer width="100%" height={chartHeight}>
+        <BarChart
+          data={bars}
+          layout="vertical"
+          margin={{ top: 4, right: 56, bottom: 4, left: 160 }}
+          barCategoryGap="18%"
+        >
+          <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+          <XAxis
+            type="number"
+            domain={domain}
+            tickFormatter={v => `${v > 0 ? '+' : ''}${v.toFixed(1)}%`}
+            tick={{ fontSize: 10, fill: '#94a3b8' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            type="category"
+            dataKey="name"
+            width={155}
+            tick={{ fontSize: 11, fill: '#64748b' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(148,163,184,0.08)' }} />
+          <ReferenceLine x={0} stroke="#cbd5e1" strokeWidth={1.5} />
+          <Bar dataKey="delta" radius={[0, 3, 3, 0]} maxBarSize={22}>
+            {bars.map((b, i) => (
+              <Cell key={i} fill={TYPE_COLOR[b.type]} fillOpacity={0.85} />
+            ))}
+            <LabelList
+              dataKey="delta"
+              position="right"
+              formatter={v => `${v > 0 ? '+' : ''}${v.toFixed(2)}%`}
+              style={{ fontSize: 10, fill: '#94a3b8' }}
+            />
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import {
   Tooltip, ResponsiveContainer, ReferenceLine,
   LineChart, Line, Legend,
   AreaChart, Area,
+  BarChart, Bar, Cell,
   Treemap,
 } from 'recharts';
 import {
@@ -926,6 +927,158 @@ function SectorBumpChart({ data, topN }) {
   );
 }
 
+// ─── Sector Drift — Waterfall sub-chart ──────────────────────────────────────
+
+function SectorWaterfall({ data, topN, fundName }) {
+  const months = data.months;
+
+  const [fromIdx, setFromIdx] = useState(Math.max(0, months.length - 2));
+  const [toIdx,   setToIdx]   = useState(months.length - 1);
+
+  const bars = useMemo(() => {
+    if (months.length < 2) return [];
+    const fromRow = data.series.find(s => s.month === months[fromIdx]) ?? {};
+    const toRow   = data.series.find(s => s.month === months[toIdx])   ?? {};
+    const inds    = data.industries.slice(0, topN);
+    return inds
+      .map(ind => ({
+        name:  ind.length > 20 ? ind.slice(0, 18) + '…' : ind,
+        full:  ind,
+        prev:  parseFloat((fromRow[ind] || 0).toFixed(2)),
+        next:  parseFloat((toRow[ind]   || 0).toFixed(2)),
+        delta: parseFloat(((toRow[ind] || 0) - (fromRow[ind] || 0)).toFixed(2)),
+      }))
+      .filter(b => b.prev > 0 || b.next > 0)
+      .sort((a, b) => b.delta - a.delta);
+  }, [data, fromIdx, toIdx, topN]);
+
+  if (months.length < 2) return (
+    <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400 text-sm mb-6">
+      Need at least 2 months of data.
+    </div>
+  );
+
+  const maxAbs   = Math.max(...bars.map(b => Math.abs(b.delta)), 0.5);
+  const domain   = [-(maxAbs * 1.25), maxAbs * 1.25];
+  const fromLabel = fmtMonth(months[fromIdx]);
+  const toLabel   = fmtMonth(months[toIdx]);
+
+  const barColor = d => {
+    if (d.delta > 0.5)  return '#6366f1'; // indigo — significant gain
+    if (d.delta > 0)    return '#a5b4fc'; // light indigo — small gain
+    if (d.delta < -0.5) return '#f97316'; // orange — significant loss
+    return '#fdba74';                      // light orange — small loss
+  };
+
+  const WaterfallTooltip = ({ active, payload }) => {
+    if (!active || !payload?.[0]) return null;
+    const d = payload[0].payload;
+    const sign = d.delta > 0 ? '+' : '';
+    return (
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-3 text-xs">
+        <p className="font-semibold text-slate-800 dark:text-slate-200 mb-2">{d.full}</p>
+        <div className="flex justify-between gap-6">
+          <span className="text-slate-500 dark:text-slate-400">{fromLabel}</span>
+          <span className="tabular-nums font-semibold text-slate-700 dark:text-slate-300">{d.prev.toFixed(2)}%</span>
+        </div>
+        <div className="flex justify-between gap-6">
+          <span className="text-slate-500 dark:text-slate-400">{toLabel}</span>
+          <span className="tabular-nums font-semibold text-slate-700 dark:text-slate-300">{d.next.toFixed(2)}%</span>
+        </div>
+        <div className="flex justify-between gap-6 mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-700">
+          <span className="text-slate-500 dark:text-slate-400">Change</span>
+          <span className="tabular-nums font-bold" style={{ color: barColor(d) }}>
+            {sign}{d.delta.toFixed(2)}%
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6">
+      <div className="flex items-center justify-between mb-1 flex-wrap gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Sector Weight Change</h2>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{fundName} · bar = Δ% of NAV between two months</p>
+        </div>
+        {/* Month pair selector */}
+        <div className="flex items-center gap-2 text-xs">
+          <select
+            value={fromIdx}
+            onChange={e => setFromIdx(Number(e.target.value))}
+            className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            {months.map((m, i) => i < months.length - 1 && (
+              <option key={m} value={i}>{fmtMonth(m)}</option>
+            ))}
+          </select>
+          <span className="text-slate-400 dark:text-slate-500">→</span>
+          <select
+            value={toIdx}
+            onChange={e => setToIdx(Number(e.target.value))}
+            className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            {months.map((m, i) => i > fromIdx && (
+              <option key={m} value={i}>{fmtMonth(m)}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-4 flex-wrap my-4">
+        <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <span className="w-2.5 h-2.5 rounded-sm inline-block bg-indigo-500" /> Gained (&gt;0.5%)
+        </span>
+        <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <span className="w-2.5 h-2.5 rounded-sm inline-block bg-indigo-300" /> Gained slightly
+        </span>
+        <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <span className="w-2.5 h-2.5 rounded-sm inline-block bg-orange-400" /> Lost (&gt;0.5%)
+        </span>
+        <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <span className="w-2.5 h-2.5 rounded-sm inline-block bg-orange-300" /> Lost slightly
+        </span>
+      </div>
+
+      <ResponsiveContainer width="100%" height={Math.max(280, bars.length * 34 + 60)}>
+        <BarChart
+          data={bars}
+          layout="vertical"
+          margin={{ top: 4, right: 60, bottom: 4, left: 148 }}
+          barCategoryGap="20%"
+        >
+          <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+          <XAxis
+            type="number"
+            domain={domain}
+            tickFormatter={v => `${v > 0 ? '+' : ''}${v.toFixed(1)}%`}
+            tick={{ fontSize: 10, fill: '#94a3b8' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            type="category"
+            dataKey="name"
+            width={143}
+            tick={{ fontSize: 11, fill: '#64748b' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip content={<WaterfallTooltip />} cursor={{ fill: 'rgba(148,163,184,0.08)' }} />
+          <ReferenceLine x={0} stroke="#cbd5e1" strokeWidth={1.5} />
+          <Bar dataKey="delta" radius={[0, 3, 3, 0]} maxBarSize={22}>
+            {bars.map((b, i) => (
+              <Cell key={i} fill={barColor(b)} fillOpacity={0.9} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 // ─── Sector Drift tab ─────────────────────────────────────────────────────────
 
 function SectorDrift({ allFunds }) {
@@ -980,8 +1133,9 @@ function SectorDrift({ allFunds }) {
   };
 
   const chartTypes = [
-    { id: 'area', label: 'Stacked Area' },
-    { id: 'bump', label: 'Rank Chart' },
+    { id: 'area',      label: 'Stacked Area' },
+    { id: 'bump',      label: 'Rank Chart'   },
+    { id: 'waterfall', label: 'Waterfall'    },
   ];
 
   return (
@@ -1060,7 +1214,8 @@ function SectorDrift({ allFunds }) {
             </div>
           )}
 
-          {chartType === 'bump' && <SectorBumpChart data={data} topN={topN} />}
+          {chartType === 'bump'      && <SectorBumpChart  data={data} topN={topN} />}
+          {chartType === 'waterfall' && <SectorWaterfall  data={data} topN={topN} fundName={allFunds.find(f => f.id === fundId)?.name ?? ''} />}
 
           {/* Month-by-month table */}
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm overflow-x-auto">
