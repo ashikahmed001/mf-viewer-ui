@@ -1051,15 +1051,23 @@ function CompareWaterfall({ result, scale, month1Label, month2Label }) {
         prev:     parseFloat(((h.pct_nav || 0) * scale).toFixed(3)),
         next:     0,
       })),
-      ...result.weightChanges.map(h => ({
-        name:     (h.stock_name || h.isin || '').replace(/\s+limited$/i, '').replace(/\s+ltd\.?$/i, ''),
-        fullName: h.stock_name,
-        delta:    parseFloat(((h.nav_delta || 0) * scale).toFixed(3)),
-        type:     h.action, // 'added' | 'trimmed'
-        industry: h.industry,
-        prev:     parseFloat(((h.prev_pct_nav || 0) * scale).toFixed(3)),
-        next:     parseFloat(((h.pct_nav || 0) * scale).toFixed(3)),
-      })),
+      ...result.weightChanges.map(h => {
+        const navDelta = (h.nav_delta || 0) * scale;
+        // Drift cases: bought more but weight fell, or trimmed but weight rose
+        let type = h.action;
+        if (h.action === 'added'   && navDelta < 0) type = 'bought_drift';
+        if (h.action === 'trimmed' && navDelta > 0) type = 'sold_drift';
+        return {
+          name:     (h.stock_name || h.isin || '').replace(/\s+limited$/i, '').replace(/\s+ltd\.?$/i, ''),
+          fullName: h.stock_name,
+          delta:    parseFloat(navDelta.toFixed(3)),
+          type,
+          industry: h.industry,
+          prev:     parseFloat(((h.prev_pct_nav || 0) * scale).toFixed(3)),
+          next:     parseFloat(((h.pct_nav || 0) * scale).toFixed(3)),
+          qtyAction: h.action, // original qty action for tooltip
+        };
+      }),
     ]
       .filter(b => Math.abs(b.delta) >= 0.01)
       .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
@@ -1078,12 +1086,21 @@ function CompareWaterfall({ result, scale, month1Label, month2Label }) {
   const domain = [-(maxAbs * 1.15), maxAbs * 1.15];
 
   const TYPE_COLOR = {
-    new:     '#10b981', // emerald
-    exit:    '#ef4444', // red
-    added:   '#6366f1', // indigo
-    trimmed: '#f97316', // orange
+    new:          '#10b981', // emerald
+    exit:         '#ef4444', // red
+    added:        '#6366f1', // indigo  — bought more, weight ↑
+    trimmed:      '#f97316', // orange  — sold some, weight ↓
+    bought_drift: '#a855f7', // violet  — bought more, but weight ↓ (price drag)
+    sold_drift:   '#14b8a6', // teal    — sold some, but weight ↑ (price lift)
   };
-  const TYPE_LABEL = { new: 'New Entry', exit: 'Exited', added: 'Increased', trimmed: 'Trimmed' };
+  const TYPE_LABEL = {
+    new:          'New Entry',
+    exit:         'Exited',
+    added:        'Increased',
+    trimmed:      'Trimmed',
+    bought_drift: 'Bought · weight ↓',
+    sold_drift:   'Sold · weight ↑',
+  };
 
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload?.[0]) return null;
@@ -1113,6 +1130,13 @@ function CompareWaterfall({ result, scale, month1Label, month2Label }) {
         )}
         <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-700">
           <span className="font-semibold" style={{ color: TYPE_COLOR[d.type] }}>{TYPE_LABEL[d.type]}</span>
+          {(d.type === 'bought_drift' || d.type === 'sold_drift') && (
+            <p className="text-slate-400 dark:text-slate-500 mt-1 leading-snug">
+              {d.type === 'bought_drift'
+                ? 'Shares added but stock underperformed the portfolio'
+                : 'Shares trimmed but stock outperformed the portfolio'}
+            </p>
+          )}
         </div>
       </div>
     );
