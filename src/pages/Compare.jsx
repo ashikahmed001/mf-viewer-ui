@@ -529,6 +529,7 @@ export default function Compare() {
   const [scale, setScale] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [compareView, setCompareView] = useState('waterfall'); // 'waterfall' | 'columns'
 
   useEffect(() => {
     Promise.all([getFund(id), getFundExtractions(id)])
@@ -729,26 +730,49 @@ export default function Compare() {
         const drifters2 = filteredDrifters(result.navDrifters, scale);
         return (
           <div>
-            {/* Summary bar */}
-            <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-slate-500">
-              <span className="font-medium text-slate-700">{fmtMonth(ext1Meta?.report_month)}</span>
-              <span className="text-slate-500">→</span>
-              <span className="font-medium text-slate-700">{fmtMonth(ext2Meta?.report_month)}</span>
-              <span className="ml-2 text-xs text-slate-400">
+            {/* Summary bar + view toggle */}
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <span className="font-medium text-slate-700 dark:text-slate-200 text-sm">{fmtMonth(ext1Meta?.report_month)}</span>
+              <span className="text-slate-400 dark:text-slate-500 text-sm">→</span>
+              <span className="font-medium text-slate-700 dark:text-slate-200 text-sm">{fmtMonth(ext2Meta?.report_month)}</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">
                 {result.newHoldings.length + result.exitedHoldings.length + result.weightChanges.length} active changes
                 {drifters2.length > 0 && ` · ${drifters2.length} NAV drifts`}
               </span>
+              <div className="ml-auto flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
+                <button
+                  onClick={() => setCompareView('waterfall')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                    compareView === 'waterfall'
+                      ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <Activity className="w-3.5 h-3.5" /> Waterfall
+                </button>
+                <button
+                  onClick={() => setCompareView('columns')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                    compareView === 'columns'
+                      ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <GitCompare className="w-3.5 h-3.5" /> Breakdown
+                </button>
+              </div>
             </div>
 
-            {/* Waterfall chart */}
-            <CompareWaterfall
-              result={result}
-              scale={scale}
-              month1Label={fmtMonth(ext1Meta?.report_month)}
-              month2Label={fmtMonth(ext2Meta?.report_month)}
-            />
+            {compareView === 'waterfall' && (
+              <CompareWaterfall
+                result={result}
+                scale={scale}
+                month1Label={fmtMonth(ext1Meta?.report_month)}
+                month2Label={fmtMonth(ext2Meta?.report_month)}
+              />
+            )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+            {compareView === 'columns' && <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
               <CompareColumn
                 title="New Entries"
                 count={result.newHoldings.length}
@@ -916,7 +940,7 @@ export default function Compare() {
                   <HoldingRow key={h.isin} h={h} variant="drifted" scale={scale} />
                 ))}
               </CompareColumn>
-            </div>
+            </div>}
           </div>
         );
       })()}
