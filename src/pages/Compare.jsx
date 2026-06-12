@@ -766,6 +766,7 @@ export default function Compare() {
             {compareView === 'waterfall' && (
               <CompareWaterfall
                 result={result}
+                drifters={drifters2}
                 scale={scale}
                 month1Label={fmtMonth(ext1Meta?.report_month)}
                 month2Label={fmtMonth(ext2Meta?.report_month)}
@@ -1028,13 +1029,14 @@ function CompareColumn({ title, subtitle, count, color, icon, children, empty, d
 
 // ─── CompareWaterfall ─────────────────────────────────────────────────────────
 
-function CompareWaterfall({ result, scale, month1Label, month2Label }) {
+function CompareWaterfall({ result, drifters = [], scale, month1Label, month2Label }) {
   const MAX_BARS = 22;
 
   const bars = useMemo(() => {
+    const shortName = h => (h.stock_name || h.isin || '').replace(/\s+limited$/i, '').replace(/\s+ltd\.?$/i, '');
     const items = [
       ...result.newHoldings.map(h => ({
-        name:     (h.stock_name || h.isin || '').replace(/\s+limited$/i, '').replace(/\s+ltd\.?$/i, ''),
+        name:     shortName(h),
         fullName: h.stock_name,
         delta:    parseFloat(((h.pct_nav || 0) * scale).toFixed(3)),
         type:     'new',
@@ -1043,13 +1045,23 @@ function CompareWaterfall({ result, scale, month1Label, month2Label }) {
         next:     parseFloat(((h.pct_nav || 0) * scale).toFixed(3)),
       })),
       ...result.exitedHoldings.map(h => ({
-        name:     (h.stock_name || h.isin || '').replace(/\s+limited$/i, '').replace(/\s+ltd\.?$/i, ''),
+        name:     shortName(h),
         fullName: h.stock_name,
         delta:    parseFloat((-((h.pct_nav || 0) * scale)).toFixed(3)),
         type:     'exit',
         industry: h.industry,
         prev:     parseFloat(((h.pct_nav || 0) * scale).toFixed(3)),
         next:     0,
+      })),
+      ...drifters.map(h => ({
+        name:      shortName(h),
+        fullName:  h.stock_name,
+        delta:     parseFloat(((h.nav_delta || 0) * scale).toFixed(3)),
+        type:      'nav_drift',
+        industry:  h.industry,
+        prev:      parseFloat(((h.prev_pct_nav || 0) * scale).toFixed(3)),
+        next:      parseFloat(((h.pct_nav      || 0) * scale).toFixed(3)),
+        qtyAction: null,
       })),
       ...result.weightChanges.map(h => {
         const navDelta = (h.nav_delta || 0) * scale;
@@ -1092,6 +1104,7 @@ function CompareWaterfall({ result, scale, month1Label, month2Label }) {
     trimmed:      '#f97316', // orange  — sold some, weight ↓
     bought_drift: '#a855f7', // violet  — bought more, but weight ↓ (price drag)
     sold_drift:   '#14b8a6', // teal    — sold some, but weight ↑ (price lift)
+    nav_drift:    '#f59e0b', // amber   — qty unchanged, price moved
   };
   const TYPE_LABEL = {
     new:          'New Entry',
@@ -1100,6 +1113,7 @@ function CompareWaterfall({ result, scale, month1Label, month2Label }) {
     trimmed:      'Trimmed',
     bought_drift: 'Bought · weight ↓',
     sold_drift:   'Sold · weight ↑',
+    nav_drift:    'NAV Drift',
   };
 
   const CustomTooltip = ({ active, payload }) => {
@@ -1135,6 +1149,11 @@ function CompareWaterfall({ result, scale, month1Label, month2Label }) {
               {d.type === 'bought_drift'
                 ? 'Shares added but stock underperformed the portfolio'
                 : 'Shares trimmed but stock outperformed the portfolio'}
+            </p>
+          )}
+          {d.type === 'nav_drift' && (
+            <p className="text-slate-400 dark:text-slate-500 mt-1 leading-snug">
+              Quantity unchanged — weight shifted due to price movement
             </p>
           )}
         </div>
