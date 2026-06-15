@@ -911,7 +911,7 @@ export default function UploadTab() {
             const out  = XLSX.write(newWb, { bookType: 'xlsx', type: 'array' });
             const blob = new File(
               [out],
-              `${f.name.replace(/\.[^.]+$/, '')} — ${sheet.name}.xlsx`,
+              `${f.name.replace(/\.[^.]+$/, '')} - ${sheet.name}.xlsx`,
               { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
             );
             const newId = crypto.randomUUID();
