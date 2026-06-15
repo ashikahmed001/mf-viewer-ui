@@ -452,7 +452,10 @@ function NavHistoryPanel({ navData, canRolling }) {
   }
 
   function xTickRolling(ts) {
-    return new Date(ts).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+    const d = new Date(ts);
+    const mon = d.toLocaleDateString('en-IN', { month: 'short' });
+    const yr  = String(d.getFullYear()).slice(-2);
+    return `${mon} '${yr}`;
   }
 
   function CustomTooltip({ active, payload }) {
@@ -600,31 +603,43 @@ function NavHistoryPanel({ navData, canRolling }) {
         <>
           {/* Returns card */}
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Returns</h3>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-              {rollingReturns.map(({ label, ret }) => (
-                <div key={label} className="text-center bg-slate-50 dark:bg-slate-900 rounded-xl p-3">
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{label}</p>
-                  <p className={`text-base font-bold ${
-                    ret === null
-                      ? 'text-slate-300 dark:text-slate-600'
-                      : ret >= 0 ? 'text-emerald-500' : 'text-rose-500'
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Point-in-time returns</h3>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {rollingReturns.map(({ label, ret }) => {
+                const isNull = ret === null;
+                const isPos  = !isNull && ret >= 0;
+                const isNeg  = !isNull && ret < 0;
+                return (
+                  <div key={label} className={`rounded-xl p-3 text-center border ${
+                    isNull ? 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-700'
+                    : isPos ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900/50'
+                    :         'bg-rose-50 dark:bg-rose-950/40 border-rose-100 dark:border-rose-900/50'
                   }`}>
-                    {ret === null ? '—' : `${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%`}
-                  </p>
-                </div>
-              ))}
+                    <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 mb-1.5 tracking-wide">{label}</p>
+                    <p className={`text-lg font-bold leading-none ${
+                      isNull ? 'text-slate-300 dark:text-slate-600'
+                      : isPos ? 'text-emerald-600 dark:text-emerald-400'
+                      :         'text-rose-600 dark:text-rose-400'
+                    }`}>
+                      {isNull ? '—' : `${isPos ? '+' : ''}${ret.toFixed(1)}%`}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           {/* Rolling return chart card */}
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
+            {/* Header row */}
+            <div className="flex items-start justify-between mb-1">
               <div>
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Rolling return</h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">How consistent is performance over time?</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                  {rollingWindow === '1y' ? '1-year' : '3-year'} trailing return at every point in history
+                </p>
               </div>
-              <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-lg">
+              <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-lg flex-shrink-0 ml-4">
                 {['1y', '3y'].map(w => (
                   <button
                     key={w}
@@ -632,7 +647,7 @@ function NavHistoryPanel({ navData, canRolling }) {
                     className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
                       rollingWindow === w
                         ? 'bg-violet-600 text-white shadow-sm'
-                        : 'text-slate-400 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white'
+                        : 'text-slate-400 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white'
                     }`}
                   >
                     {w.toUpperCase()}
@@ -640,61 +655,87 @@ function NavHistoryPanel({ navData, canRolling }) {
                 ))}
               </div>
             </div>
+
             {rollingSeries.length < 10 ? (
               <p className="text-center text-sm text-slate-400 dark:text-slate-500 py-10">
                 Not enough data for rolling analysis
               </p>
             ) : (
-              <ResponsiveContainer width="100%" height={220}>
-                <AreaChart data={rollingSeries} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
-                  <defs>
-                    <linearGradient id="rollingFillPos" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#10b981" stopOpacity={0.18} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="rollingFillNeg" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#f43f5e" stopOpacity={0.18} />
-                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f8fafc" vertical={false} />
-                  <XAxis
-                    dataKey="ts"
-                    type="number"
-                    scale="time"
-                    domain={['dataMin', 'dataMax']}
-                    tickFormatter={xTickRolling}
-                    tick={{ fontSize: 11, fill: '#94a3b8' }}
-                    tickLine={false}
-                    axisLine={false}
-                    minTickGap={50}
-                  />
-                  <YAxis
-                    domain={[Math.min(rollingMin * 1.1, -5), Math.max(rollingMax * 1.1, 5)]}
-                    tickFormatter={v => `${v.toFixed(0)}%`}
-                    tick={{ fontSize: 11, fill: '#94a3b8' }}
-                    tickLine={false}
-                    axisLine={false}
-                    width={48}
-                  />
-                  <ReferenceLine y={0} stroke="#94a3b8" strokeDasharray="4 3" strokeWidth={1} />
-                  <Tooltip content={<RollingTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey={rollingKey}
-                    stroke="#8b5cf6"
-                    fill="url(#rollingFillPos)"
-                    dot={false}
-                    strokeWidth={2}
-                    activeDot={{ r: 4, fill: '#8b5cf6', stroke: '#fff', strokeWidth: 2 }}
-                    connectNulls={false}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <>
+                {/* Summary stats row */}
+                {(() => {
+                  const vals = rollingValues;
+                  if (!vals.length) return null;
+                  const pctPos = Math.round(vals.filter(v => v >= 0).length / vals.length * 100);
+                  const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
+                  return (
+                    <div className="flex gap-4 mt-3 mb-4 text-xs">
+                      <span className="text-slate-400 dark:text-slate-500">
+                        Positive periods:{' '}
+                        <span className={`font-semibold ${pctPos >= 70 ? 'text-emerald-500' : pctPos >= 50 ? 'text-amber-500' : 'text-rose-500'}`}>
+                          {pctPos}%
+                        </span>
+                      </span>
+                      <span className="text-slate-400 dark:text-slate-500">
+                        Avg return:{' '}
+                        <span className={`font-semibold ${avg >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {avg >= 0 ? '+' : ''}{avg.toFixed(1)}%
+                        </span>
+                      </span>
+                    </div>
+                  );
+                })()}
+
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={rollingSeries} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="rollingFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%"  stopColor="#8b5cf6" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} className="dark:stroke-slate-700" />
+                    <XAxis
+                      dataKey="ts"
+                      type="number"
+                      scale="time"
+                      domain={['dataMin', 'dataMax']}
+                      tickFormatter={xTickRolling}
+                      tick={{ fontSize: 11, fill: '#94a3b8' }}
+                      tickLine={false}
+                      axisLine={false}
+                      minTickGap={60}
+                    />
+                    <YAxis
+                      domain={[Math.min(rollingMin * 1.1, -5), Math.max(rollingMax * 1.1, 5)]}
+                      tickFormatter={v => `${v.toFixed(0)}%`}
+                      tick={{ fontSize: 11, fill: '#94a3b8' }}
+                      tickLine={false}
+                      axisLine={false}
+                      width={44}
+                    />
+                    <ReferenceLine
+                      y={0}
+                      stroke="#cbd5e1"
+                      strokeDasharray="4 3"
+                      strokeWidth={1.5}
+                      label={{ value: '0%', position: 'insideTopLeft', fontSize: 10, fill: '#94a3b8', dy: -4 }}
+                    />
+                    <Tooltip content={<RollingTooltip />} />
+                    <Area
+                      type="monotone"
+                      dataKey={rollingKey}
+                      stroke="#8b5cf6"
+                      fill="url(#rollingFill)"
+                      dot={false}
+                      strokeWidth={1.5}
+                      activeDot={{ r: 4, fill: '#8b5cf6', stroke: '#fff', strokeWidth: 2 }}
+                      connectNulls={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </>
             )}
-            <p className="text-xs text-slate-400 dark:text-slate-500 text-right mt-2">
-              Above 0% = positive rolling return · Below 0% = negative
-            </p>
           </div>
         </>
       ) : (
