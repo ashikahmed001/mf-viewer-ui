@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, BarChart2, GitCompare, FileDown, RefreshCw, Printer } from 'lucide-react';
 import { getFund, getFundExtractions, getHoldings, getHoldingsSummary, getStockTrend, getFundNav } from '../api/client.js';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from 'recharts';
 import { useFeatureFlags, canUseFeature } from '../context/FeatureFlagsContext.jsx';
 import { useSubscription } from '../context/SubscriptionContext.jsx';
 import UpgradePrompt from '../components/UpgradePrompt.jsx';
@@ -28,8 +28,9 @@ export default function FundDetail() {
   const [navData, setNavData]     = useState(null);
   const { flags, overrides } = useFeatureFlags();
   const { isPro }            = useSubscription();
-  const canNav   = canUseFeature(flags, overrides, isPro, 'nav_history');
-  const canTrend = canUseFeature(flags, overrides, isPro, 'stock_trend');
+  const canNav     = canUseFeature(flags, overrides, isPro, 'nav_history');
+  const canTrend   = canUseFeature(flags, overrides, isPro, 'stock_trend');
+  const canRolling = canUseFeature(flags, overrides, isPro, 'rolling_returns');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -170,7 +171,7 @@ export default function FundDetail() {
           {!canNav && <span className="text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Pro</span>}
         </div>
         {canNav
-          ? <NavHistoryPanel navData={navData} />
+          ? <NavHistoryPanel navData={navData} canRolling={canRolling} />
           : <UpgradePrompt feature="NAV history charts" />
         }
       </div>
@@ -302,17 +303,27 @@ export default function FundDetail() {
 }
 
 const NAV_RANGES = [
-  { key: '1m',  label: '1M',       days: 30 },
-  { key: '3m',  label: '3M',       days: 90 },
-  { key: '6m',  label: '6M',       days: 180 },
-  { key: '1y',  label: '1Y',       days: 365 },
-  { key: '3y',  label: '3Y',       days: 365 * 3 },
-  { key: '5y',  label: '5Y',       days: 365 * 5 },
-  { key: 'all', label: 'All',      days: null },
+  { key: '1m',  label: '1M',  days: 30 },
+  { key: '3m',  label: '3M',  days: 90 },
+  { key: '6m',  label: '6M',  days: 180 },
+  { key: '1y',  label: '1Y',  days: 365 },
+  { key: '3y',  label: '3Y',  days: 365 * 3 },
+  { key: '5y',  label: '5Y',  days: 365 * 5 },
+  { key: 'all', label: 'All', days: null },
 ];
 
-function NavHistoryPanel({ navData }) {
-  const [range, setRange] = useState('1y');
+const RETURN_PERIODS = [
+  { label: '1M', days: 30 },
+  { label: '3M', days: 91 },
+  { label: '6M', days: 182 },
+  { label: '1Y', days: 365 },
+  { label: '3Y', days: 1095 },
+  { label: '5Y', days: 1825 },
+];
+
+function NavHistoryPanel({ navData, canRolling }) {
+  const [range,         setRange]         = useState('1y');
+  const [rollingWindow, setRollingWindow] = useState('1y');
 
   if (!navData) {
     return (
@@ -399,6 +410,10 @@ function NavHistoryPanel({ navData }) {
     return d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
   }
 
+  function xTickRolling(ts) {
+    return new Date(ts).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+  }
+
   function CustomTooltip({ active, payload }) {
     if (!active || !payload?.length) return null;
     const d = payload[0].payload;
@@ -410,8 +425,65 @@ function NavHistoryPanel({ navData }) {
     );
   }
 
+  function RollingTooltip({ active, payload }) {
+    if (!active || !payload?.length) return null;
+    const val = payload[0]?.value;
+    const ts  = payload[0]?.payload?.ts;
+    if (val == null) return null;
+    return (
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 shadow-lg">
+        <p className={`font-bold ${val >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+          {val >= 0 ? '+' : ''}{val.toFixed(2)}%
+        </p>
+        <p className="text-slate-400 dark:text-slate-500 mt-0.5">{ts ? fmtDate(ts) : ''}</p>
+      </div>
+    );
+  }
+
+  // ── Rolling returns: point-in-time for each standard period ────────────────
+  const rollingReturns = useMemo(() => {
+    if (!all.length) return [];
+    const latest = all[all.length - 1];
+    return RETURN_PERIODS.map(({ label, days }) => {
+      const targetTs = latest.ts - days * 86400 * 1000;
+      let past = null;
+      for (let i = all.length - 2; i >= 0; i--) {
+        if (all[i].ts <= targetTs) { past = all[i]; break; }
+      }
+      if (!past) return { label, ret: null };
+      return { label, ret: (latest.nav / past.nav - 1) * 100 };
+    });
+  }, [all]);
+
+  // ── Rolling return time-series (O(n) two-pointer) ─────────────────────────
+  const rollingSeries = useMemo(() => {
+    if (all.length < 60) return [];
+    const MS_1Y = 365 * 86400 * 1000;
+    const MS_3Y = 1095 * 86400 * 1000;
+    const result = [];
+    let p1 = 0, p3 = 0;
+    for (let i = 1; i < all.length; i++) {
+      const cur = all[i];
+      while (p1 + 1 < i && all[p1 + 1].ts <= cur.ts - MS_1Y) p1++;
+      while (p3 + 1 < i && all[p3 + 1].ts <= cur.ts - MS_3Y) p3++;
+      const ret1y = all[p1].ts <= cur.ts - MS_1Y
+        ? parseFloat(((cur.nav / all[p1].nav - 1) * 100).toFixed(2)) : null;
+      const ret3y = all[p3].ts <= cur.ts - MS_3Y
+        ? parseFloat(((cur.nav / all[p3].nav - 1) * 100).toFixed(2)) : null;
+      if (ret1y !== null || ret3y !== null) result.push({ ts: cur.ts, ret1y, ret3y });
+    }
+    const step = Math.max(1, Math.floor(result.length / 300));
+    return result.filter((_, i) => i % step === 0 || i === result.length - 1);
+  }, [all]);
+
+  const rollingKey    = rollingWindow === '1y' ? 'ret1y' : 'ret3y';
+  const rollingValues = rollingSeries.map(p => p[rollingKey]).filter(v => v != null);
+  const rollingMin    = rollingValues.length ? Math.min(...rollingValues) : -20;
+  const rollingMax    = rollingValues.length ? Math.max(...rollingValues) : 60;
+
   return (
     <div className="space-y-4">
+
       {/* Header: scheme + key stats */}
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4">
         <div className="flex items-start justify-between flex-wrap gap-4">
@@ -517,6 +589,112 @@ function NavHistoryPanel({ navData }) {
           </span>
         </p>
       </div>
+
+      {/* ── Rolling returns — pro gated ──────────────────────────────────────── */}
+      {canRolling ? (
+        <>
+          {/* Returns card */}
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Returns</h3>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+              {rollingReturns.map(({ label, ret }) => (
+                <div key={label} className="text-center bg-slate-50 dark:bg-slate-900 rounded-xl p-3">
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{label}</p>
+                  <p className={`text-base font-bold ${
+                    ret === null
+                      ? 'text-slate-300 dark:text-slate-600'
+                      : ret >= 0 ? 'text-emerald-500' : 'text-rose-500'
+                  }`}>
+                    {ret === null ? '—' : `${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%`}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Rolling return chart card */}
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Rolling return</h3>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">How consistent is performance over time?</p>
+              </div>
+              <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                {['1y', '3y'].map(w => (
+                  <button
+                    key={w}
+                    onClick={() => setRollingWindow(w)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                      rollingWindow === w
+                        ? 'bg-violet-600 text-white shadow-sm'
+                        : 'text-slate-400 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white'
+                    }`}
+                  >
+                    {w.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {rollingSeries.length < 10 ? (
+              <p className="text-center text-sm text-slate-400 dark:text-slate-500 py-10">
+                Not enough data for rolling analysis
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={220}>
+                <AreaChart data={rollingSeries} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
+                  <defs>
+                    <linearGradient id="rollingFillPos" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#10b981" stopOpacity={0.18} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="rollingFillNeg" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#f43f5e" stopOpacity={0.18} />
+                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f8fafc" vertical={false} />
+                  <XAxis
+                    dataKey="ts"
+                    type="number"
+                    scale="time"
+                    domain={['dataMin', 'dataMax']}
+                    tickFormatter={xTickRolling}
+                    tick={{ fontSize: 11, fill: '#94a3b8' }}
+                    tickLine={false}
+                    axisLine={false}
+                    minTickGap={50}
+                  />
+                  <YAxis
+                    domain={[Math.min(rollingMin * 1.1, -5), Math.max(rollingMax * 1.1, 5)]}
+                    tickFormatter={v => `${v.toFixed(0)}%`}
+                    tick={{ fontSize: 11, fill: '#94a3b8' }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={48}
+                  />
+                  <ReferenceLine y={0} stroke="#94a3b8" strokeDasharray="4 3" strokeWidth={1} />
+                  <Tooltip content={<RollingTooltip />} />
+                  <Area
+                    type="monotone"
+                    dataKey={rollingKey}
+                    stroke="#8b5cf6"
+                    fill="url(#rollingFillPos)"
+                    dot={false}
+                    strokeWidth={2}
+                    activeDot={{ r: 4, fill: '#8b5cf6', stroke: '#fff', strokeWidth: 2 }}
+                    connectNulls={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+            <p className="text-xs text-slate-400 dark:text-slate-500 text-right mt-2">
+              Above 0% = positive rolling return · Below 0% = negative
+            </p>
+          </div>
+        </>
+      ) : (
+        <UpgradePrompt feature="rolling returns analysis" />
+      )}
     </div>
   );
 }
