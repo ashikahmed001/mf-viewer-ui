@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import {
   Upload, FileSpreadsheet, X, CheckCircle, AlertTriangle,
   Loader2, Plus, Trash2, ChevronDown, ChevronUp, Save, RotateCcw,
-  Info, AlertCircle, Layers, Eye, EyeOff,
+  Info, AlertCircle, Layers, Eye,
 } from 'lucide-react';
 import { uploadSingleFile, uploadBatchStream, importExtraction, getFunds } from '../../api/client.js';
 
@@ -196,126 +196,202 @@ function FileCard({ item, onRemove, onSheetsChange }) {
   );
 }
 
+// ─── SheetPreviewModal ────────────────────────────────────────────────────────
+function SheetPreviewModal({ sheet, onClose }) {
+  // Close on Escape
+  useEffect(() => {
+    function onKey(e) { if (e.key === 'Escape') onClose(); }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  if (!sheet?.data?.length) return null;
+  const headers  = sheet.data[0] ?? [];
+  const dataRows = sheet.data.slice(1);
+  const colCount = Math.max(...sheet.data.map(r => r.length));
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-5xl flex flex-col overflow-hidden"
+        style={{ maxHeight: '88vh' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Modal header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center shrink-0">
+              <FileSpreadsheet className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 truncate">{sheet.name}</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                {dataRows.length} row{dataRows.length !== 1 ? 's' : ''} · {colCount} column{colCount !== 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="shrink-0 ml-4 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Scrollable table */}
+        <div className="overflow-auto flex-1">
+          <table className="text-xs w-max border-collapse">
+            {/* Sticky header row */}
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-slate-100 dark:bg-slate-800">
+                <th className="px-3 py-2.5 text-right text-slate-400 dark:text-slate-500 border-b border-r border-slate-200 dark:border-slate-700 w-10 font-normal select-none">
+                  #
+                </th>
+                {Array.from({ length: colCount }, (_, ci) => (
+                  <th
+                    key={ci}
+                    className="px-3 py-2.5 text-left border-b border-r border-slate-200 dark:border-slate-700 font-semibold text-slate-700 dark:text-slate-200 whitespace-nowrap"
+                  >
+                    {headers[ci] ?? <span className="text-slate-400 dark:text-slate-500 font-normal">Col {ci + 1}</span>}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {dataRows.map((row, ri) => (
+                <tr
+                  key={ri}
+                  className={`transition-colors hover:bg-indigo-50/60 dark:hover:bg-indigo-950/20 ${
+                    ri % 2 === 0
+                      ? 'bg-white dark:bg-slate-900'
+                      : 'bg-slate-50/60 dark:bg-slate-800/30'
+                  }`}
+                >
+                  <td className="px-3 py-1.5 text-right text-slate-300 dark:text-slate-600 border-r border-b border-slate-100 dark:border-slate-800 select-none">
+                    {ri + 1}
+                  </td>
+                  {Array.from({ length: colCount }, (_, ci) => {
+                    const cell = row[ci] ?? '';
+                    return (
+                      <td
+                        key={ci}
+                        className="px-3 py-1.5 border-r border-b border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap max-w-[220px] truncate"
+                        title={cell || undefined}
+                      >
+                        {cell || <span className="text-slate-300 dark:text-slate-600">—</span>}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Modal footer */}
+        <div className="px-5 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 shrink-0 flex items-center justify-between">
+          <p className="text-xs text-slate-400 dark:text-slate-500">
+            {dataRows.length} data row{dataRows.length !== 1 ? 's' : ''} · first row used as header
+          </p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">
+            Press <kbd className="px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-xs">Esc</kbd> to close
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── SheetPicker ─────────────────────────────────────────────────────────────
 function SheetPicker({ sheets, onChange }) {
-  const [openPreview, setOpenPreview] = useState(null); // sheet name or null
+  const [previewSheet, setPreviewSheet] = useState(null); // sheet object or null
   const selectedCount = sheets.filter(s => s.selected).length;
 
   return (
-    <div className="mt-2.5 rounded-xl border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20 px-3 py-2.5">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-          <Layers className="w-3.5 h-3.5" />
-          {sheets.length} sheets · select which to extract
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => onChange(sheets.map(s => ({ ...s, selected: true })))}
-            className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 font-medium transition-colors"
-          >All</button>
-          <span className="text-slate-300 dark:text-slate-600">·</span>
-          <button
-            type="button"
-            onClick={() => onChange(sheets.map(s => ({ ...s, selected: false })))}
-            className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 font-medium transition-colors"
-          >None</button>
+    <>
+      {/* Full-screen preview modal */}
+      {previewSheet && (
+        <SheetPreviewModal
+          sheet={previewSheet}
+          onClose={() => setPreviewSheet(null)}
+        />
+      )}
+
+      <div className="mt-2.5 rounded-xl border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20 px-3 py-2.5">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5" />
+            {sheets.length} sheets · select which to extract
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onChange(sheets.map(s => ({ ...s, selected: true })))}
+              className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 font-medium transition-colors"
+            >All</button>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <button
+              type="button"
+              onClick={() => onChange(sheets.map(s => ({ ...s, selected: false })))}
+              className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 font-medium transition-colors"
+            >None</button>
+          </div>
         </div>
-      </div>
 
-      {/* Sheet rows */}
-      <div className="space-y-1">
-        {sheets.map((sheet, i) => {
-          const isOpen = openPreview === sheet.name;
-          const hasPreview = sheet.preview?.length > 0;
-
-          return (
-            <div key={sheet.name}>
-              {/* Checkbox row */}
-              <div className="flex items-center gap-2.5">
-                <input
-                  type="checkbox"
-                  id={`sheet-${sheet.name}-${i}`}
-                  checked={sheet.selected}
-                  onChange={e => onChange(sheets.map((s, j) => j === i ? { ...s, selected: e.target.checked } : s))}
-                  className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500 focus:ring-1 cursor-pointer shrink-0"
-                />
-                <label
-                  htmlFor={`sheet-${sheet.name}-${i}`}
-                  className="text-xs text-slate-700 dark:text-slate-300 flex-1 truncate font-medium cursor-pointer select-none"
-                >
-                  {sheet.name}
-                </label>
-                <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">
-                  {sheet.rows} row{sheet.rows !== 1 ? 's' : ''}
-                  {sheet.rows < 5 && (
-                    <span className="ml-1 text-amber-500 dark:text-amber-400">(skip)</span>
-                  )}
-                </span>
-                {/* Preview toggle */}
-                {hasPreview && (
-                  <button
-                    type="button"
-                    onClick={() => setOpenPreview(isOpen ? null : sheet.name)}
-                    title={isOpen ? 'Hide preview' : 'Show preview'}
-                    className={`shrink-0 transition-colors ${
-                      isOpen
-                        ? 'text-indigo-500 dark:text-indigo-400'
-                        : 'text-slate-300 dark:text-slate-600 hover:text-indigo-400 dark:hover:text-indigo-500'
-                    }`}
-                  >
-                    {isOpen ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                  </button>
+        {/* Sheet rows */}
+        <div className="space-y-1">
+          {sheets.map((sheet, i) => (
+            <div key={sheet.name} className="flex items-center gap-2.5">
+              <input
+                type="checkbox"
+                id={`sheet-${sheet.name}-${i}`}
+                checked={sheet.selected}
+                onChange={e => onChange(sheets.map((s, j) => j === i ? { ...s, selected: e.target.checked } : s))}
+                className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500 focus:ring-1 cursor-pointer shrink-0"
+              />
+              <label
+                htmlFor={`sheet-${sheet.name}-${i}`}
+                className="text-xs text-slate-700 dark:text-slate-300 flex-1 truncate font-medium cursor-pointer select-none"
+              >
+                {sheet.name}
+              </label>
+              <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">
+                {sheet.rows} row{sheet.rows !== 1 ? 's' : ''}
+                {sheet.rows < 5 && (
+                  <span className="ml-1 text-amber-500 dark:text-amber-400">(skip)</span>
                 )}
-              </div>
-
-              {/* Inline preview table */}
-              {isOpen && hasPreview && (
-                <div className="mt-1.5 ml-6 overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <table className="text-xs w-max border-collapse">
-                    <tbody>
-                      {sheet.preview.map((row, ri) => (
-                        <tr
-                          key={ri}
-                          className={ri === 0
-                            ? 'bg-slate-100 dark:bg-slate-700/80 font-semibold text-slate-700 dark:text-slate-200'
-                            : 'bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-300'}
-                        >
-                          {row.map((cell, ci) => (
-                            <td
-                              key={ci}
-                              className="px-2.5 py-1 border-r border-b border-slate-100 dark:border-slate-700 max-w-[130px] truncate"
-                              title={cell}
-                            >
-                              {cell || <span className="text-slate-300 dark:text-slate-600">—</span>}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <p className="px-2.5 py-1 text-xs text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-700">
-                    First {sheet.preview.length} rows · {sheet.preview[0]?.length ?? 0} columns shown
-                  </p>
-                </div>
+              </span>
+              {/* Eye — opens full preview modal */}
+              {sheet.data?.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setPreviewSheet(sheet)}
+                  title="Preview sheet"
+                  className="shrink-0 text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                </button>
               )}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
 
-      {/* Footer summary */}
-      <p className={`mt-2.5 text-xs font-medium transition-colors ${
-        selectedCount === 0
-          ? 'text-amber-500 dark:text-amber-400'
-          : 'text-indigo-600 dark:text-indigo-400'
-      }`}>
-        {selectedCount === 0
-          ? 'No sheets selected — this file will be skipped'
-          : `${selectedCount} of ${sheets.length} sheet${sheets.length !== 1 ? 's' : ''} will be extracted`}
-      </p>
-    </div>
+        {/* Footer summary */}
+        <p className={`mt-2.5 text-xs font-medium transition-colors ${
+          selectedCount === 0
+            ? 'text-amber-500 dark:text-amber-400'
+            : 'text-indigo-600 dark:text-indigo-400'
+        }`}>
+          {selectedCount === 0
+            ? 'No sheets selected — this file will be skipped'
+            : `${selectedCount} of ${sheets.length} sheet${sheets.length !== 1 ? 's' : ''} will be extracted`}
+        </p>
+      </div>
+    </>
   );
 }
 
@@ -763,12 +839,12 @@ export default function UploadTab() {
             const range = ws['!ref'] ? XLSX.utils.decode_range(ws['!ref']) : null;
             // rows = data rows (not counting header)
             const rows = range ? Math.max(0, range.e.r - range.s.r) : 0;
-            // First 4 rows × first 6 columns for the inline preview
+            // Full sheet data as string[][] for the preview modal
             const allRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-            const preview = allRows.slice(0, 4).map(row =>
-              Array.isArray(row) ? row.slice(0, 6).map(c => String(c ?? '')) : []
+            const data = allRows.map(row =>
+              Array.isArray(row) ? row.map(c => String(c ?? '')) : []
             );
-            return { name, rows, selected: rows >= 5, preview };
+            return { name, rows, selected: rows >= 5, data };
           });
           setFiles(prev => prev.map(f =>
             f.id === item.id ? { ...f, sheets, sheetsLoading: false } : f
