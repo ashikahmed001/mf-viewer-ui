@@ -3508,10 +3508,67 @@ function ContinuityTab({ onCountChange: _onCountChange }) {
 
       {/* Fund rows */}
       {filtered.length === 0 && data && !loading && (
-        <div className="text-center py-12 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
-          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
-          <p className="font-medium text-slate-500 dark:text-slate-400 dark:text-slate-500">All funds look good!</p>
-          <p className="text-xs mt-1">No gaps or issues found matching your filters</p>
+        <div className="text-center py-14 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
+          {/* Calendar doodle — all months checked */}
+          <svg width="120" height="108" viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-1">
+            <defs><style>{`
+              @keyframes ag-bob  { 0%,100%{transform:translateY(0)}        50%{transform:translateY(-5px)} }
+              @keyframes ag-sp   { 0%,100%{opacity:.2;transform:scale(1)}  50%{opacity:1;transform:scale(1.8)} }
+              @keyframes ag-pop1 { 0%,15%,100%{opacity:0;transform:scale(.3)} 20%{opacity:1;transform:scale(1.1)} 25%{transform:scale(1)} }
+              @keyframes ag-pop2 { 0%,30%,100%{opacity:0;transform:scale(.3)} 35%{opacity:1;transform:scale(1.1)} 40%{transform:scale(1)} }
+              @keyframes ag-pop3 { 0%,50%,100%{opacity:0;transform:scale(.3)} 55%{opacity:1;transform:scale(1.1)} 60%{transform:scale(1)} }
+              @keyframes ag-pop4 { 0%,65%,100%{opacity:0;transform:scale(.3)} 70%{opacity:1;transform:scale(1.1)} 75%{transform:scale(1)} }
+              .ag-cal  { transform-origin:50px 50px; animation:ag-bob  3s   ease-in-out infinite; }
+              .ag-sp1  { animation:ag-sp   2s   ease-in-out infinite; }
+              .ag-sp2  { animation:ag-sp   2s   ease-in-out infinite .7s; }
+              .ag-sp3  { animation:ag-sp   2s   ease-in-out infinite 1.4s; }
+              .ag-sp4  { animation:ag-sp   2s   ease-in-out infinite 2.1s; }
+              .ag-p1a  { animation:ag-pop1 3.5s ease-in-out infinite; }
+              .ag-p1b  { animation:ag-pop1 3.5s ease-in-out infinite .1s; }
+              .ag-p2a  { animation:ag-pop2 3.5s ease-in-out infinite; }
+              .ag-p2b  { animation:ag-pop2 3.5s ease-in-out infinite .1s; }
+              .ag-p3a  { animation:ag-pop3 3.5s ease-in-out infinite; }
+              .ag-p3b  { animation:ag-pop3 3.5s ease-in-out infinite .1s; }
+              .ag-p4a  { animation:ag-pop4 3.5s ease-in-out infinite; }
+              .ag-p4b  { animation:ag-pop4 3.5s ease-in-out infinite .1s; }
+              .ag-p4c  { animation:ag-pop4 3.5s ease-in-out infinite .2s; }
+              .ag-p4d  { animation:ag-pop4 3.5s ease-in-out infinite .3s; }
+              .ag-p4e  { animation:ag-pop4 3.5s ease-in-out infinite .4s; }
+              .ag-p4f  { animation:ag-pop4 3.5s ease-in-out infinite .5s; }
+            `}</style></defs>
+
+            <g className="ag-cal">
+              <rect x="18" y="22" width="64" height="56" rx="5" fill="#ecfdf5" stroke="#10b981" strokeWidth="1.5"/>
+              <rect x="18" y="22" width="64" height="16" rx="5" fill="#d1fae5" stroke="#10b981" strokeWidth="1.5"/>
+              <rect x="18" y="30" width="64" height="8" fill="#d1fae5"/>
+              <line x1="18" y1="38" x2="82" y2="38" stroke="#10b981" strokeWidth="1"/>
+              <circle cx="32" cy="18" r="4" fill="#a7f3d0" stroke="#10b981" strokeWidth="1.5"/>
+              <circle cx="68" cy="18" r="4" fill="#a7f3d0" stroke="#10b981" strokeWidth="1.5"/>
+              {/* Row 1 */}
+              <g className="ag-p1a"><rect x="24" y="43" width="11" height="9" rx="2" fill="#a7f3d0"/><path d="M26.5 48 L28 50 L31 45" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              <g className="ag-p1b"><rect x="38" y="43" width="11" height="9" rx="2" fill="#a7f3d0"/><path d="M40.5 48 L42 50 L45 45" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              <g className="ag-p2a"><rect x="52" y="43" width="11" height="9" rx="2" fill="#a7f3d0"/><path d="M54.5 48 L56 50 L59 45" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              <g className="ag-p2b"><rect x="66" y="43" width="11" height="9" rx="2" fill="#a7f3d0"/><path d="M68.5 48 L70 50 L73 45" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              {/* Row 2 */}
+              <g className="ag-p3a"><rect x="24" y="55" width="11" height="9" rx="2" fill="#a7f3d0"/><path d="M26.5 60 L28 62 L31 57" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              <g className="ag-p3b"><rect x="38" y="55" width="11" height="9" rx="2" fill="#a7f3d0"/><path d="M40.5 60 L42 62 L45 57" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              <g className="ag-p4a"><rect x="52" y="55" width="11" height="9" rx="2" fill="#a7f3d0"/><path d="M54.5 60 L56 62 L59 57" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              <g className="ag-p4b"><rect x="66" y="55" width="11" height="9" rx="2" fill="#a7f3d0"/><path d="M68.5 60 L70 62 L73 57" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              {/* Row 3 */}
+              <g className="ag-p4c"><rect x="24" y="67" width="11" height="9" rx="2" fill="#6ee7b7"/><path d="M26.5 72 L28 74 L31 69" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              <g className="ag-p4d"><rect x="38" y="67" width="11" height="9" rx="2" fill="#6ee7b7"/><path d="M40.5 72 L42 74 L45 69" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              <g className="ag-p4e"><rect x="52" y="67" width="11" height="9" rx="2" fill="#6ee7b7"/><path d="M54.5 72 L56 74 L59 69" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+              <g className="ag-p4f"><rect x="66" y="67" width="11" height="9" rx="2" fill="#6ee7b7"/><path d="M68.5 72 L70 74 L73 69" stroke="#059669" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></g>
+            </g>
+
+            <circle cx="8"  cy="12" r="2"   className="ag-sp1 fill-emerald-300 dark:fill-emerald-500"/>
+            <circle cx="92" cy="10" r="1.6" className="ag-sp2 fill-emerald-400 dark:fill-emerald-400"/>
+            <circle cx="6"  cy="78" r="1.4" className="ag-sp3 fill-emerald-300 dark:fill-emerald-500"/>
+            <circle cx="94" cy="76" r="1.8" className="ag-sp4 fill-emerald-400 dark:fill-emerald-400"/>
+          </svg>
+
+          <p className="font-semibold text-slate-600 dark:text-slate-300">All funds look good!</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">No gaps or issues found matching your filters</p>
         </div>
       )}
 
