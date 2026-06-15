@@ -2773,7 +2773,7 @@ function BackupTab() {
           <div>
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">On-Demand Backup</h3>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 max-w-sm">
-              Runs <code className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">PRAGMA wal_checkpoint(TRUNCATE)</code> — flushes all pending writes to the main DB file so Litestream syncs immediately to Cloudflare R2.
+              Force a checkpoint now — flushes all pending writes from SQLite's WAL into the main database file, then Litestream syncs it to Cloudflare R2 within seconds.
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -2824,18 +2824,65 @@ function BackupTab() {
         )}
       </SectionCard>
 
+      {/* Rocket doodle */}
+      <div className="flex justify-center py-1">
+        <svg width="110" height="96" viewBox="0 0 110 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <style>{`
+            @keyframes rkt-bob   { 0%,100%{transform:translateY(0)}  50%{transform:translateY(-5px)} }
+            @keyframes rkt-glow  { 0%,100%{opacity:.3} 50%{opacity:.9} }
+            @keyframes rkt-spark { 0%,100%{opacity:.15;transform:scale(1)} 50%{opacity:1;transform:scale(1.9)} }
+          `}</style>
+          {/* Cloud destination */}
+          <g style={{animation:'rkt-glow 2.5s ease-in-out infinite', transformOrigin:'72px 22px'}}>
+            <path d="M52 28 Q50 28 50 24 Q50 18 57 18 Q59 12 66 12 Q73 12 75 18 Q82 18 82 24 Q82 28 80 28 Z" fill="#e0e7ff" stroke="#6366f1" strokeWidth="1.2"/>
+            <path d="M60 22 L64 18 L68 22" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            <line x1="64" y1="18" x2="64" y2="25" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round"/>
+          </g>
+          {/* Rocket */}
+          <g style={{animation:'rkt-bob 2.4s ease-in-out infinite', transformOrigin:'42px 54px'}}>
+            {/* Exhaust flames */}
+            <ellipse cx="34" cy="76" rx="4" ry="6" fill="#fde68a" style={{animation:'rkt-glow 0.4s ease-in-out infinite'}} opacity="0.8"/>
+            <ellipse cx="34" cy="78" rx="2.5" ry="4" fill="#fbbf24" style={{animation:'rkt-glow 0.4s ease-in-out infinite 0.1s'}} opacity="0.9"/>
+            <ellipse cx="42" cy="76" rx="5" ry="7" fill="#fed7aa" style={{animation:'rkt-glow 0.5s ease-in-out infinite 0.2s'}} opacity="0.8"/>
+            <ellipse cx="42" cy="79" rx="3" ry="5" fill="#f97316" style={{animation:'rkt-glow 0.5s ease-in-out infinite'}} opacity="0.9"/>
+            <ellipse cx="50" cy="76" rx="4" ry="6" fill="#fde68a" style={{animation:'rkt-glow 0.4s ease-in-out infinite 0.3s'}} opacity="0.8"/>
+            {/* Rocket body */}
+            <path d="M28 68 L28 44 Q28 28 42 20 Q56 28 56 44 L56 68 Z" fill="#e0e7ff" stroke="#6366f1" strokeWidth="1.5"/>
+            {/* Nose cone */}
+            <path d="M28 44 Q28 28 42 20 Q56 28 56 44" fill="#c7d2fe" stroke="#6366f1" strokeWidth="1.2"/>
+            {/* Window */}
+            <circle cx="42" cy="46" r="8" fill="#ddd6fe" stroke="#6366f1" strokeWidth="1.2"/>
+            <circle cx="42" cy="46" r="5" fill="#ede9fe" stroke="#818cf8" strokeWidth="0.8"/>
+            {/* DB symbol in window */}
+            <ellipse cx="42" cy="44" rx="3.5" ry="1.2" fill="#6366f1"/>
+            <rect x="38.5" y="44" width="7" height="3" fill="#818cf8"/>
+            <ellipse cx="42" cy="47" rx="3.5" ry="1.2" fill="#6366f1"/>
+            {/* Fins */}
+            <path d="M28 64 L20 72 L28 68 Z" fill="#c7d2fe" stroke="#818cf8" strokeWidth="1"/>
+            <path d="M56 64 L64 72 L56 68 Z" fill="#c7d2fe" stroke="#818cf8" strokeWidth="1"/>
+          </g>
+          {/* Trajectory dashes */}
+          <path d="M52 56 Q58 40 62 28" stroke="#a5b4fc" strokeWidth="1" strokeDasharray="3 4" fill="none"/>
+          {/* Corner sparkles */}
+          <circle cx="10"  cy="14" r="2"   style={{animation:'rkt-spark 2.2s ease-in-out infinite'}}       fill="#818cf8"/>
+          <circle cx="100" cy="12" r="1.6" style={{animation:'rkt-spark 2.2s ease-in-out infinite 0.8s'}}  fill="#6366f1"/>
+          <circle cx="100" cy="82" r="1.6" style={{animation:'rkt-spark 2.2s ease-in-out infinite 1.6s'}}  fill="#a5b4fc"/>
+          <circle cx="10"  cy="82" r="1.8" style={{animation:'rkt-spark 2.2s ease-in-out infinite 2.4s'}}  fill="#818cf8"/>
+        </svg>
+      </div>
+
       <SectionCard className="p-5">
         <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">How it works</h3>
-        <ol className="space-y-2.5 text-sm text-slate-600 dark:text-slate-300">
+        <ol className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
           {[
-            'You click Backup Now → backend flushes the SQLite WAL file into the main .db file',
-            'Litestream detects the checkpoint and immediately uploads the updated segments to Cloudflare R2',
-            'To restore: run litestream restore with your R2 credentials to get a .db file',
-            'Open the restored .db file in DB Browser for SQLite',
-          ].map((step, i) => (
+            { step: 'Checkpoint', desc: 'Clicking Backup Now runs PRAGMA wal_checkpoint(TRUNCATE), flushing all pending SQLite writes from the WAL into the main .db file.' },
+            { step: 'Sync to R2',  desc: 'Litestream detects the checkpoint and uploads the updated database segments to Cloudflare R2 within seconds.' },
+            { step: 'Restore',     desc: 'To recover: run litestream restore with your R2 credentials. This pulls down the latest snapshot as a .db file.' },
+            { step: 'Inspect',     desc: 'Open the restored .db file in DB Browser for SQLite to browse tables, run queries, or export data.' },
+          ].map(({ step, desc }, i) => (
             <li key={i} className="flex gap-3">
               <span className="shrink-0 w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
-              <span>{step}</span>
+              <span><span className="font-medium text-slate-800 dark:text-slate-200">{step} — </span>{desc}</span>
             </li>
           ))}
         </ol>
