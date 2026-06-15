@@ -335,11 +335,15 @@ function NavHistoryPanel({ navData, canRolling }) {
   }, [navData]);
 
   // ── Rolling returns: point-in-time for each standard period ────────────────
+  // Use Date.now() as the look-back anchor so these match the header's "1Y return"
+  // (which also uses Date.now()). The latest available NAV is still used as the
+  // price endpoint — the difference is only in where we look for the start NAV.
   const rollingReturns = useMemo(() => {
     if (!all.length) return [];
-    const latest = all[all.length - 1];
+    const latest   = all[all.length - 1];
+    const nowTs    = Date.now();
     return RETURN_PERIODS.map(({ label, days }) => {
-      const targetTs = latest.ts - days * 86400 * 1000;
+      const targetTs = nowTs - days * 86400 * 1000;
       let past = null;
       for (let i = all.length - 2; i >= 0; i--) {
         if (all[i].ts <= targetTs) { past = all[i]; break; }
