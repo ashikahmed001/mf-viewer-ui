@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import {
   Upload, FileSpreadsheet, X, CheckCircle, AlertTriangle,
   Loader2, Plus, Trash2, ChevronDown, ChevronUp, Save, RotateCcw,
-  Info, AlertCircle,
+  Info, AlertCircle, Layers, Eye, EyeOff,
 } from 'lucide-react';
 import { uploadSingleFile, uploadBatchStream, importExtraction, getFunds } from '../../api/client.js';
 
@@ -135,7 +136,7 @@ function DropZone({ onFiles, disabled }) {
 }
 
 // ─── FileCard (upload progress) ───────────────────────────────────────────────
-function FileCard({ item, onRemove }) {
+function FileCard({ item, onRemove, onSheetsChange }) {
   const statusIcon = {
     pending:    <FileSpreadsheet className="w-5 h-5 text-slate-400" />,
     queued:     <svg className="w-5 h-5 text-slate-300 dark:text-slate-500" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5"/><path d="M10 6v4l2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
@@ -144,34 +145,176 @@ function FileCard({ item, onRemove }) {
     error:      <AlertTriangle className="w-5 h-5 text-red-500" />,
   }[item.status] ?? null;
 
+  const hasSheets = item.status === 'pending' && item.sheets && item.sheets.length > 0;
+
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 border rounded-xl shadow-sm transition-colors ${
+    <div className={`px-4 py-3 bg-white dark:bg-slate-800 border rounded-xl shadow-sm transition-colors ${
       item.status === 'extracting' ? 'border-indigo-200 dark:border-indigo-800' :
       item.status === 'done'       ? 'border-emerald-200 dark:border-emerald-900' :
       item.status === 'error'      ? 'border-red-200 dark:border-red-900' :
+      hasSheets                    ? 'border-indigo-100 dark:border-indigo-900/40' :
       'border-slate-200 dark:border-slate-700'
     }`}>
-      {statusIcon}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{item.name}</p>
-        {item.status === 'queued' && (
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">In queue…</p>
-        )}
-        {item.status === 'extracting' && (
-          <p className="text-xs text-indigo-500 mt-0.5">Extracting… {item.elapsed}s</p>
-        )}
-        {item.status === 'done' && (
-          <p className="text-xs text-emerald-600 mt-0.5">{item.result?.holdings?.length ?? 0} holdings · {fmtMonth(item.result?.report_month)}</p>
-        )}
-        {item.status === 'error' && (
-          <p className="text-xs text-red-500 mt-0.5 truncate">{item.error}</p>
+      {/* Row: icon + name + status text + remove button */}
+      <div className="flex items-center gap-3">
+        {statusIcon}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{item.name}</p>
+          {item.sheetsLoading && (
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-1">
+              <Loader2 className="w-3 h-3 animate-spin" /> Reading sheets…
+            </p>
+          )}
+          {item.status === 'queued' && (
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">In queue…</p>
+          )}
+          {item.status === 'extracting' && (
+            <p className="text-xs text-indigo-500 mt-0.5">Extracting… {item.elapsed}s</p>
+          )}
+          {item.status === 'done' && (
+            <p className="text-xs text-emerald-600 mt-0.5">{item.result?.holdings?.length ?? 0} holdings · {fmtMonth(item.result?.report_month)}</p>
+          )}
+          {item.status === 'error' && (
+            <p className="text-xs text-red-500 mt-0.5 truncate">{item.error}</p>
+          )}
+        </div>
+        {(item.status === 'pending' || item.status === 'error') && (
+          <button onClick={() => onRemove(item.id)} className="text-slate-300 hover:text-red-400 transition-colors shrink-0">
+            <X className="w-4 h-4" />
+          </button>
         )}
       </div>
-      {(item.status === 'pending' || item.status === 'error') && (
-        <button onClick={() => onRemove(item.id)} className="text-slate-300 hover:text-red-400 transition-colors">
-          <X className="w-4 h-4" />
-        </button>
+
+      {/* Sheet picker — only for pending multi-sheet files */}
+      {hasSheets && (
+        <SheetPicker
+          sheets={item.sheets}
+          onChange={sheets => onSheetsChange(item.id, sheets)}
+        />
       )}
+    </div>
+  );
+}
+
+// ─── SheetPicker ─────────────────────────────────────────────────────────────
+function SheetPicker({ sheets, onChange }) {
+  const [openPreview, setOpenPreview] = useState(null); // sheet name or null
+  const selectedCount = sheets.filter(s => s.selected).length;
+
+  return (
+    <div className="mt-2.5 rounded-xl border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20 px-3 py-2.5">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+          <Layers className="w-3.5 h-3.5" />
+          {sheets.length} sheets · select which to extract
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onChange(sheets.map(s => ({ ...s, selected: true })))}
+            className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 font-medium transition-colors"
+          >All</button>
+          <span className="text-slate-300 dark:text-slate-600">·</span>
+          <button
+            type="button"
+            onClick={() => onChange(sheets.map(s => ({ ...s, selected: false })))}
+            className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 font-medium transition-colors"
+          >None</button>
+        </div>
+      </div>
+
+      {/* Sheet rows */}
+      <div className="space-y-1">
+        {sheets.map((sheet, i) => {
+          const isOpen = openPreview === sheet.name;
+          const hasPreview = sheet.preview?.length > 0;
+
+          return (
+            <div key={sheet.name}>
+              {/* Checkbox row */}
+              <div className="flex items-center gap-2.5">
+                <input
+                  type="checkbox"
+                  id={`sheet-${sheet.name}-${i}`}
+                  checked={sheet.selected}
+                  onChange={e => onChange(sheets.map((s, j) => j === i ? { ...s, selected: e.target.checked } : s))}
+                  className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500 focus:ring-1 cursor-pointer shrink-0"
+                />
+                <label
+                  htmlFor={`sheet-${sheet.name}-${i}`}
+                  className="text-xs text-slate-700 dark:text-slate-300 flex-1 truncate font-medium cursor-pointer select-none"
+                >
+                  {sheet.name}
+                </label>
+                <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">
+                  {sheet.rows} row{sheet.rows !== 1 ? 's' : ''}
+                  {sheet.rows < 5 && (
+                    <span className="ml-1 text-amber-500 dark:text-amber-400">(skip)</span>
+                  )}
+                </span>
+                {/* Preview toggle */}
+                {hasPreview && (
+                  <button
+                    type="button"
+                    onClick={() => setOpenPreview(isOpen ? null : sheet.name)}
+                    title={isOpen ? 'Hide preview' : 'Show preview'}
+                    className={`shrink-0 transition-colors ${
+                      isOpen
+                        ? 'text-indigo-500 dark:text-indigo-400'
+                        : 'text-slate-300 dark:text-slate-600 hover:text-indigo-400 dark:hover:text-indigo-500'
+                    }`}
+                  >
+                    {isOpen ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                )}
+              </div>
+
+              {/* Inline preview table */}
+              {isOpen && hasPreview && (
+                <div className="mt-1.5 ml-6 overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <table className="text-xs w-max border-collapse">
+                    <tbody>
+                      {sheet.preview.map((row, ri) => (
+                        <tr
+                          key={ri}
+                          className={ri === 0
+                            ? 'bg-slate-100 dark:bg-slate-700/80 font-semibold text-slate-700 dark:text-slate-200'
+                            : 'bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-300'}
+                        >
+                          {row.map((cell, ci) => (
+                            <td
+                              key={ci}
+                              className="px-2.5 py-1 border-r border-b border-slate-100 dark:border-slate-700 max-w-[130px] truncate"
+                              title={cell}
+                            >
+                              {cell || <span className="text-slate-300 dark:text-slate-600">—</span>}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className="px-2.5 py-1 text-xs text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-700">
+                    First {sheet.preview.length} rows · {sheet.preview[0]?.length ?? 0} columns shown
+                  </p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer summary */}
+      <p className={`mt-2.5 text-xs font-medium transition-colors ${
+        selectedCount === 0
+          ? 'text-amber-500 dark:text-amber-400'
+          : 'text-indigo-600 dark:text-indigo-400'
+      }`}>
+        {selectedCount === 0
+          ? 'No sheets selected — this file will be skipped'
+          : `${selectedCount} of ${sheets.length} sheet${sheets.length !== 1 ? 's' : ''} will be extracted`}
+      </p>
     </div>
   );
 }
@@ -582,17 +725,62 @@ export default function UploadTab() {
     }
   }, []);
 
-  function addFiles(newFiles) {
+  async function addFiles(newFiles) {
+    // Build items first so we can reference them for async sheet reading
+    const toAdd = [...newFiles].map(f => ({
+      id: crypto.randomUUID(),
+      name: f.name,
+      file: f,
+      status: 'pending',
+      sheets: null,
+      sheetsLoading: true,
+    }));
+
+    // Add to state (dedup by filename inside functional update)
     setFiles(prev => {
       const existing = new Set(prev.map(f => f.name));
-      const fresh = [...newFiles].filter(f => !existing.has(f.name));
-      if (fresh.length < newFiles.length) {
-        const skipped = newFiles.length - fresh.length;
-        console.warn(`[UploadTab] Skipped ${skipped} duplicate file(s) — filename already in queue`);
+      const fresh = toAdd.filter(item => !existing.has(item.name));
+      if (fresh.length < toAdd.length) {
+        console.warn(`[UploadTab] Skipped ${toAdd.length - fresh.length} duplicate file(s)`);
       }
-      const items = fresh.map(f => ({ id: crypto.randomUUID(), name: f.name, file: f, status: 'pending' }));
-      return [...prev, ...items];
+      return [...prev, ...fresh];
     });
+
+    // Async: read sheet info for each added file
+    for (const item of toAdd) {
+      try {
+        const buffer = await item.file.arrayBuffer();
+        const wb = XLSX.read(buffer, { type: 'array' });
+
+        if (wb.SheetNames.length <= 1) {
+          // Single-sheet file — no picker needed
+          setFiles(prev => prev.map(f =>
+            f.id === item.id ? { ...f, sheetsLoading: false } : f
+          ));
+        } else {
+          const sheets = wb.SheetNames.map(name => {
+            const ws = wb.Sheets[name];
+            const range = ws['!ref'] ? XLSX.utils.decode_range(ws['!ref']) : null;
+            // rows = data rows (not counting header)
+            const rows = range ? Math.max(0, range.e.r - range.s.r) : 0;
+            // First 4 rows × first 6 columns for the inline preview
+            const allRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+            const preview = allRows.slice(0, 4).map(row =>
+              Array.isArray(row) ? row.slice(0, 6).map(c => String(c ?? '')) : []
+            );
+            return { name, rows, selected: rows >= 5, preview };
+          });
+          setFiles(prev => prev.map(f =>
+            f.id === item.id ? { ...f, sheets, sheetsLoading: false } : f
+          ));
+        }
+      } catch {
+        // If sheet reading fails, treat as single-sheet and proceed normally
+        setFiles(prev => prev.map(f =>
+          f.id === item.id ? { ...f, sheetsLoading: false } : f
+        ));
+      }
+    }
   }
 
   function removeFile(id) {
@@ -601,6 +789,10 @@ export default function UploadTab() {
 
   function updateFile(id, patch) {
     setFiles(prev => prev.map(f => f.id === id ? { ...f, ...patch } : f));
+  }
+
+  function updateSheets(id, sheets) {
+    setFiles(prev => prev.map(f => f.id === id ? { ...f, sheets } : f));
   }
 
   function startTimer(id) {
@@ -621,9 +813,58 @@ export default function UploadTab() {
     if (!pending.length) return;
     setRunning(true);
 
-    if (pending.length === 1) {
-      // Single file path
-      const item = pending[0];
+    // ── Step 1: Expand multi-sheet files into individual single-sheet blobs ──
+    // itemsToExtract = { id, name, file } — one entry per actual extraction request
+    const itemsToExtract = [];
+    const idsToReplace   = []; // original multi-sheet file IDs to remove from state
+    const replacements   = []; // new single-sheet file items to add to state
+
+    for (const f of pending) {
+      const selectedSheets = f.sheets?.filter(s => s.selected) ?? [];
+
+      if (selectedSheets.length > 0) {
+        // Multi-sheet file: split into N single-sheet blobs, one per selected sheet
+        idsToReplace.push(f.id);
+        try {
+          const buffer = await f.file.arrayBuffer();
+          const wb = XLSX.read(buffer, { type: 'array' });
+
+          for (const sheet of selectedSheets) {
+            const newWb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(newWb, wb.Sheets[sheet.name], sheet.name);
+            const out  = XLSX.write(newWb, { bookType: 'xlsx', type: 'array' });
+            const blob = new File(
+              [out],
+              `${f.name.replace(/\.[^.]+$/, '')} — ${sheet.name}.xlsx`,
+              { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
+            );
+            const newId = crypto.randomUUID();
+            itemsToExtract.push({ id: newId, name: blob.name, file: blob });
+            replacements.push({ id: newId, name: blob.name, file: blob, status: 'pending', sheets: null, sheetsLoading: false });
+          }
+        } catch (e) {
+          // Sheet split failed — fall back to sending original file
+          console.warn('[UploadTab] Sheet split failed for', f.name, e);
+          idsToReplace.pop();
+          itemsToExtract.push({ id: f.id, name: f.name, file: f.file });
+        }
+      } else {
+        // Single sheet (or unread) — send as-is
+        itemsToExtract.push({ id: f.id, name: f.name, file: f.file });
+      }
+    }
+
+    // Swap multi-sheet originals out, single-sheet replacements in
+    if (idsToReplace.length > 0) {
+      setFiles(prev => [
+        ...prev.filter(f => !idsToReplace.includes(f.id)),
+        ...replacements,
+      ]);
+    }
+
+    // ── Step 2: Run extraction (single vs batch path) ──
+    if (itemsToExtract.length === 1) {
+      const item = itemsToExtract[0];
       updateFile(item.id, { status: 'extracting', elapsed: 0 });
       startTimer(item.id);
       try {
@@ -639,14 +880,14 @@ export default function UploadTab() {
         updateFile(item.id, { status: 'error', error: err.response?.data?.error || err.message });
       }
     } else {
-      // Batch path: SSE stream — mark all queued, only flip to extracting when server starts each one
-      pending.forEach(f => updateFile(f.id, { status: 'queued' }));
+      // Batch path: SSE stream
+      itemsToExtract.forEach(item => updateFile(item.id, { status: 'queued' }));
 
       const completed = [];
-      const fileMap = Object.fromEntries(pending.map(f => [f.name, f.id]));
+      const fileMap   = Object.fromEntries(itemsToExtract.map(i => [i.name, i.id]));
 
       const cancel = uploadBatchStream(
-        pending.map(f => f.file),
+        itemsToExtract.map(i => i.file),
         {
           onProgress: ({ file }) => {
             const id = fileMap[file];
@@ -674,16 +915,16 @@ export default function UploadTab() {
             }
           },
           onError: ({ error }) => {
-            pending.forEach(f => {
-              stopTimer(f.id);
-              updateFile(f.id, { status: 'error', error });
+            itemsToExtract.forEach(item => {
+              stopTimer(item.id);
+              updateFile(item.id, { status: 'error', error });
             });
             setRunning(false);
           },
         }
       );
       cancelRef.current = cancel;
-      return; // done in onDone callback
+      return; // resolved in onDone / onError callbacks
     }
 
     setRunning(false);
@@ -722,6 +963,14 @@ export default function UploadTab() {
   const queuedCount     = files.filter(f => f.status === 'queued').length;
   const extractingCount = files.filter(f => f.status === 'extracting').length;
   const doneCount       = files.filter(f => f.status === 'done').length;
+
+  // Total extractions after multi-sheet expansion (may be > pendingCount)
+  const totalExtractions = files
+    .filter(f => f.status === 'pending')
+    .reduce((sum, f) => {
+      const selected = f.sheets?.filter(s => s.selected).length ?? 0;
+      return sum + (selected > 0 ? selected : 1);
+    }, 0);
 
   // ── Review phase ────────────────────────────────────────────────────────────
   if (phase === 'review' && drafts.length > 0) {
@@ -826,7 +1075,7 @@ export default function UploadTab() {
       {files.length > 0 && (
         <div className="space-y-2">
           {files.map(item => (
-            <FileCard key={item.id} item={item} onRemove={removeFile} />
+            <FileCard key={item.id} item={item} onRemove={removeFile} onSheetsChange={updateSheets} />
           ))}
         </div>
       )}
@@ -854,11 +1103,17 @@ export default function UploadTab() {
           <>
             <button
               onClick={runExtraction}
-              disabled={pendingCount === 0}
+              disabled={pendingCount === 0 || totalExtractions === 0}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors shadow-sm"
             >
               <Upload className="w-4 h-4" />
-              {pendingCount === 0 ? 'No files pending' : `Extract ${pendingCount} file${pendingCount !== 1 ? 's' : ''}`}
+              {pendingCount === 0
+                ? 'No files pending'
+                : totalExtractions === 0
+                  ? 'No sheets selected'
+                  : totalExtractions === pendingCount
+                    ? `Extract ${pendingCount} file${pendingCount !== 1 ? 's' : ''}`
+                    : `Extract ${totalExtractions} sheet${totalExtractions !== 1 ? 's' : ''} from ${pendingCount} file${pendingCount !== 1 ? 's' : ''}`}
             </button>
             {files.length > 0 && (
               <button
