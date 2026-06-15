@@ -1756,6 +1756,7 @@ function NavTab({ onCountChange }) {
   const [editRow, setEditRow]             = useState(null);
   const [removeTarget, setRemoveTarget]   = useState(null); // { id, name }
   const [removing, setRemoving]           = useState(false);
+  const [savingEdit, setSavingEdit]       = useState(false);
   const [search, setSearch]               = useState('');
   const [allSchemes, setAllSchemes]       = useState(null);  // full AMFI list for client-side search
   const { show, toast, hide }             = useToast();
@@ -1826,6 +1827,7 @@ function NavTab({ onCountChange }) {
 
   async function saveEdit() {
     if (!editRow?.scheme_code || !editRow?.scheme_name) return;
+    setSavingEdit(true);
     try {
       await confirmNavMapping(editRow.fund_id, editRow.scheme_code, editRow.scheme_name);
       show('Mapping confirmed');
@@ -1834,6 +1836,8 @@ function NavTab({ onCountChange }) {
       onCountChange?.();
     } catch (e) {
       show(e.response?.data?.error || e.message, false);
+    } finally {
+      setSavingEdit(false);
     }
   }
 
@@ -2033,9 +2037,25 @@ function NavTab({ onCountChange }) {
                       <div className="flex items-center gap-1.5 justify-end">
                         {isEditing ? (
                           <>
-                            <button onClick={saveEdit}
-                              className="text-xs px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium">
-                              Save
+                            <button
+                              onClick={saveEdit}
+                              disabled={savingEdit}
+                              className="relative text-xs px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-80 text-white rounded-lg font-medium overflow-hidden transition-opacity"
+                            >
+                              {/* Animated loading bar along the bottom edge */}
+                              {savingEdit && (
+                                <span className="absolute bottom-0 left-0 h-[3px] bg-white/50 rounded-full animate-[saving-bar_1s_ease-in-out_infinite]"
+                                  style={{ animation: 'saving-bar 1s ease-in-out infinite' }}
+                                />
+                              )}
+                              <style>{`
+                                @keyframes saving-bar {
+                                  0%   { width: 0%;   opacity: 1; }
+                                  70%  { width: 100%; opacity: 1; }
+                                  100% { width: 100%; opacity: 0; }
+                                }
+                              `}</style>
+                              {savingEdit ? 'Saving…' : 'Save'}
                             </button>
                             <button onClick={() => setEditRow(null)}
                               className="text-xs px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-400 dark:text-slate-500 rounded-lg">
