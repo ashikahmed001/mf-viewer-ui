@@ -325,6 +325,52 @@ function NavHistoryPanel({ navData, canRolling }) {
   const [range,         setRange]         = useState('1y');
   const [rollingWindow, setRollingWindow] = useState('1y');
 
+  // ── ALL: full sorted NAV history — must be a hook so it sits above early returns
+  const all = useMemo(() => {
+    if (!navData?.history?.length) return [];
+    return navData.history.map(r => {
+      const [d, m, y] = r.nav_date.split('-');
+      return { date: r.nav_date, nav: r.nav, ts: new Date(`${y}-${m}-${d}`).getTime() };
+    }).sort((a, b) => a.ts - b.ts);
+  }, [navData]);
+
+  // ── Rolling returns: point-in-time for each standard period ────────────────
+  const rollingReturns = useMemo(() => {
+    if (!all.length) return [];
+    const latest = all[all.length - 1];
+    return RETURN_PERIODS.map(({ label, days }) => {
+      const targetTs = latest.ts - days * 86400 * 1000;
+      let past = null;
+      for (let i = all.length - 2; i >= 0; i--) {
+        if (all[i].ts <= targetTs) { past = all[i]; break; }
+      }
+      if (!past) return { label, ret: null };
+      return { label, ret: (latest.nav / past.nav - 1) * 100 };
+    });
+  }, [all]);
+
+  // ── Rolling return time-series (O(n) two-pointer) ─────────────────────────
+  const rollingSeries = useMemo(() => {
+    if (all.length < 60) return [];
+    const MS_1Y = 365 * 86400 * 1000;
+    const MS_3Y = 1095 * 86400 * 1000;
+    const result = [];
+    let p1 = 0, p3 = 0;
+    for (let i = 1; i < all.length; i++) {
+      const cur = all[i];
+      while (p1 + 1 < i && all[p1 + 1].ts <= cur.ts - MS_1Y) p1++;
+      while (p3 + 1 < i && all[p3 + 1].ts <= cur.ts - MS_3Y) p3++;
+      const ret1y = all[p1].ts <= cur.ts - MS_1Y
+        ? parseFloat(((cur.nav / all[p1].nav - 1) * 100).toFixed(2)) : null;
+      const ret3y = all[p3].ts <= cur.ts - MS_3Y
+        ? parseFloat(((cur.nav / all[p3].nav - 1) * 100).toFixed(2)) : null;
+      if (ret1y !== null || ret3y !== null) result.push({ ts: cur.ts, ret1y, ret3y });
+    }
+    const step = Math.max(1, Math.floor(result.length / 300));
+    return result.filter((_, i) => i % step === 0 || i === result.length - 1);
+  }, [all]);
+
+  // Early returns AFTER all hooks ───────────────────────────────────────────
   if (!navData) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -367,11 +413,6 @@ function NavHistoryPanel({ navData, canRolling }) {
       </div>
     );
   }
-
-  const all = navData.history.map(r => {
-    const [d, m, y] = r.nav_date.split('-');
-    return { date: r.nav_date, nav: r.nav, ts: new Date(`${y}-${m}-${d}`).getTime() };
-  }).sort((a, b) => a.ts - b.ts);
 
   const selectedRange = NAV_RANGES.find(r => r.key === range);
   const cutoff  = selectedRange.days ? Date.now() - selectedRange.days * 86400 * 1000 : 0;
@@ -439,42 +480,6 @@ function NavHistoryPanel({ navData, canRolling }) {
       </div>
     );
   }
-
-  // ── Rolling returns: point-in-time for each standard period ────────────────
-  const rollingReturns = useMemo(() => {
-    if (!all.length) return [];
-    const latest = all[all.length - 1];
-    return RETURN_PERIODS.map(({ label, days }) => {
-      const targetTs = latest.ts - days * 86400 * 1000;
-      let past = null;
-      for (let i = all.length - 2; i >= 0; i--) {
-        if (all[i].ts <= targetTs) { past = all[i]; break; }
-      }
-      if (!past) return { label, ret: null };
-      return { label, ret: (latest.nav / past.nav - 1) * 100 };
-    });
-  }, [all]);
-
-  // ── Rolling return time-series (O(n) two-pointer) ─────────────────────────
-  const rollingSeries = useMemo(() => {
-    if (all.length < 60) return [];
-    const MS_1Y = 365 * 86400 * 1000;
-    const MS_3Y = 1095 * 86400 * 1000;
-    const result = [];
-    let p1 = 0, p3 = 0;
-    for (let i = 1; i < all.length; i++) {
-      const cur = all[i];
-      while (p1 + 1 < i && all[p1 + 1].ts <= cur.ts - MS_1Y) p1++;
-      while (p3 + 1 < i && all[p3 + 1].ts <= cur.ts - MS_3Y) p3++;
-      const ret1y = all[p1].ts <= cur.ts - MS_1Y
-        ? parseFloat(((cur.nav / all[p1].nav - 1) * 100).toFixed(2)) : null;
-      const ret3y = all[p3].ts <= cur.ts - MS_3Y
-        ? parseFloat(((cur.nav / all[p3].nav - 1) * 100).toFixed(2)) : null;
-      if (ret1y !== null || ret3y !== null) result.push({ ts: cur.ts, ret1y, ret3y });
-    }
-    const step = Math.max(1, Math.floor(result.length / 300));
-    return result.filter((_, i) => i % step === 0 || i === result.length - 1);
-  }, [all]);
 
   const rollingKey    = rollingWindow === '1y' ? 'ret1y' : 'ret3y';
   const rollingValues = rollingSeries.map(p => p[rollingKey]).filter(v => v != null);
