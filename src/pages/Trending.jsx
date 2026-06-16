@@ -146,12 +146,10 @@ function SortTh({ score, sortKey, direction, onSort, isLast }) {
   const Icon   = active ? (direction === 'desc' ? ChevronDown : ChevronUp) : ChevronsUpDown;
 
   return (
-    <th style={{
-      padding:     '10px 6px',
-      textAlign:   'center',
-      whiteSpace:  'nowrap',
-      borderRight: isLast ? '1px solid var(--color-border-tertiary)' : 'none',
-    }}>
+    <th
+      style={{ padding: '10px 6px', textAlign: 'center', whiteSpace: 'nowrap' }}
+      className={isLast ? 'border-r border-slate-200 dark:border-slate-700' : ''}
+    >
       <button
         onClick={() => onSort(score.key)}
         style={{
@@ -205,25 +203,37 @@ function ScorePill({ score, val, active }) {
 function FundRow({ fund, rank, sortKey, odd }) {
   const scores  = fund.scores  ?? {};
   const returns = fund.returns ?? {};
+  const B = '#e2e8f0'; // slate-200, reliable visible border
 
   return (
-    <tr style={{
-      borderTop:  '1px solid var(--color-border-tertiary)',
-      background: odd ? 'var(--color-background-secondary)' : 'var(--color-background-primary)',
-    }}
-    className="hover:brightness-95 dark:hover:brightness-110 transition-all"
+    <tr
+      style={{ borderTop: `1px solid ${B}`, background: odd ? '#f8fafc' : '#ffffff' }}
+      className="dark:border-slate-700 dark:odd:bg-slate-800/40 dark:even:bg-transparent hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
     >
-      <td style={{ padding: '11px 10px 11px 16px', fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid var(--color-border-tertiary)' }}>
+      <td style={{ padding: '11px 10px 11px 16px', fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: `1px solid ${B}` }}
+          className="dark:border-slate-700">
         {rank}
       </td>
 
-      <td style={{ padding: '11px 14px', verticalAlign: 'middle', maxWidth: 0, width: '100%', borderRight: '1px solid var(--color-border-tertiary)' }}>
+      <td style={{ padding: '11px 14px', verticalAlign: 'middle', maxWidth: 0, width: '100%', borderRight: `1px solid ${B}` }}
+          className="dark:border-slate-700">
         <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {fund.scheme_name}
         </p>
-        <p style={{ fontSize: 10, color: 'var(--color-text-tertiary)', marginTop: 2 }}>
-          {fund.category}
-        </p>
+        <div style={{ marginTop: 4 }}>
+          <span style={{
+            display:      'inline-block',
+            fontSize:     9,
+            fontWeight:   500,
+            padding:      '2px 7px',
+            borderRadius: 999,
+            background:   '#f1f5f9',
+            color:        '#64748b',
+            whiteSpace:   'nowrap',
+          }}>
+            {fund.category}
+          </span>
+        </div>
       </td>
 
       {SCORES.map((s, i) => (
@@ -231,8 +241,8 @@ function FundRow({ fund, rank, sortKey, odd }) {
           padding:     '8px 6px',
           whiteSpace:  'nowrap',
           verticalAlign: 'middle',
-          borderRight: i === SCORES.length - 1 ? '1px solid var(--color-border-tertiary)' : 'none',
-        }}>
+          borderRight: i === SCORES.length - 1 ? '1px solid #e2e8f0' : 'none',
+        }} className={i === SCORES.length - 1 ? 'dark:border-slate-700' : ''}>
           <ScorePill score={s} val={scores[s.key]} active={s.key === sortKey} />
         </td>
       ))}
@@ -257,6 +267,101 @@ function FundRow({ fund, rank, sortKey, odd }) {
         );
       })}
     </tr>
+  );
+}
+
+// ─── Fund autocomplete search ─────────────────────────────────────────────────
+
+function FundSearch({ value, onChange, allFunds }) {
+  const [open, setOpen] = useState(false);
+  const ref             = useRef(null);
+
+  const suggestions = useMemo(() => {
+    if (!value.trim()) return [];
+    const q = value.trim().toLowerCase();
+    return allFunds
+      .filter(f => f.scheme_name.toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [value, allFunds]);
+
+  // close on outside click
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const highlight = (name) => {
+    const q = value.trim();
+    if (!q) return name;
+    const idx = name.toLowerCase().indexOf(q.toLowerCase());
+    if (idx === -1) return name;
+    return (
+      <>
+        {name.slice(0, idx)}
+        <strong style={{ fontWeight: 700 }}>{name.slice(idx, idx + q.length)}</strong>
+        {name.slice(idx + q.length)}
+      </>
+    );
+  };
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <Search style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', width: 13, height: 13, color: 'var(--color-text-tertiary)', pointerEvents: 'none', zIndex: 1 }} />
+      <input
+        type="text"
+        value={value}
+        onChange={e => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        placeholder="Search funds…"
+        className="text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        style={{ paddingLeft: 28, paddingRight: value ? 28 : 10, paddingTop: 7, paddingBottom: 7, width: 240 }}
+      />
+      {value && (
+        <button
+          onMouseDown={e => { e.preventDefault(); onChange(''); setOpen(false); }}
+          style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', display: 'flex', background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: 'var(--color-text-tertiary)' }}
+        >
+          <X style={{ width: 13, height: 13 }} />
+        </button>
+      )}
+
+      {open && suggestions.length > 0 && (
+        <div style={{
+          position:     'absolute',
+          top:          'calc(100% + 4px)',
+          left:         0,
+          width:        360,
+          zIndex:       200,
+          background:   'var(--color-background-primary)',
+          border:       '1px solid #e2e8f0',
+          borderRadius: 10,
+          boxShadow:    '0 8px 24px rgba(0,0,0,0.12)',
+          overflow:     'hidden',
+        }}>
+          {suggestions.map((fund, i) => (
+            <div
+              key={fund.scheme_code}
+              onMouseDown={e => { e.preventDefault(); onChange(fund.scheme_name); setOpen(false); }}
+              style={{
+                padding:     '9px 12px',
+                cursor:      'pointer',
+                borderTop:   i > 0 ? '1px solid #f1f5f9' : 'none',
+                background:  'transparent',
+              }}
+              className="hover:bg-slate-50 dark:hover:bg-slate-700"
+            >
+              <p style={{ fontSize: 12, fontWeight: 400, color: 'var(--color-text-primary)', lineHeight: 1.4 }}>
+                {highlight(fund.scheme_name)}
+              </p>
+              <p style={{ fontSize: 10, color: 'var(--color-text-tertiary)', marginTop: 2 }}>
+                {fund.category}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -314,7 +419,7 @@ export default function Trending() {
       return direction === 'desc' ? bv - av : av - bv;
     });
     return list;
-  }, [data, sortKey, direction, catFilter]);
+  }, [data, sortKey, direction, catFilter, search]);
 
   const paginated  = useMemo(
     () => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
@@ -376,26 +481,12 @@ export default function Trending() {
 
       {/* ── Controls ── */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
-        {/* Search */}
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <Search style={{ position: 'absolute', left: 9, width: 13, height: 13, color: 'var(--color-text-tertiary)', pointerEvents: 'none' }} />
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search funds…"
-            className="text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            style={{ paddingLeft: 28, paddingRight: search ? 28 : 10, paddingTop: 6, paddingBottom: 6, width: 220 }}
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              style={{ position: 'absolute', right: 8, display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--color-text-tertiary)' }}
-            >
-              <X style={{ width: 13, height: 13 }} />
-            </button>
-          )}
-        </div>
+        {/* Autocomplete search */}
+        <FundSearch
+          value={search}
+          onChange={setSearch}
+          allFunds={data?.funds ?? []}
+        />
 
         {/* Category filter */}
         <div className="flex items-center gap-1.5">
@@ -426,17 +517,13 @@ export default function Trending() {
         </div>
       ) : (
         <>
-          <div style={{
-            border:       '1px solid var(--color-border-tertiary)',
-            borderRadius: 'var(--border-radius-lg)',
-            overflow:     'hidden',
-          }}>
+          <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
                 <thead>
-                  <tr style={{ background: 'var(--color-background-secondary)', borderBottom: '1px solid var(--color-border-tertiary)' }}>
-                    <th style={{ padding: '10px 10px 10px 16px', fontSize: 10, fontWeight: 600, color: 'var(--color-text-tertiary)', textAlign: 'left', borderRight: '1px solid var(--color-border-tertiary)' }}>#</th>
-                    <th style={{ padding: '10px 14px', fontSize: 10, fontWeight: 600, color: 'var(--color-text-tertiary)', textAlign: 'left', borderRight: '1px solid var(--color-border-tertiary)' }}>Fund</th>
+                  <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                    <th className="border-r border-slate-200 dark:border-slate-700" style={{ padding: '10px 10px 10px 16px', fontSize: 10, fontWeight: 600, color: 'var(--color-text-tertiary)', textAlign: 'left' }}>#</th>
+                    <th className="border-r border-slate-200 dark:border-slate-700" style={{ padding: '10px 14px', fontSize: 10, fontWeight: 600, color: 'var(--color-text-tertiary)', textAlign: 'left' }}>Fund</th>
 
                     {SCORES.map((s, i) => (
                       <SortTh
