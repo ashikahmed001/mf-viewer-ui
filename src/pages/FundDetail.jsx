@@ -344,9 +344,11 @@ function NavHistoryPanel({ navData, canRolling }) {
     const nowTs    = Date.now();
     return RETURN_PERIODS.map(({ label, days }) => {
       const targetTs = nowTs - days * 86400 * 1000;
+      // Search forward: first NAV on or after targetTs — same logic as the header's
+      // rangeStart so both 1Y figures use identical start prices.
       let past = null;
-      for (let i = all.length - 2; i >= 0; i--) {
-        if (all[i].ts <= targetTs) { past = all[i]; break; }
+      for (let i = 0; i < all.length - 1; i++) {
+        if (all[i].ts >= targetTs) { past = all[i]; break; }
       }
       if (!past) return { label, ret: null };
       return { label, ret: (latest.nav / past.nav - 1) * 100 };
