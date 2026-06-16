@@ -170,7 +170,7 @@ function SortTh({ score, sortKey, direction, onSort }) {
 
   return (
     <th style={{ padding: '9px 6px', textAlign: 'center', whiteSpace: 'nowrap' }}>
-      <ScoreTooltip score={score}>{btn}</ScoreTooltip>
+      {btn}
     </th>
   );
 }
