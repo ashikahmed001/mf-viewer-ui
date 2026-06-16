@@ -3,7 +3,7 @@ import { Home, Layers, Flame, Newspaper, Settings, Zap, Sun, Moon, Clock, X, Men
 import { UserButton, useUser } from '@clerk/clerk-react';
 import { useState, useRef, useEffect } from 'react';
 import { useSubscription } from '../context/SubscriptionContext.jsx';
-import { useFeatureFlags } from '../context/FeatureFlagsContext.jsx';
+import { useFeatureFlags, isFeatureEnabled } from '../context/FeatureFlagsContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 
 const ADMIN_EMAIL = 'ashikahmed001@gmail.com';
@@ -145,7 +145,8 @@ export default function Layout({ children }) {
   const { user } = useUser();
   const isAdmin = user?.primaryEmailAddress?.emailAddress === ADMIN_EMAIL;
   const { isPro } = useSubscription();
-  const { paymentsEnabled } = useFeatureFlags();
+  const { paymentsEnabled, flags, overrides } = useFeatureFlags();
+  const trendingOn = isFeatureEnabled(flags, overrides, 'trending_scores');
   const { isDark, prefs } = useTheme();
 
   const [showPrefs, setShowPrefs] = useState(false);
@@ -174,7 +175,7 @@ export default function Layout({ children }) {
     { to: '/',         icon: <Newspaper className="w-5 h-5" />, label: 'Feed',     active: location.pathname === '/'                  },
     { to: '/funds',    icon: <Home      className="w-5 h-5" />, label: 'Funds',    active: location.pathname.startsWith('/funds')      },
     { to: '/analysis', icon: <Layers    className="w-5 h-5" />, label: 'Analysis', active: location.pathname === '/analysis'           },
-    { to: '/trending', icon: <TrendingUp className="w-5 h-5" />, label: 'Trending', active: location.pathname === '/trending'           },
+    ...(trendingOn ? [{ to: '/trending', icon: <TrendingUp className="w-5 h-5" />, label: 'Trending', active: location.pathname === '/trending' }] : []),
     { to: '/rising',   icon: <Flame     className="w-5 h-5" />, label: 'Rising',   active: location.pathname === '/rising'             },
     ...(isAdmin ? [{ to: '/admin', icon: <Settings className="w-5 h-5" />, label: 'Admin', active: location.pathname === '/admin' }] : []),
   ];
