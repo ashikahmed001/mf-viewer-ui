@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { TrendingUp, RefreshCw, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { TrendingUp, RefreshCw, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { getTrending } from '../api/client.js';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -141,36 +141,37 @@ function ScoreTooltip({ score, children }) {
 
 // ─── Sortable column header ───────────────────────────────────────────────────
 
-function SortTh({ score, sortKey, direction, onSort }) {
+function SortTh({ score, sortKey, direction, onSort, isLast }) {
   const active = sortKey === score.key;
   const Icon   = active ? (direction === 'desc' ? ChevronDown : ChevronUp) : ChevronsUpDown;
 
-  const btn = (
-    <button
-      onClick={() => onSort(score.key)}
-      style={{
-        display:    'inline-flex',
-        alignItems: 'center',
-        gap:        3,
-        fontSize:   10,
-        fontWeight: active ? 700 : 500,
-        color:      active ? score.color : 'var(--color-text-tertiary)',
-        background: 'none',
-        border:     'none',
-        cursor:     'pointer',
-        padding:    0,
-        userSelect: 'none',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {score.short}
-      <Icon style={{ width: 10, height: 10, flexShrink: 0, opacity: active ? 1 : 0.4 }} />
-    </button>
-  );
-
   return (
-    <th style={{ padding: '9px 6px', textAlign: 'center', whiteSpace: 'nowrap' }}>
-      {btn}
+    <th style={{
+      padding:     '10px 6px',
+      textAlign:   'center',
+      whiteSpace:  'nowrap',
+      borderRight: isLast ? '1px solid var(--color-border-tertiary)' : 'none',
+    }}>
+      <button
+        onClick={() => onSort(score.key)}
+        style={{
+          display:    'inline-flex',
+          alignItems: 'center',
+          gap:        3,
+          fontSize:   10,
+          fontWeight: active ? 700 : 600,
+          color:      active ? score.color : 'var(--color-text-tertiary)',
+          background: 'none',
+          border:     'none',
+          cursor:     'pointer',
+          padding:    0,
+          userSelect: 'none',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {score.short}
+        <Icon style={{ width: 10, height: 10, flexShrink: 0, opacity: active ? 1 : 0.4 }} />
+      </button>
     </th>
   );
 }
@@ -201,20 +202,22 @@ function ScorePill({ score, val, active }) {
 
 // ─── Table Row ────────────────────────────────────────────────────────────────
 
-function FundRow({ fund, rank, sortKey }) {
+function FundRow({ fund, rank, sortKey, odd }) {
   const scores  = fund.scores  ?? {};
   const returns = fund.returns ?? {};
 
   return (
-    <tr
-      style={{ borderTop: '0.5px solid var(--color-border-tertiary)' }}
-      className="hover:bg-[var(--color-background-secondary)] transition-colors"
+    <tr style={{
+      borderTop:  '1px solid var(--color-border-tertiary)',
+      background: odd ? 'var(--color-background-secondary)' : 'var(--color-background-primary)',
+    }}
+    className="hover:brightness-95 dark:hover:brightness-110 transition-all"
     >
-      <td style={{ padding: '10px 10px 10px 14px', fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+      <td style={{ padding: '11px 10px 11px 16px', fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid var(--color-border-tertiary)' }}>
         {rank}
       </td>
 
-      <td style={{ padding: '10px 12px', verticalAlign: 'middle', maxWidth: 0, width: '100%' }}>
+      <td style={{ padding: '11px 14px', verticalAlign: 'middle', maxWidth: 0, width: '100%', borderRight: '1px solid var(--color-border-tertiary)' }}>
         <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {fund.scheme_name}
         </p>
@@ -223,8 +226,13 @@ function FundRow({ fund, rank, sortKey }) {
         </p>
       </td>
 
-      {SCORES.map(s => (
-        <td key={s.key} style={{ padding: '8px 6px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+      {SCORES.map((s, i) => (
+        <td key={s.key} style={{
+          padding:     '8px 6px',
+          whiteSpace:  'nowrap',
+          verticalAlign: 'middle',
+          borderRight: i === SCORES.length - 1 ? '1px solid var(--color-border-tertiary)' : 'none',
+        }}>
           <ScorePill score={s} val={scores[s.key]} active={s.key === sortKey} />
         </td>
       ))}
@@ -234,7 +242,7 @@ function FundRow({ fund, rank, sortKey }) {
         const pos = val != null && val >= 0;
         return (
           <td key={r.key} style={{
-            padding:       '10px 10px 10px 6px',
+            padding:       '11px 14px 11px 6px',
             fontSize:      12,
             fontWeight:    500,
             textAlign:     'right',
@@ -262,6 +270,7 @@ export default function Trending() {
   const [sortKey, setSortKey]       = useState('momentum');
   const [direction, setDirection]   = useState('desc');
   const [catFilter, setCatFilter]   = useState('All');
+  const [search, setSearch]         = useState('');
   const [page, setPage]             = useState(0);
 
   const load = async (refresh = false) => {
@@ -279,7 +288,7 @@ export default function Trending() {
   };
 
   useEffect(() => { load(); }, []);
-  useEffect(() => { setPage(0); }, [sortKey, catFilter, direction]);
+  useEffect(() => { setPage(0); }, [sortKey, catFilter, direction, search]);
 
   const handleSort = (col) => {
     if (col === sortKey) {
@@ -294,6 +303,10 @@ export default function Trending() {
     if (!data?.funds) return [];
     let list = [...data.funds];
     if (catFilter !== 'All') list = list.filter(f => f.category === catFilter);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(f => f.scheme_name.toLowerCase().includes(q));
+    }
     const isReturn = RETURNS.some(r => r.key === sortKey);
     list.sort((a, b) => {
       const av = isReturn ? (a.returns?.[sortKey] ?? -Infinity) : (a.scores?.[sortKey] ?? -Infinity);
@@ -363,6 +376,28 @@ export default function Trending() {
 
       {/* ── Controls ── */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
+        {/* Search */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <Search style={{ position: 'absolute', left: 9, width: 13, height: 13, color: 'var(--color-text-tertiary)', pointerEvents: 'none' }} />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search funds…"
+            className="text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            style={{ paddingLeft: 28, paddingRight: search ? 28 : 10, paddingTop: 6, paddingBottom: 6, width: 220 }}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              style={{ position: 'absolute', right: 8, display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--color-text-tertiary)' }}
+            >
+              <X style={{ width: 13, height: 13 }} />
+            </button>
+          )}
+        </div>
+
+        {/* Category filter */}
         <div className="flex items-center gap-1.5">
           <Filter className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
           <select
@@ -392,24 +427,25 @@ export default function Trending() {
       ) : (
         <>
           <div style={{
-            border:       '0.5px solid var(--color-border-tertiary)',
+            border:       '1px solid var(--color-border-tertiary)',
             borderRadius: 'var(--border-radius-lg)',
             overflow:     'hidden',
           }}>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
                 <thead>
-                  <tr style={{ background: 'var(--color-background-secondary)' }}>
-                    <th style={{ padding: '9px 10px 9px 14px', fontSize: 10, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'left' }}>#</th>
-                    <th style={{ padding: '9px 12px', fontSize: 10, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'left' }}>Fund</th>
+                  <tr style={{ background: 'var(--color-background-secondary)', borderBottom: '1px solid var(--color-border-tertiary)' }}>
+                    <th style={{ padding: '10px 10px 10px 16px', fontSize: 10, fontWeight: 600, color: 'var(--color-text-tertiary)', textAlign: 'left', borderRight: '1px solid var(--color-border-tertiary)' }}>#</th>
+                    <th style={{ padding: '10px 14px', fontSize: 10, fontWeight: 600, color: 'var(--color-text-tertiary)', textAlign: 'left', borderRight: '1px solid var(--color-border-tertiary)' }}>Fund</th>
 
-                    {SCORES.map(s => (
+                    {SCORES.map((s, i) => (
                       <SortTh
                         key={s.key}
                         score={s}
                         sortKey={sortKey}
                         direction={direction}
                         onSort={handleSort}
+                        isLast={i === SCORES.length - 1}
                       />
                     ))}
 
@@ -417,7 +453,7 @@ export default function Trending() {
                       const active = sortKey === r.key;
                       const Icon   = active ? (direction === 'desc' ? ChevronDown : ChevronUp) : ChevronsUpDown;
                       return (
-                        <th key={r.key} style={{ padding: '9px 10px 9px 6px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <th key={r.key} style={{ padding: '10px 14px 10px 6px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                           <button
                             onClick={() => handleSort(r.key)}
                             style={{
@@ -425,7 +461,7 @@ export default function Trending() {
                               alignItems: 'center',
                               gap:        3,
                               fontSize:   10,
-                              fontWeight: active ? 700 : 500,
+                              fontWeight: active ? 700 : 600,
                               color:      active ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
                               background: 'none',
                               border:     'none',
@@ -449,6 +485,7 @@ export default function Trending() {
                       fund={fund}
                       rank={page * PAGE_SIZE + i + 1}
                       sortKey={sortKey}
+                      odd={i % 2 === 1}
                     />
                   ))}
                 </tbody>
