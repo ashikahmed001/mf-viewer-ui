@@ -5,65 +5,64 @@ import { getFunds } from '../api/client.js';
 
 // ─── AMC logo helpers ─────────────────────────────────────────────────────────
 
-const BAJAJ_CDN = 'https://apis-marketplace.bajajfinserv.in/mf/static/kbprofiles/amc/';
-
+// Logos downloaded locally via download-amc-logos.js → public/amc-logos/
 // Longest prefix first so "Aditya Birla" matches before a shorter key.
-// Value: [bajajCdnFilename | null, fallbackDomain | null]
+// Value: [localFile | null, fallbackDomain | null]
 const AMC_MAP = [
-  ['Aditya Birla',       'Aditya_Birla.png',          'mutualfund.adityabirlacapital.com'],
-  ['Mahindra Manulife',   null,                        'mahindramanulifemf.com'],
-  ['Parag Parikh',        'ppfas.png',                 'ppfas.com'],
-  ['Motilal Oswal',       'motilal.png',               'motilaloswalmf.com'],
-  ['Canara Robeco',       'robeco.png',                'canararobeco.com'],
-  ['WhiteOak',            null,                        'whiteoakcapital.com'],
-  ['White Oak',           null,                        'whiteoakcapital.com'],
-  ['Mirae Asset',         'mirale.png',                'miraeassetmf.co.in'],
-  ['Nippon India',        'nippon_mutual_fund.png',    'mf.nipponindiaim.com'],
-  ['Franklin Templeton',  'franklin_mutual_fund.jpg',  'franklintempletonindia.com'],
-  ['Franklin',            'franklin_mutual_fund.jpg',  'franklintempletonindia.com'],
-  ['ICICI Prudential',    'ICICI.png',                 'icicipruamc.com'],
-  ['ICICI',               'ICICI.png',                 'icicipruamc.com'],
-  ['Bajaj Finserv',       null,                        'mutualfund.bajajfinserv.in'],
-  ['Baroda BNP',          null,                        'barodabnpparibas.com'],
-  ['Baroda',              null,                        'barodabnpparibas.com'],
-  ['JM Financial',        'JM_financial.png',          'jmfinancialmf.com'],
-  ['360 ONE',             null,                        '360.one'],
-  ['HDFC',                'hdfc.png',                  'hdfcfund.com'],
-  ['quant',               'Quant_logo.png',            'quantmutualfund.com'],
-  ['SBI',                 'SBIMF.png',                 'sbimf.com'],
-  ['UTI',                 'uti.png',                   'utimf.com'],
-  ['Axis',                'Axis.png',                  'axismf.com'],
-  ['Kotak',               'kotak_mutual_fund.png',     'kotakmf.com'],
-  ['Tata',                'tata.png',                  'tatamutualfund.com'],
-  ['DSP',                 'DSP.png',                   'dspim.com'],
-  ['Bandhan',             null,                        'bandhanmf.com'],
-  ['Edelweiss',           null,                        'edelweissmf.com'],
-  ['Invesco',             null,                        'invescomutualfund.com'],
-  ['Sundaram',            null,                        'sundarammutual.com'],
-  ['PGIM',                null,                        'pgimindiamf.com'],
-  ['Navi',                null,                        'navimf.com'],
-  ['Groww',               null,                        'groww.in'],
-  ['Helios',              null,                        'heliosmf.in'],
-  ['Samco',               null,                        'samco.in'],
-  ['Union',               null,                        'unionmf.com'],
-  ['LIC',                 null,                        'licmf.com'],
-  ['ITI',                 null,                        'itimf.com'],
-  ['Trust',               null,                        'trustmf.com'],
-  ['NJ',                  null,                        'njmutualfund.in'],
-  ['Zerodha',             null,                        'zerodhaassetmanagement.com'],
+  ['Aditya Birla',       'aditya_birla.png',  'mutualfund.adityabirlacapital.com'],
+  ['Mahindra Manulife',   null,               'mahindramanulifemf.com'],
+  ['Parag Parikh',        'parag.png',         'ppfas.com'],
+  ['Motilal Oswal',       'motilal.png',       'motilaloswalmf.com'],
+  ['Canara Robeco',       'robeco.png',        'canararobeco.com'],
+  ['WhiteOak',            null,               'whiteoakcapital.com'],
+  ['White Oak',           null,               'whiteoakcapital.com'],
+  ['Mirae Asset',         'mirae.png',         'miraeassetmf.co.in'],
+  ['Nippon India',        'nippon.png',        'mf.nipponindiaim.com'],
+  ['Franklin Templeton',  'franklin.jpg',      'franklintempletonindia.com'],
+  ['Franklin',            'franklin.jpg',      'franklintempletonindia.com'],
+  ['ICICI Prudential',    'icici.png',         'icicipruamc.com'],
+  ['ICICI',               'icici.png',         'icicipruamc.com'],
+  ['Bajaj Finserv',       null,               'mutualfund.bajajfinserv.in'],
+  ['Baroda BNP',          null,               'barodabnpparibas.com'],
+  ['Baroda',              null,               'barodabnpparibas.com'],
+  ['JM Financial',        'jm.png',            'jmfinancialmf.com'],
+  ['360 ONE',             null,               '360.one'],
+  ['HDFC',                'hdfc.png',          'hdfcfund.com'],
+  ['quant',               'quant.png',         'quantmutualfund.com'],
+  ['SBI',                 'sbi.png',           'sbimf.com'],
+  ['UTI',                 'uti.png',           'utimf.com'],
+  ['Axis',                'axis.png',          'axismf.com'],
+  ['Kotak',               'kotak.png',         'kotakmf.com'],
+  ['Tata',                'tata.png',          'tatamutualfund.com'],
+  ['DSP',                 'dsp.png',           'dspim.com'],
+  ['Bandhan',             null,               'bandhanmf.com'],
+  ['Edelweiss',           null,               'edelweissmf.com'],
+  ['Invesco',             null,               'invescomutualfund.com'],
+  ['Sundaram',            null,               'sundarammutual.com'],
+  ['PGIM',                null,               'pgimindiamf.com'],
+  ['Navi',                null,               'navimf.com'],
+  ['Groww',               null,               'groww.in'],
+  ['Helios',              null,               'heliosmf.in'],
+  ['Samco',               null,               'samco.in'],
+  ['Union',               null,               'unionmf.com'],
+  ['LIC',                 null,               'licmf.com'],
+  ['ITI',                 null,               'itimf.com'],
+  ['Trust',               null,               'trustmf.com'],
+  ['NJ',                  null,               'njmutualfund.in'],
+  ['Zerodha',             null,               'zerodhaassetmanagement.com'],
 ];
 
 function getAmcSources(fundName) {
   const lower = fundName.toLowerCase();
-  for (const [prefix, cdnFile, domain] of AMC_MAP) {
+  for (const [prefix, localFile, domain] of AMC_MAP) {
     if (lower.startsWith(prefix.toLowerCase())) {
       return {
-        cdnUrl: cdnFile ? BAJAJ_CDN + cdnFile : null,
+        localUrl: localFile ? `/amc-logos/${localFile}` : null,
         domain,
       };
     }
   }
-  return { cdnUrl: null, domain: null };
+  return { localUrl: null, domain: null };
 }
 
 function getInitials(name) {
@@ -89,19 +88,19 @@ function avatarColor(name) {
   return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
 
-// Three-tier fallback: Bajaj CDN (high-res) → Google favicon → initials avatar
+// Three-tier fallback: local file → Google favicon → initials avatar
 function AmcLogo({ name }) {
-  // 0 = try CDN, 1 = try Google favicon, 2 = initials
+  // 0 = try local, 1 = try Google favicon, 2 = initials
   const [tier, setTier] = useState(0);
-  const { cdnUrl, domain } = getAmcSources(name);
+  const { localUrl, domain } = getAmcSources(name);
 
   const advance = () => setTier(t => t + 1);
 
-  if (tier === 0 && cdnUrl) {
+  if (tier === 0 && localUrl) {
     return (
       <div className="w-9 h-9 rounded-xl bg-white border border-slate-100 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
         <img
-          src={cdnUrl}
+          src={localUrl}
           alt=""
           onError={advance}
           className="w-full h-full object-contain p-0.5"
