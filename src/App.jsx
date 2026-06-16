@@ -18,6 +18,7 @@ const Home       = lazy(() => import('./pages/Home.jsx'));
 const FundDetail = lazy(() => import('./pages/FundDetail.jsx'));
 
 // ─── Pro tier — separate chunks, never fetched on free/core routes ────────────
+const Trending          = lazy(() => import('./pages/Trending.jsx'));
 const Compare           = lazy(() => import('./pages/Compare.jsx'));
 const CrossFundAnalysis = lazy(() => import('./pages/CrossFundAnalysis.jsx'));
 const RisingConviction  = lazy(() => import('./pages/RisingConviction.jsx'));
@@ -85,6 +86,7 @@ export default function App() {
                           <CrossFundAnalysis />
                         </GatedPage>
                       } />
+                      <Route path="/trending" element={<Trending />} />
                       <Route path="/rising" element={
                         <GatedPage featureKey="rising_conviction" featureLabel="Rising Conviction">
                           <RisingConviction />

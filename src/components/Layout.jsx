@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Layers, Flame, Newspaper, Settings, Zap, Sun, Moon, Clock, X, Menu } from 'lucide-react';
+import { Home, Layers, Flame, Newspaper, Settings, Zap, Sun, Moon, Clock, X, Menu, TrendingUp } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
 import { useState, useRef, useEffect } from 'react';
 import { useSubscription } from '../context/SubscriptionContext.jsx';
@@ -174,6 +174,7 @@ export default function Layout({ children }) {
     { to: '/',         icon: <Newspaper className="w-5 h-5" />, label: 'Feed',     active: location.pathname === '/'                  },
     { to: '/funds',    icon: <Home      className="w-5 h-5" />, label: 'Funds',    active: location.pathname.startsWith('/funds')      },
     { to: '/analysis', icon: <Layers    className="w-5 h-5" />, label: 'Analysis', active: location.pathname === '/analysis'           },
+    { to: '/trending', icon: <TrendingUp className="w-5 h-5" />, label: 'Trending', active: location.pathname === '/trending'           },
     { to: '/rising',   icon: <Flame     className="w-5 h-5" />, label: 'Rising',   active: location.pathname === '/rising'             },
     ...(isAdmin ? [{ to: '/admin', icon: <Settings className="w-5 h-5" />, label: 'Admin', active: location.pathname === '/admin' }] : []),
   ];

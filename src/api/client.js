@@ -183,6 +183,10 @@ export const getSubscriptionStatus = ()              => api.get('/billing/status
 export const createCheckout        = (cycle)         => api.post('/billing/checkout', { cycle }).then(r => r.data);
 export const verifyPayment         = (payload)       => api.post('/billing/verify', payload).then(r => r.data);
 
+// ─── TRENDING ────────────────────────────────────────────────────────────────
+export const getTrending = (refresh = false) =>
+  api.get('/trending', { params: refresh ? { refresh: 1 } : {}, timeout: 120000 }).then(r => r.data);
+
 // ─── NAV ─────────────────────────────────────────────────────────────────────
 export const getNavMappings    = ()                                  => api.get('/nav/mappings').then(r => r.data);
 export const getAllNavSchemes   = ()                                  => api.get('/nav/schemes/all', { timeout: 30000 }).then(r => r.data);
