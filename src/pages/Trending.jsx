@@ -273,8 +273,10 @@ function FundRow({ fund, rank, sortKey, odd }) {
 // ─── Fund autocomplete search ─────────────────────────────────────────────────
 
 function FundSearch({ value, onChange, allFunds }) {
-  const [open, setOpen] = useState(false);
-  const ref             = useRef(null);
+  const [open, setOpen]   = useState(false);
+  const [rect, setRect]   = useState(null);
+  const inputRef          = useRef(null);
+  const containerRef      = useRef(null);
 
   const suggestions = useMemo(() => {
     if (!value.trim()) return [];
@@ -284,9 +286,15 @@ function FundSearch({ value, onChange, allFunds }) {
       .slice(0, 8);
   }, [value, allFunds]);
 
-  // close on outside click
+  const openDropdown = () => {
+    if (inputRef.current) setRect(inputRef.current.getBoundingClientRect());
+    setOpen(true);
+  };
+
   useEffect(() => {
-    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const handler = e => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false);
+    };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
@@ -306,13 +314,14 @@ function FundSearch({ value, onChange, allFunds }) {
   };
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <Search style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', width: 13, height: 13, color: 'var(--color-text-tertiary)', pointerEvents: 'none', zIndex: 1 }} />
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      <Search style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', width: 13, height: 13, color: 'var(--color-text-tertiary)', pointerEvents: 'none' }} />
       <input
+        ref={inputRef}
         type="text"
         value={value}
-        onChange={e => { onChange(e.target.value); setOpen(true); }}
-        onFocus={() => setOpen(true)}
+        onChange={e => { onChange(e.target.value); openDropdown(); }}
+        onFocus={openDropdown}
         placeholder="Search funds…"
         className="text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         style={{ paddingLeft: 28, paddingRight: value ? 28 : 10, paddingTop: 7, paddingBottom: 7, width: 240 }}
@@ -326,32 +335,34 @@ function FundSearch({ value, onChange, allFunds }) {
         </button>
       )}
 
-      {open && suggestions.length > 0 && (
+      {/* Fixed-position dropdown — escapes any overflow:hidden or stacking context */}
+      {open && suggestions.length > 0 && rect && (
         <div style={{
-          position:     'absolute',
-          top:          'calc(100% + 4px)',
-          left:         0,
+          position:     'fixed',
+          top:          rect.bottom + 4,
+          left:         rect.left,
           width:        360,
-          zIndex:       200,
+          zIndex:       9999,
           background:   'var(--color-background-primary)',
           border:       '1px solid #e2e8f0',
           borderRadius: 10,
-          boxShadow:    '0 8px 24px rgba(0,0,0,0.12)',
+          boxShadow:    '0 8px 32px rgba(0,0,0,0.14)',
           overflow:     'hidden',
+          maxHeight:    320,
+          overflowY:    'auto',
         }}>
           {suggestions.map((fund, i) => (
             <div
               key={fund.scheme_code}
               onMouseDown={e => { e.preventDefault(); onChange(fund.scheme_name); setOpen(false); }}
               style={{
-                padding:     '9px 12px',
-                cursor:      'pointer',
-                borderTop:   i > 0 ? '1px solid #f1f5f9' : 'none',
-                background:  'transparent',
+                padding:    '9px 12px',
+                cursor:     'pointer',
+                borderTop:  i > 0 ? '1px solid #f1f5f9' : 'none',
               }}
               className="hover:bg-slate-50 dark:hover:bg-slate-700"
             >
-              <p style={{ fontSize: 12, fontWeight: 400, color: 'var(--color-text-primary)', lineHeight: 1.4 }}>
+              <p style={{ fontSize: 12, color: 'var(--color-text-primary)', lineHeight: 1.4 }}>
                 {highlight(fund.scheme_name)}
               </p>
               <p style={{ fontSize: 10, color: 'var(--color-text-tertiary)', marginTop: 2 }}>
