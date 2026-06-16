@@ -86,7 +86,11 @@ export default function App() {
                           <CrossFundAnalysis />
                         </GatedPage>
                       } />
-                      <Route path="/trending" element={<Trending />} />
+                      <Route path="/trending" element={
+                        <GatedPage featureKey="trending_scores" featureLabel="Trending Funds">
+                          <Trending />
+                        </GatedPage>
+                      } />
                       <Route path="/rising" element={
                         <GatedPage featureKey="rising_conviction" featureLabel="Rising Conviction">
                           <RisingConviction />

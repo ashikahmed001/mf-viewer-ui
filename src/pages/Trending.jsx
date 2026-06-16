@@ -1,105 +1,198 @@
 import { useEffect, useState, useMemo } from 'react';
-import { TrendingUp, TrendingDown, RefreshCw, Info, ChevronUp, ChevronDown, Filter } from 'lucide-react';
+import { TrendingUp, RefreshCw, Info, ChevronUp, ChevronDown, Filter } from 'lucide-react';
 import { getTrending } from '../api/client.js';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Score config ──────────────────────────────────────────────────────────────
 
-function fmt(val) {
-  if (val == null) return '—';
-  const sign = val >= 0 ? '+' : '';
-  return `${sign}${val.toFixed(2)}%`;
-}
+const SCORES = [
+  {
+    key:       'momentum',
+    label:     'Momentum',
+    color:     '#6366F1',
+    textClass: 'text-indigo-500',
+    tooltip:   'Recency-weighted return — 1M×40% + 3M×35% + 6M×25%, normalized 0–10 across all funds',
+  },
+  {
+    key:       'acceleration',
+    label:     'Acceleration',
+    color:     '#F59E0B',
+    textClass: 'text-amber-500',
+    tooltip:   'Annualised 3-month return minus 1-year return — funds picking up pace score higher',
+  },
+  {
+    key:       'consistency',
+    label:     'Consistency',
+    color:     '#10B981',
+    textClass: 'text-emerald-500',
+    tooltip:   '% of the last 12 months with positive returns, scaled to 10',
+  },
+  {
+    key:       'recovery',
+    label:     'Recovery',
+    color:     '#0EA5E9',
+    textClass: 'text-sky-500',
+    tooltip:   '1-month gain offset against any 6-month drawdown — rewards funds bouncing back from a dip',
+  },
+  {
+    key:       'riskAdj',
+    label:     'Risk-adj',
+    color:     '#A855F7',
+    textClass: 'text-purple-500',
+    tooltip:   '6-month return divided by monthly return volatility (Sharpe-like ratio), normalized 0–10',
+  },
+];
 
-function ReturnBadge({ val, label }) {
-  if (val == null) return (
-    <div className="flex flex-col items-center">
-      <span className="text-[10px] text-slate-400 dark:text-slate-500 mb-0.5">{label}</span>
-      <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
-    </div>
-  );
-  const pos = val >= 0;
+const SORT_TABS = SCORES.map(s => ({ key: s.key, label: s.label }));
+
+// ─── Dot meter ────────────────────────────────────────────────────────────────
+
+function DotMeter({ value, color, totalDots = 20 }) {
+  const filled = value != null ? Math.round((value / 10) * totalDots) : 0;
   return (
-    <div className="flex flex-col items-center">
-      <span className="text-[10px] text-slate-400 dark:text-slate-500 mb-0.5">{label}</span>
-      <span className={`text-xs font-semibold ${pos ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
-        {fmt(val)}
-      </span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+      {Array.from({ length: totalDots }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: '50%',
+            backgroundColor: color,
+            opacity: i < filled ? 1 : 0.13,
+          }}
+        />
+      ))}
     </div>
   );
 }
+
+// ─── Score tooltip ────────────────────────────────────────────────────────────
+
+function ScoreTooltip({ text }) {
+  return (
+    <div className="relative inline-flex items-center group ml-0.5">
+      <Info className="w-3 h-3 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400 cursor-help transition-colors" />
+      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        <div className="w-52 text-[11px] bg-slate-900 dark:bg-slate-950 text-slate-100 rounded-xl px-3 py-2 shadow-2xl leading-relaxed whitespace-normal">
+          {text}
+        </div>
+        <div className="w-2 h-2 bg-slate-900 dark:bg-slate-950 rotate-45 mx-auto -mt-1" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Fund card ────────────────────────────────────────────────────────────────
 
 function FundCard({ fund, rank }) {
-  const r = fund.returns;
-  const score = fund.score;
-  const isPositive = score >= 0;
+  const scores = fund.scores ?? {};
+
+  // Per-card: find which score is highest
+  const highestKey = SCORES.reduce((best, s) => {
+    const v    = scores[s.key] ?? -Infinity;
+    const bestV = scores[best] ?? -Infinity;
+    return v > bestV ? s.key : best;
+  }, SCORES[0].key);
+
+  const highestScore = SCORES.find(s => s.key === highestKey);
+
+  // Format NAV date "DD-MM-YYYY" → "D Mon YYYY"
+  function fmtNavDate(str) {
+    if (!str) return '';
+    const [d, m, y] = str.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${+d} ${months[+m - 1]} ${y}`;
+  }
 
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all">
-      {/* Top row */}
-      <div className="flex items-start gap-3 mb-3">
-        {/* Rank */}
-        <span className="text-xs font-bold text-slate-400 dark:text-slate-500 w-5 shrink-0 pt-0.5">#{rank}</span>
-
-        {/* Name + meta */}
+      {/* Header */}
+      <div className="flex items-start gap-3 mb-4">
+        <span className="text-xs font-bold text-slate-400 dark:text-slate-500 w-5 shrink-0 pt-0.5">
+          #{rank}
+        </span>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2">
             {fund.scheme_name}
           </p>
-          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
             <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full px-2 py-0.5">
               {fund.category}
             </span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500">
+              NAV ₹{fund.nav} · {fmtNavDate(fund.nav_date)}
+            </span>
           </div>
         </div>
-
-        {/* Score pill */}
-        <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-lg shrink-0 ${
-          isPositive
-            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-            : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
-        }`}>
-          {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-          {fmt(score)}
-        </div>
       </div>
 
-      {/* Returns row */}
-      <div className="grid grid-cols-5 gap-1 border-t border-slate-100 dark:border-slate-700 pt-3">
-        <ReturnBadge val={r['1w']} label="1W" />
-        <ReturnBadge val={r['1m']} label="1M" />
-        <ReturnBadge val={r['3m']} label="3M" />
-        <ReturnBadge val={r['6m']} label="6M" />
-        <ReturnBadge val={r['1y']} label="1Y" />
-      </div>
+      {/* Score rows */}
+      <div className="space-y-1.5">
+        {SCORES.map(s => {
+          const val       = scores[s.key];
+          const isHighest = s.key === highestKey;
+          const display   = val != null ? val.toFixed(1) : '—';
 
-      {/* NAV */}
-      <div className="mt-2 text-[10px] text-slate-400 dark:text-slate-500 text-right">
-        NAV ₹{fund.nav} · {fund.nav_date}
+          return (
+            <div
+              key={s.key}
+              style={{
+                backgroundColor: isHighest ? `${s.color}18` : 'transparent',
+                borderRadius: 8,
+                padding: isHighest ? '6px 8px' : '2px 0',
+              }}
+            >
+              {/* Label row */}
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-1">
+                  <span
+                    className="text-[11px] font-medium"
+                    style={{ color: isHighest ? s.color : undefined }}
+                  >
+                    {!isHighest && (
+                      <span className="text-slate-400 dark:text-slate-500">{s.label}</span>
+                    )}
+                    {isHighest && s.label}
+                  </span>
+                  {isHighest && (
+                    <span
+                      className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+                      style={{ backgroundColor: `${s.color}22`, color: s.color }}
+                    >
+                      BEST
+                    </span>
+                  )}
+                  <ScoreTooltip text={s.tooltip} />
+                </div>
+                <span
+                  className="text-xs font-bold tabular-nums"
+                  style={{ color: isHighest ? s.color : undefined }}
+                >
+                  {!isHighest && <span className="text-slate-400 dark:text-slate-500">{display}</span>}
+                  {isHighest && display}
+                </span>
+              </div>
+
+              {/* Dot meter */}
+              <DotMeter value={val} color={s.color} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-// ─── Sort config ──────────────────────────────────────────────────────────────
-
-const SORT_TABS = [
-  { key: 'byScore', label: 'Momentum',  field: 'score',        tooltip: 'Weighted score: 1M×0.4 + 3M×0.35 + 6M×0.25' },
-  { key: 'by1m',   label: '1 Month',   field: 'returns.1m'    },
-  { key: 'by3m',   label: '3 Months',  field: 'returns.3m'    },
-  { key: 'by6m',   label: '6 Months',  field: 'returns.6m'    },
-  { key: 'by1y',   label: '1 Year',    field: 'returns.1y'    },
-];
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Trending() {
-  const [data, setData]         = useState(null);
-  const [loading, setLoading]   = useState(true);
+  const [data, setData]             = useState(null);
+  const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError]       = useState(null);
-  const [sortKey, setSortKey]   = useState('byScore');
-  const [catFilter, setCatFilter] = useState('All');
-  const [direction, setDirection] = useState('desc'); // asc | desc
+  const [error, setError]           = useState(null);
+  const [sortKey, setSortKey]       = useState('momentum');
+  const [catFilter, setCatFilter]   = useState('All');
+  const [direction, setDirection]   = useState('desc');
 
   const load = async (refresh = false) => {
     try {
@@ -117,21 +210,15 @@ export default function Trending() {
 
   useEffect(() => { load(); }, []);
 
-  // Sort + filter entirely client-side so category filter works across the full dataset
   const filtered = useMemo(() => {
     if (!data?.funds) return [];
-    const tab = SORT_TABS.find(t => t.key === sortKey);
-    const returnKey = { by1m: '1m', by3m: '3m', by6m: '6m', by1y: '1y' }[sortKey];
-
     let list = [...data.funds];
 
-    // Category filter
     if (catFilter !== 'All') list = list.filter(f => f.category === catFilter);
 
-    // Sort
     list.sort((a, b) => {
-      const av = returnKey ? (a.returns[returnKey] ?? -Infinity) : a.score;
-      const bv = returnKey ? (b.returns[returnKey] ?? -Infinity) : b.score;
+      const av = a.scores?.[sortKey] ?? -Infinity;
+      const bv = b.scores?.[sortKey] ?? -Infinity;
       return bv - av;
     });
 
@@ -148,7 +235,7 @@ export default function Trending() {
     <div className="space-y-4">
       <div className="skeleton h-10 w-64 rounded-xl" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: 9 }).map((_, i) => <div key={i} className="skeleton h-44 rounded-2xl" />)}
+        {Array.from({ length: 9 }).map((_, i) => <div key={i} className="skeleton h-56 rounded-2xl" />)}
       </div>
     </div>
   );
@@ -161,8 +248,6 @@ export default function Trending() {
     </div>
   );
 
-  const activeTab = SORT_TABS.find(t => t.key === sortKey);
-
   return (
     <div>
       {/* Header */}
@@ -173,7 +258,7 @@ export default function Trending() {
             Trending Funds
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
-            {data?.total ?? 0} equity &amp; hybrid Direct Growth funds · NAV data from mfapi.in
+            {data?.total ?? 0} equity &amp; hybrid Direct Growth funds · 5-dimensional score analysis
           </p>
         </div>
 
@@ -199,14 +284,14 @@ export default function Trending() {
       <div className="flex items-start gap-2 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl px-4 py-3 mb-6 text-xs text-indigo-700 dark:text-indigo-300">
         <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
         <span>
-          Returns are point-to-point from actual NAV data. Only Direct Growth plans from major AMCs are shown.
-          Results are cached for 6 hours — click Refresh to force recompute.
+          Each fund is scored across 5 dimensions — hover the <strong>ⓘ</strong> on any row for the formula.
+          All scores are normalized 0–10 across all funds. Cached for 6 hours.
         </span>
       </div>
 
-      {/* Controls row: sort tabs + category dropdown + direction */}
+      {/* Controls */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
-        {/* Sort tabs */}
+        {/* Score sort tabs */}
         <div className="flex items-center gap-1 overflow-x-auto">
           {SORT_TABS.map(tab => (
             <button
@@ -245,16 +330,19 @@ export default function Trending() {
             onClick={() => setDirection(d => d === 'desc' ? 'asc' : 'desc')}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-400 whitespace-nowrap"
           >
-            {direction === 'desc' ? <><ChevronDown className="w-3.5 h-3.5" /> Best first</> : <><ChevronUp className="w-3.5 h-3.5" /> Worst first</>}
+            {direction === 'desc'
+              ? <><ChevronDown className="w-3.5 h-3.5" /> Best first</>
+              : <><ChevronUp className="w-3.5 h-3.5" /> Worst first</>}
           </button>
         </div>
       </div>
 
-      {/* Showing count */}
+      {/* Count */}
       <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
         Showing {filtered.length} funds
         {catFilter !== 'All' && ` · ${catFilter}`}
-        {activeTab?.tooltip && <span className="ml-2 text-slate-300 dark:text-slate-600">· {activeTab.tooltip}</span>}
+        {' · sorted by '}
+        {SCORES.find(s => s.key === sortKey)?.label}
       </p>
 
       {/* Grid */}
