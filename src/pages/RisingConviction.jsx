@@ -162,44 +162,46 @@ function StockCard({ stockGroup, maxStreak, isMultiFund, direction }) {
   );
 }
 
-// ─── Table view ───────────────────────────────────────────────────────────────
+// ─── Leaderboard view ─────────────────────────────────────────────────────────
 
-function SortHeader({ label, col, sortCol, sortDir, onSort, accentColor = 'text-slate-700 dark:text-slate-300' }) {
+function SortHeader({ label, col, sortCol, sortDir, onSort }) {
   const active = sortCol === col;
   return (
     <th
-      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide cursor-pointer select-none hover:text-slate-700 dark:text-slate-300 whitespace-nowrap"
+      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
       onClick={() => onSort(col)}
     >
       <span className="inline-flex items-center gap-1">
         {label}
         {active
           ? sortDir === 'desc'
-            ? <ChevronDown className={`w-3 h-3 ${accentColor}`} />
-            : <ChevronUp   className={`w-3 h-3 ${accentColor}`} />
+            ? <ChevronDown className="w-3 h-3" />
+            : <ChevronUp   className="w-3 h-3" />
           : <ChevronsUpDown className="w-3 h-3 opacity-30" />}
       </span>
     </th>
   );
 }
 
-function downloadCSV(rows, direction) {
-  const headers = ['Stock', 'ISIN', 'Industry', 'Fund', 'Streak', 'Up/Down Months', 'Window Months', 'Oldest %', 'Latest %', 'Change %'];
+function downloadCSV(stockGroups, direction) {
+  const headers = ['#', 'Stock', 'ISIN', 'Industry', 'Market Cap', 'Funds', 'Best Streak', 'Avg Change %'];
   const label   = direction === 'rising' ? 'Up' : 'Down';
   const csvRows = [
     headers.join(','),
-    ...rows.map(r => [
-      `"${r.stock_name.replace(/"/g, '""')}"`,
-      r.isin,
-      `"${(r.industry || '').replace(/"/g, '""')}"`,
-      `"${r.fund_name.replace(/"/g, '""')}"`,
-      r.streak,
-      `${r.up_count}/${r.window_count - 1} ${label}`,
-      r.window_count,
-      r.oldest_pct,
-      r.latest_pct,
-      r.gain,
-    ].join(',')),
+    ...stockGroups.map((g, i) => {
+      const bestStreak = Math.max(...g.entries.map(e => e.streak));
+      const avgGain    = g.entries.reduce((s, e) => s + e.gain, 0) / g.entries.length;
+      return [
+        i + 1,
+        `"${g.stock_name.replace(/"/g, '""')}"`,
+        g.isin,
+        `"${(g.industry || '').replace(/"/g, '""')}"`,
+        g.entries[0]?.market_cap_cat || '',
+        g.entries.length,
+        `${bestStreak} straight`,
+        avgGain.toFixed(2),
+      ].join(',');
+    }),
   ];
   const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
@@ -210,10 +212,10 @@ function downloadCSV(rows, direction) {
   URL.revokeObjectURL(url);
 }
 
-function TableView({ flatRows, maxStreak, direction }) {
-  // null = no active sort → preserves natural order (same as cards view)
+function LeaderboardView({ stockGroups, maxStreak, direction }) {
   const [sortCol, setSortCol] = useState(null);
   const [sortDir, setSortDir] = useState('desc');
+  const isRising = direction === 'rising';
 
   function handleSort(col) {
     if (sortCol === col) {
@@ -225,94 +227,117 @@ function TableView({ flatRows, maxStreak, direction }) {
   }
 
   const sorted = useMemo(() => {
-    if (!sortCol) return flatRows;   // natural order = same as cards
+    if (!sortCol) return stockGroups;
     const mult = sortDir === 'desc' ? -1 : 1;
-    return [...flatRows].sort((a, b) => {
-      if (sortCol === 'streak')     return mult * (a.streak - b.streak);
-      if (sortCol === 'gain')       return mult * (a.gain - b.gain);
-      if (sortCol === 'latest_pct') return mult * (a.latest_pct - b.latest_pct);
+    return [...stockGroups].sort((a, b) => {
+      const aStreak = Math.max(...a.entries.map(e => e.streak));
+      const bStreak = Math.max(...b.entries.map(e => e.streak));
+      const aGain   = a.entries.reduce((s, e) => s + e.gain, 0) / a.entries.length;
+      const bGain   = b.entries.reduce((s, e) => s + e.gain, 0) / b.entries.length;
+      if (sortCol === 'streak')     return mult * (aStreak - bStreak);
+      if (sortCol === 'gain')       return mult * (aGain - bGain);
+      if (sortCol === 'funds')      return mult * (a.entries.length - b.entries.length);
       if (sortCol === 'stock_name') return mult * a.stock_name.localeCompare(b.stock_name);
-      if (sortCol === 'up_count')   return mult * (a.up_count - b.up_count);
       return 0;
     });
-  }, [flatRows, sortCol, sortDir]);
+  }, [stockGroups, sortCol, sortDir]);
 
-  const accentColor = direction === 'rising' ? 'text-emerald-600' : 'text-red-500';
-  const hp = { sortCol, sortDir, onSort: handleSort, accentColor };
-  const isRising = direction === 'rising';
+  const hp = { sortCol, sortDir, onSort: handleSort };
 
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-slate-800">
-        <span className="text-xs text-slate-400 dark:text-slate-500">{sorted.length} row{sorted.length !== 1 ? 's' : ''}</span>
+      {/* toolbar */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-slate-700">
+        <span className="text-xs text-slate-400 dark:text-slate-500">
+          {sorted.length} stock{sorted.length !== 1 ? 's' : ''}
+        </span>
         <button
           onClick={() => downloadCSV(sorted, direction)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 hover:border-slate-400 px-3 py-1.5 rounded-lg transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-200 dark:border-slate-700 hover:border-slate-400 px-3 py-1.5 rounded-lg transition-colors"
         >
           <Download className="w-3.5 h-3.5" /> Download CSV
         </button>
       </div>
+
+      {/* column headers */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm min-w-[900px]">
+        <table className="w-full text-sm min-w-[640px]">
           <thead>
-            <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
-              <SortHeader label="Stock"       col="stock_name" {...hp} />
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Industry</th>
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Fund</th>
-              <SortHeader label="Streak"      col="streak"     {...hp} />
-              <SortHeader label={isRising ? 'Up / Window' : 'Down / Window'} col="up_count" {...hp} />
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wide">Trend</th>
-              <SortHeader label="Allocation"  col="latest_pct" {...hp} />
-              <SortHeader label="Change"      col="gain"       {...hp} />
+            <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700">
+              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide w-8">#</th>
+              <SortHeader label="Stock"  col="stock_name" {...hp} />
+              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Industry</th>
+              <SortHeader label="Funds"  col="funds"      {...hp} />
+              <SortHeader label="Streak" col="streak"     {...hp} />
+              <SortHeader label="Avg Δ"  col="gain"       {...hp} />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-            {sorted.map((entry, i) => {
-              const color    = getIndustryColor(entry.industry).hex;
-              const gainSign = entry.gain >= 0 ? '+' : '';
-              const gainColor = isRising
-                ? entry.gain > 0 ? 'text-emerald-600' : 'text-red-500'
-                : entry.gain < 0 ? 'text-red-500' : 'text-emerald-600';
+            {sorted.map((group, idx) => {
+              const bestStreak = Math.max(...group.entries.map(e => e.streak));
+              const avgGain    = group.entries.reduce((s, e) => s + e.gain, 0) / group.entries.length;
+              const gainSign   = avgGain >= 0 ? '+' : '';
+              const gainColor  = isRising
+                ? avgGain >= 0 ? 'text-emerald-600' : 'text-red-500'
+                : avgGain < 0  ? 'text-red-500'     : 'text-emerald-600';
+
               return (
-                <tr key={`${entry.fund_id}-${entry.isin}-${i}`} className="hover:bg-slate-50 dark:hover:bg-slate-700 dark:bg-slate-900 transition-colors">
+                <tr key={group.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                  {/* rank */}
+                  <td className="px-4 py-3 text-xs font-medium text-slate-400 dark:text-slate-500 tabular-nums">
+                    {idx + 1}
+                  </td>
+
+                  {/* stock + fund pills */}
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <p className="font-medium text-slate-800 dark:text-slate-200 leading-snug">{entry.stock_name}</p>
-                      <CapBadge cap={entry.market_cap_cat} />
+                    <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                      <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{group.stock_name}</span>
+                      <CapBadge cap={group.entries[0]?.market_cap_cat} />
                     </div>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{entry.isin}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    {entry.industry
-                      ? <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(entry.industry)}`}>
-                          {entry.industry}
+                    <div className="flex gap-1.5 flex-wrap">
+                      {group.entries.map((e, i) => (
+                        <span
+                          key={i}
+                          className="inline-flex items-center text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded"
+                          title={e.fund_name}
+                        >
+                          {e.fund_name.split(' ').slice(0, 3).join(' ')}
+                          {e.fund_name.split(' ').length > 3 ? '…' : ''}
                         </span>
-                      : <span className="text-slate-400 dark:text-slate-500 text-xs">—</span>}
+                      ))}
+                    </div>
                   </td>
-                  <td className="px-4 py-3 max-w-[180px]">
-                    <p className="text-xs text-slate-600 dark:text-slate-400 dark:text-slate-500 truncate" title={entry.fund_name}>
-                      {entry.fund_name.split(' ').slice(0, 4).join(' ')}
-                      {entry.fund_name.split(' ').length > 4 ? '…' : ''}
-                    </p>
-                  </td>
+
+                  {/* industry */}
                   <td className="px-4 py-3">
-                    <StreakBadge streak={entry.streak} maxStreak={maxStreak} direction={direction} />
+                    {group.industry
+                      ? <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-xs font-medium ${industryBadgeClass(group.industry)}`}>
+                          {group.industry}
+                        </span>
+                      : <span className="text-slate-400 text-xs">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-center tabular-nums">
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{entry.up_count}</span>
-                    <span className="text-xs text-slate-400 dark:text-slate-500">/{entry.window_count - 1}</span>
-                  </td>
+
+                  {/* fund count */}
                   <td className="px-4 py-3">
-                    <Sparkline history={entry.pct_history} color={color} width={80} height={28} />
+                    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                      isRising
+                        ? 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-700'
+                        : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700'
+                    }`}>
+                      <Layers className="w-3 h-3" />
+                      {group.entries.length}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-right">
-                    <span className="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500">{fmt(entry.oldest_pct)}%</span>
-                    <span className="mx-1 text-slate-300 text-xs">→</span>
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{fmt(entry.latest_pct)}%</span>
+
+                  {/* streak */}
+                  <td className="px-4 py-3">
+                    <StreakBadge streak={bestStreak} maxStreak={maxStreak} direction={direction} />
                   </td>
+
+                  {/* avg gain */}
                   <td className="px-4 py-3 text-right tabular-nums">
                     <span className={`text-sm font-bold ${gainColor}`}>
-                      {gainSign}{fmt(entry.gain)}%
+                      {gainSign}{fmt(avgGain)}%
                     </span>
                   </td>
                 </tr>
@@ -372,7 +397,7 @@ function ConvictionPanel({ direction }) {
 
   const maxStreak  = data.length > 0 ? Math.max(...data.map(d => d.streak), 1) : 1;
   const multiCount = stockGroups.filter(g => g.entries.length >= 2).length;
-  const totalShown = viewMode === 'table' ? flatFiltered.length : filtered.length;
+  const totalShown = filtered.length;
 
   const accentActive  = isRising ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-red-500 text-white border-red-500';
   const accentHover   = isRising ? 'hover:border-emerald-300 hover:text-emerald-600' : 'hover:border-red-300 hover:text-red-600';
@@ -446,7 +471,7 @@ function ConvictionPanel({ direction }) {
 
           <div className="flex items-center gap-3 sm:ml-auto">
             <span className="text-xs text-slate-400 dark:text-slate-500">
-              {totalShown} {viewMode === 'table' ? 'row' : 'stock'}{totalShown !== 1 ? 's' : ''}
+              {totalShown} stock{totalShown !== 1 ? 's' : ''}
             </span>
             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
               <button onClick={() => setViewMode('cards')} title="Card view"
@@ -492,7 +517,7 @@ function ConvictionPanel({ direction }) {
       )}
 
       {!loading && !error && totalShown > 0 && viewMode === 'table' && (
-        <TableView flatRows={flatFiltered} maxStreak={maxStreak} direction={direction} />
+        <LeaderboardView stockGroups={filtered} maxStreak={maxStreak} direction={direction} />
       )}
     </>
   );
