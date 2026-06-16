@@ -5,57 +5,65 @@ import { getFunds } from '../api/client.js';
 
 // ─── AMC logo helpers ─────────────────────────────────────────────────────────
 
-// Longest prefix first so "Aditya Birla" matches before a shorter key
+const BAJAJ_CDN = 'https://apis-marketplace.bajajfinserv.in/mf/static/kbprofiles/amc/';
+
+// Longest prefix first so "Aditya Birla" matches before a shorter key.
+// Value: [bajajCdnFilename | null, fallbackDomain | null]
 const AMC_MAP = [
-  ['Aditya Birla',       'mutualfund.adityabirlacapital.com'],
-  ['Mahindra Manulife',  'mahindramanulifemf.com'],
-  ['Parag Parikh',       'ppfas.com'],
-  ['Motilal Oswal',      'motilaloswalmf.com'],
-  ['Canara Robeco',      'canararobeco.com'],
-  ['WhiteOak',           'whiteoakcapital.com'],
-  ['White Oak',          'whiteoakcapital.com'],
-  ['Mirae Asset',        'miraeassetmf.co.in'],
-  ['Nippon India',       'mf.nipponindiaim.com'],
-  ['Franklin Templeton', 'franklintempletonindia.com'],
-  ['Franklin',           'franklintempletonindia.com'],
-  ['ICICI Prudential',   'icicipruamc.com'],
-  ['ICICI',              'icicipruamc.com'],
-  ['Bajaj Finserv',      'mutualfund.bajajfinserv.in'],
-  ['Baroda BNP',         'barodabnpparibas.com'],
-  ['Baroda',             'barodabnpparibas.com'],
-  ['JM Financial',       'jmfinancialmf.com'],
-  ['360 ONE',            '360.one'],
-  ['HDFC',               'hdfcfund.com'],
-  ['quant',              'quantmutualfund.com'],
-  ['SBI',                'sbimf.com'],
-  ['UTI',                'utimf.com'],
-  ['Axis',               'axismf.com'],
-  ['Kotak',              'kotakmf.com'],
-  ['Tata',               'tatamutualfund.com'],
-  ['DSP',                'dspim.com'],
-  ['Bandhan',            'bandhanmf.com'],
-  ['Edelweiss',          'edelweissmf.com'],
-  ['Invesco',            'invescomutualfund.com'],
-  ['Sundaram',           'sundarammutual.com'],
-  ['PGIM',               'pgimindiamf.com'],
-  ['Navi',               'navimf.com'],
-  ['Groww',              'groww.in'],
-  ['Helios',             'heliosmf.in'],
-  ['Samco',              'samco.in'],
-  ['Union',              'unionmf.com'],
-  ['LIC',                'licmf.com'],
-  ['ITI',                'itimf.com'],
-  ['Trust',              'trustmf.com'],
-  ['NJ',                 'njmutualfund.in'],
-  ['Zerodha',            'zerodhaassetmanagement.com'],
+  ['Aditya Birla',       'Aditya_Birla.png',          'mutualfund.adityabirlacapital.com'],
+  ['Mahindra Manulife',   null,                        'mahindramanulifemf.com'],
+  ['Parag Parikh',        'ppfas.png',                 'ppfas.com'],
+  ['Motilal Oswal',       'motilal.png',               'motilaloswalmf.com'],
+  ['Canara Robeco',       'robeco.png',                'canararobeco.com'],
+  ['WhiteOak',            null,                        'whiteoakcapital.com'],
+  ['White Oak',           null,                        'whiteoakcapital.com'],
+  ['Mirae Asset',         'mirale.png',                'miraeassetmf.co.in'],
+  ['Nippon India',        'nippon_mutual_fund.png',    'mf.nipponindiaim.com'],
+  ['Franklin Templeton',  'franklin_mutual_fund.jpg',  'franklintempletonindia.com'],
+  ['Franklin',            'franklin_mutual_fund.jpg',  'franklintempletonindia.com'],
+  ['ICICI Prudential',    'ICICI.png',                 'icicipruamc.com'],
+  ['ICICI',               'ICICI.png',                 'icicipruamc.com'],
+  ['Bajaj Finserv',       null,                        'mutualfund.bajajfinserv.in'],
+  ['Baroda BNP',          null,                        'barodabnpparibas.com'],
+  ['Baroda',              null,                        'barodabnpparibas.com'],
+  ['JM Financial',        'JM_financial.png',          'jmfinancialmf.com'],
+  ['360 ONE',             null,                        '360.one'],
+  ['HDFC',                'hdfc.png',                  'hdfcfund.com'],
+  ['quant',               'Quant_logo.png',            'quantmutualfund.com'],
+  ['SBI',                 'SBIMF.png',                 'sbimf.com'],
+  ['UTI',                 'uti.png',                   'utimf.com'],
+  ['Axis',                'Axis.png',                  'axismf.com'],
+  ['Kotak',               'kotak_mutual_fund.png',     'kotakmf.com'],
+  ['Tata',                'tata.png',                  'tatamutualfund.com'],
+  ['DSP',                 'DSP.png',                   'dspim.com'],
+  ['Bandhan',             null,                        'bandhanmf.com'],
+  ['Edelweiss',           null,                        'edelweissmf.com'],
+  ['Invesco',             null,                        'invescomutualfund.com'],
+  ['Sundaram',            null,                        'sundarammutual.com'],
+  ['PGIM',                null,                        'pgimindiamf.com'],
+  ['Navi',                null,                        'navimf.com'],
+  ['Groww',               null,                        'groww.in'],
+  ['Helios',              null,                        'heliosmf.in'],
+  ['Samco',               null,                        'samco.in'],
+  ['Union',               null,                        'unionmf.com'],
+  ['LIC',                 null,                        'licmf.com'],
+  ['ITI',                 null,                        'itimf.com'],
+  ['Trust',               null,                        'trustmf.com'],
+  ['NJ',                  null,                        'njmutualfund.in'],
+  ['Zerodha',             null,                        'zerodhaassetmanagement.com'],
 ];
 
-function getAmcDomain(fundName) {
+function getAmcSources(fundName) {
   const lower = fundName.toLowerCase();
-  for (const [prefix, domain] of AMC_MAP) {
-    if (lower.startsWith(prefix.toLowerCase())) return domain;
+  for (const [prefix, cdnFile, domain] of AMC_MAP) {
+    if (lower.startsWith(prefix.toLowerCase())) {
+      return {
+        cdnUrl: cdnFile ? BAJAJ_CDN + cdnFile : null,
+        domain,
+      };
+    }
   }
-  return null;
+  return { cdnUrl: null, domain: null };
 }
 
 function getInitials(name) {
@@ -81,17 +89,34 @@ function avatarColor(name) {
   return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
 
+// Three-tier fallback: Bajaj CDN (high-res) → Google favicon → initials avatar
 function AmcLogo({ name }) {
-  const [failed, setFailed] = useState(false);
-  const domain = getAmcDomain(name);
+  // 0 = try CDN, 1 = try Google favicon, 2 = initials
+  const [tier, setTier] = useState(0);
+  const { cdnUrl, domain } = getAmcSources(name);
 
-  if (!failed && domain) {
+  const advance = () => setTier(t => t + 1);
+
+  if (tier === 0 && cdnUrl) {
+    return (
+      <div className="w-9 h-9 rounded-xl bg-white border border-slate-100 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <img
+          src={cdnUrl}
+          alt=""
+          onError={advance}
+          className="w-full h-full object-contain p-0.5"
+        />
+      </div>
+    );
+  }
+
+  if (tier <= 1 && domain) {
     return (
       <div className="w-9 h-9 rounded-xl bg-white border border-slate-100 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
         <img
           src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
           alt=""
-          onError={() => setFailed(true)}
+          onError={advance}
           className="w-6 h-6 object-contain"
         />
       </div>
