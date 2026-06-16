@@ -2,176 +2,137 @@ import { useEffect, useState, useMemo } from 'react';
 import { TrendingUp, RefreshCw, ChevronUp, ChevronDown, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTrending } from '../api/client.js';
 
-// ─── Score config ──────────────────────────────────────────────────────────────
+// ─── Config ───────────────────────────────────────────────────────────────────
 
 const SCORES = [
-  {
-    key:     'momentum',
-    label:   'Momentum',
-    color:   '#6366F1',   // indigo
-    tooltip: 'Recency-weighted return — 1M×40% + 3M×35% + 6M×25%, normalized 0–10 across all funds',
-  },
-  {
-    key:     'acceleration',
-    label:   'Acceleration',
-    color:   '#F59E0B',   // amber
-    tooltip: 'Annualised 3-month return minus 1-year return — funds picking up pace score higher',
-  },
-  {
-    key:     'consistency',
-    label:   'Consistency',
-    color:   '#10B981',   // emerald
-    tooltip: '% of the last 12 months with positive returns, scaled to 10',
-  },
-  {
-    key:     'recovery',
-    label:   'Recovery',
-    color:   '#0EA5E9',   // sky
-    tooltip: '1-month gain offset against any 6-month drawdown — rewards funds bouncing back',
-  },
-  {
-    key:     'riskAdj',
-    label:   'Risk-adj',
-    color:   '#A855F7',   // purple
-    tooltip: '6-month return ÷ monthly return volatility (Sharpe-like), normalized 0–10',
-  },
+  { key: 'momentum',     label: 'Momentum',     short: 'Mom',  tooltip: 'Recency-weighted return — 1M×40% + 3M×35% + 6M×25%, normalized 0–10' },
+  { key: 'acceleration', label: 'Acceleration', short: 'Acc',  tooltip: 'Annualised 3-month return minus 1-year return — funds picking up pace score higher' },
+  { key: 'consistency',  label: 'Consistency',  short: 'Con',  tooltip: '% of last 12 months with positive returns, scaled to 10' },
+  { key: 'recovery',     label: 'Recovery',     short: 'Rec',  tooltip: '1-month gain offset against any 6-month drawdown — rewards bounce-backs' },
+  { key: 'riskAdj',      label: 'Risk-adj',     short: 'Risk', tooltip: '6-month return ÷ monthly volatility (Sharpe-like), normalized 0–10' },
+];
+
+const RETURNS = [
+  { key: '1w', label: '1W' },
+  { key: '1m', label: '1M' },
+  { key: '3m', label: '3M' },
+  { key: '6m', label: '6M' },
+  { key: '1y', label: '1Y' },
 ];
 
 const PAGE_SIZE = 50;
-const DOTS      = 20;
-// SVG dot layout constants
-const DOT_R     = 2.5;   // radius px
-const DOT_GAP   = 7;     // center-to-center px
-const SVG_W     = DOTS * DOT_GAP - (DOT_GAP - DOT_R * 2);   // ~134
-const SVG_H     = DOT_R * 2;                                   // 5
 
-// ─── Dot bar — single SVG element, no per-dot DOM nodes ───────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function DotBar({ value, color, muted }) {
-  const filled = value != null ? Math.round((value / 10) * DOTS) : 0;
-  const dotColor = muted ? '#CBD5E1' : color;   // slate-300 when not best
-
-  return (
-    <svg
-      viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-      width="100%"
-      height={SVG_H}
-      style={{ display: 'block', overflow: 'visible' }}
-      preserveAspectRatio="none"
-    >
-      {Array.from({ length: DOTS }).map((_, i) => (
-        <circle
-          key={i}
-          cx={i * DOT_GAP + DOT_R}
-          cy={DOT_R}
-          r={DOT_R}
-          fill={dotColor}
-          opacity={i < filled ? (muted ? 0.7 : 1) : 0.15}
-        />
-      ))}
-    </svg>
-  );
+function fmtReturn(val) {
+  if (val == null) return '—';
+  return `${val >= 0 ? '+' : ''}${val.toFixed(1)}%`;
 }
-
-// ─── Score row ────────────────────────────────────────────────────────────────
-
-function ScoreRow({ s, value, isHighest }) {
-  const display = value != null ? value.toFixed(1) : '—';
-
-  return (
-    <div
-      title={s.tooltip}
-      className="flex items-center gap-2 rounded cursor-default"
-      style={{
-        padding:         isHighest ? '3px 6px 3px 5px' : '2px 0',
-        margin:          isHighest ? '1px -6px' : undefined,
-        backgroundColor: isHighest ? `${s.color}18` : undefined,
-        borderLeft:      isHighest ? `2.5px solid ${s.color}` : undefined,
-      }}
-    >
-      {/* Label — fixed width 80px */}
-      <span
-        className="text-[11px] shrink-0 truncate"
-        style={{
-          width:      80,
-          color:      isHighest ? s.color : '#94A3B8',
-          fontWeight: isHighest ? 600 : 400,
-        }}
-      >
-        {s.label}{isHighest && (
-          <span
-            className="ml-1 text-[8px] font-bold px-1 py-px rounded"
-            style={{ backgroundColor: `${s.color}20`, color: s.color }}
-          >
-            BEST
-          </span>
-        )}
-      </span>
-
-      {/* Dot bar — fills remaining space */}
-      <div className="flex-1 min-w-0">
-        <DotBar value={value} color={s.color} muted={!isHighest} />
-      </div>
-
-      {/* Score number — fixed 28px */}
-      <span
-        className="text-[11px] font-semibold tabular-nums shrink-0 text-right"
-        style={{ width: 28, color: isHighest ? s.color : '#94A3B8' }}
-      >
-        {display}
-      </span>
-    </div>
-  );
-}
-
-// ─── Fund card ────────────────────────────────────────────────────────────────
 
 function fmtNavDate(str) {
   if (!str) return '';
   const [d, m, y] = str.split('-');
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${+d} ${months[+m - 1]} ${y}`;
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${+d} ${mo[+m - 1]} ${y}`;
 }
 
-function FundCard({ fund, rank }) {
-  const scores = fund.scores ?? {};
+// ─── Fund card ────────────────────────────────────────────────────────────────
 
-  const highestKey = SCORES.reduce((best, s) => {
-    return (scores[s.key] ?? -Infinity) > (scores[best] ?? -Infinity) ? s.key : best;
-  }, SCORES[0].key);
+function FundCard({ fund, rank, sortKey }) {
+  const scores  = fund.scores  ?? {};
+  const returns = fund.returns ?? {};
+
+  const heroScore = SCORES.find(s => s.key === sortKey);
+  const heroVal   = scores[sortKey];
 
   return (
-    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all">
+    <div style={{
+      background:   'var(--color-background-primary)',
+      border:       '0.5px solid var(--color-border-tertiary)',
+      borderRadius: 'var(--border-radius-lg)',
+      padding:      '14px 16px',
+    }}>
       {/* Header */}
-      <div className="flex items-start gap-2 mb-3">
-        <span className="text-xs font-bold text-slate-300 dark:text-slate-600 shrink-0 pt-0.5 w-5">
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)', paddingTop: 2, width: 20, flexShrink: 0 }}>
           #{rank}
         </span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2">
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-primary)', lineHeight: 1.35, marginBottom: 5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {fund.scheme_name}
           </p>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full px-2 py-0.5 shrink-0">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 10, background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', borderRadius: 20, padding: '2px 8px', whiteSpace: 'nowrap' }}>
               {fund.category}
             </span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500">
+            <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>
               NAV ₹{fund.nav} · {fmtNavDate(fund.nav_date)}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Score rows */}
-      <div className="space-y-0.5 pt-2.5 border-t border-slate-100 dark:border-slate-700/60">
-        {SCORES.map(s => (
-          <ScoreRow
-            key={s.key}
-            s={s}
-            value={scores[s.key] ?? null}
-            isHighest={s.key === highestKey}
-          />
-        ))}
+      {/* Divider */}
+      <div style={{ borderTop: '0.5px solid var(--color-border-tertiary)', margin: '10px 0' }} />
+
+      {/* Hero score */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 10 }}>
+        <span style={{ fontSize: 28, fontWeight: 500, color: '#6366F1', lineHeight: 1 }}>
+          {heroVal != null ? heroVal.toFixed(1) : '—'}
+        </span>
+        <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
+          {heroScore?.label} score
+        </span>
+      </div>
+
+      {/* 5 score tiles */}
+      <div style={{ display: 'flex', gap: 6 }}>
+        {SCORES.map(s => {
+          const active = s.key === sortKey;
+          const val    = scores[s.key];
+          return (
+            <div
+              key={s.key}
+              title={s.tooltip}
+              style={{
+                flex:         1,
+                textAlign:    'center',
+                padding:      '5px 4px',
+                borderRadius: 'var(--border-radius-md)',
+                background:   active ? 'rgba(99,102,241,0.1)' : 'var(--color-background-secondary)',
+                cursor:       'default',
+              }}
+            >
+              <span style={{ fontSize: 9, color: active ? '#6366F1' : 'var(--color-text-tertiary)', display: 'block', marginBottom: 2 }}>
+                {s.short}
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: active ? '#6366F1' : 'var(--color-text-primary)', display: 'block' }}>
+                {val != null ? val.toFixed(1) : '—'}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Divider */}
+      <div style={{ borderTop: '0.5px solid var(--color-border-tertiary)', margin: '10px 0' }} />
+
+      {/* Returns row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)' }}>
+        {RETURNS.map(r => {
+          const val = returns[r.key];
+          const pos = val != null && val >= 0;
+          return (
+            <div key={r.key} style={{ textAlign: 'center' }}>
+              <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)', display: 'block', marginBottom: 2 }}>
+                {r.label}
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 500, color: val == null ? 'var(--color-text-tertiary)' : pos ? '#059669' : '#E11D48' }}>
+                {fmtReturn(val)}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -235,7 +196,7 @@ export default function Trending() {
       <div className="skeleton h-10 w-64 rounded-xl" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} className="skeleton h-48 rounded-2xl" />
+          <div key={i} className="skeleton h-52 rounded-2xl" />
         ))}
       </div>
     </div>
@@ -283,7 +244,6 @@ export default function Trending() {
 
       {/* Controls */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
-        {/* Score tabs */}
         <div className="flex items-center gap-1 overflow-x-auto">
           {SCORES.map(s => (
             <button
@@ -310,9 +270,7 @@ export default function Trending() {
                          bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200
                          focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             >
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
+              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
           </div>
 
@@ -327,17 +285,15 @@ export default function Trending() {
         </div>
       </div>
 
-      {/* Meta row */}
+      {/* Meta */}
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs text-slate-400 dark:text-slate-500">
           {filtered.length} funds · sorted by {SCORES.find(s => s.key === sortKey)?.label}
           {catFilter !== 'All' && ` · ${catFilter}`}
-          {' · hover a row for score formula'}
+          {' · hover score tiles for formula'}
         </p>
         {totalPages > 1 && (
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            Page {page + 1} of {totalPages}
-          </p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">Page {page + 1} of {totalPages}</p>
         )}
       </div>
 
@@ -355,11 +311,11 @@ export default function Trending() {
                 key={fund.scheme_code}
                 fund={fund}
                 rank={page * PAGE_SIZE + i + 1}
+                sortKey={sortKey}
               />
             ))}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-3 mt-8">
               <button
@@ -369,9 +325,7 @@ export default function Trending() {
               >
                 <ChevronLeft className="w-4 h-4" /> Prev
               </button>
-              <span className="text-sm text-slate-500 dark:text-slate-400">
-                {page + 1} / {totalPages}
-              </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">{page + 1} / {totalPages}</span>
               <button
                 onClick={() => { setPage(p => p + 1); window.scrollTo(0, 0); }}
                 disabled={page >= totalPages - 1}
