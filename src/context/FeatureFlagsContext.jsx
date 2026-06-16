@@ -56,6 +56,16 @@ export function useFeatureFlags() {
   return useContext(FeatureFlagsContext);
 }
 
+/** Returns true if the feature is turned on at all (ignores plan). */
+export function isFeatureEnabled(flags, overrides, key) {
+  const override = overrides?.[key];
+  if (override?.enabled === false) return false;
+  if (override?.enabled === true)  return true;
+  const flag = flags[key];
+  if (!flag) return true;
+  return flag.enabled !== false;
+}
+
 /**
  * Returns true if the current user can access a feature.
  *

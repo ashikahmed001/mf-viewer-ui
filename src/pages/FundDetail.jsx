@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, BarChart2, GitCompare, FileDown, RefreshCw, Printer } from 'lucide-react';
 import { getFund, getFundExtractions, getHoldings, getHoldingsSummary, getStockTrend, getFundNav } from '../api/client.js';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from 'recharts';
-import { useFeatureFlags, canUseFeature } from '../context/FeatureFlagsContext.jsx';
+import { useFeatureFlags, canUseFeature, isFeatureEnabled } from '../context/FeatureFlagsContext.jsx';
 import { useSubscription } from '../context/SubscriptionContext.jsx';
 import UpgradePrompt from '../components/UpgradePrompt.jsx';
 import MonthSelector from '../components/MonthSelector.jsx';
@@ -28,9 +28,10 @@ export default function FundDetail() {
   const [navData, setNavData]     = useState(null);
   const { flags, overrides } = useFeatureFlags();
   const { isPro }            = useSubscription();
-  const canNav     = canUseFeature(flags, overrides, isPro, 'nav_history');
-  const canTrend   = canUseFeature(flags, overrides, isPro, 'stock_trend');
-  const canRolling = canUseFeature(flags, overrides, isPro, 'rolling_returns');
+  const canNav          = canUseFeature(flags, overrides, isPro, 'nav_history');
+  const canTrend        = canUseFeature(flags, overrides, isPro, 'stock_trend');
+  const canRolling      = canUseFeature(flags, overrides, isPro, 'rolling_returns');
+  const rollingEnabled  = isFeatureEnabled(flags, overrides, 'rolling_returns');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -171,7 +172,7 @@ export default function FundDetail() {
           {!canNav && <span className="text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Pro</span>}
         </div>
         {canNav
-          ? <NavHistoryPanel navData={navData} canRolling={canRolling} />
+          ? <NavHistoryPanel navData={navData} canRolling={canRolling} rollingEnabled={rollingEnabled} />
           : <UpgradePrompt feature="NAV history charts" />
         }
       </div>
@@ -321,7 +322,7 @@ const RETURN_PERIODS = [
   { label: '5Y', days: 1825 },
 ];
 
-function NavHistoryPanel({ navData, canRolling }) {
+function NavHistoryPanel({ navData, canRolling, rollingEnabled }) {
   const [range,         setRange]         = useState('1y');
   const [rollingWindow, setRollingWindow] = useState('1y');
 
@@ -607,8 +608,8 @@ function NavHistoryPanel({ navData, canRolling }) {
         </p>
       </div>
 
-      {/* ── Rolling returns — pro gated ──────────────────────────────────────── */}
-      {canRolling ? (
+      {/* ── Rolling returns — hidden when disabled, pro-gated when enabled ──── */}
+      {rollingEnabled && canRolling ? (
         <>
           {/* Returns card — HM-2A violet spectrum */}
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
@@ -793,9 +794,9 @@ function NavHistoryPanel({ navData, canRolling }) {
             )}
           </div>
         </>
-      ) : (
+      ) : rollingEnabled ? (
         <UpgradePrompt feature="rolling returns analysis" />
-      )}
+      ) : null}
     </div>
   );
 }
