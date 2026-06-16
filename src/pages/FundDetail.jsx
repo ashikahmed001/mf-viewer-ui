@@ -350,8 +350,11 @@ function NavHistoryPanel({ navData, canRolling }) {
       for (let i = 0; i < all.length - 1; i++) {
         if (all[i].ts >= targetTs) { past = all[i]; break; }
       }
-      if (!past) return { label, ret: null };
-      return { label, ret: (latest.nav / past.nav - 1) * 100 };
+      if (!past) return { label, days, ret: null, cagr: null, sinceTs: null };
+      const ret  = (latest.nav / past.nav - 1) * 100;
+      const yrs  = days / 365;
+      const cagr = yrs >= 1 ? (Math.pow(latest.nav / past.nav, 1 / yrs) - 1) * 100 : null;
+      return { label, days, ret, cagr, sinceTs: past.ts };
     });
   }, [all]);
 
@@ -611,24 +614,46 @@ function NavHistoryPanel({ navData, canRolling }) {
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Point-in-time returns</h3>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              {rollingReturns.map(({ label, ret }) => {
+              {rollingReturns.map(({ label, days, ret, cagr, sinceTs }) => {
                 const isNull = ret === null;
                 const isPos  = !isNull && ret >= 0;
-                const isNeg  = !isNull && ret < 0;
+                const sinceStr = sinceTs
+                  ? new Date(sinceTs).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })
+                  : null;
                 return (
-                  <div key={label} className={`rounded-xl p-3 text-center border ${
+                  <div key={label} className={`rounded-xl px-3 py-3.5 text-center border flex flex-col gap-1 ${
                     isNull ? 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-700'
                     : isPos ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900/50'
                     :         'bg-rose-50 dark:bg-rose-950/40 border-rose-100 dark:border-rose-900/50'
                   }`}>
-                    <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 mb-1.5 tracking-wide">{label}</p>
-                    <p className={`text-lg font-bold leading-none ${
+                    {/* Period label */}
+                    <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 tracking-wide">{label}</p>
+
+                    {/* Return value */}
+                    <p className={`text-xl font-bold leading-none ${
                       isNull ? 'text-slate-300 dark:text-slate-600'
                       : isPos ? 'text-emerald-600 dark:text-emerald-400'
                       :         'text-rose-600 dark:text-rose-400'
                     }`}>
                       {isNull ? '—' : `${isPos ? '+' : ''}${ret.toFixed(1)}%`}
                     </p>
+
+                    {/* CAGR for multi-year periods */}
+                    {cagr !== null && !isNull && (
+                      <p className={`text-[10px] font-medium leading-none ${
+                        isPos ? 'text-emerald-500/70 dark:text-emerald-500/60'
+                              : 'text-rose-500/70 dark:text-rose-500/60'
+                      }`}>
+                        {isPos ? '+' : ''}{cagr.toFixed(1)}% p.a.
+                      </p>
+                    )}
+
+                    {/* Since date */}
+                    {sinceStr && !isNull && (
+                      <p className="text-[10px] text-slate-400 dark:text-slate-600 leading-none">
+                        since {sinceStr}
+                      </p>
+                    )}
                   </div>
                 );
               })}
