@@ -29,113 +29,87 @@ function fmtReturn(val) {
   return `${val >= 0 ? '+' : ''}${val.toFixed(1)}%`;
 }
 
-function fmtNavDate(str) {
-  if (!str) return '';
-  const [d, m, y] = str.split('-');
-  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${+d} ${mo[+m - 1]} ${y}`;
+// ─── Score Pill ───────────────────────────────────────────────────────────────
+
+function ScorePill({ score, val, active }) {
+  return (
+    <div title={score.tooltip} style={{ display: 'flex', justifyContent: 'center' }}>
+      <span
+        style={{
+          display:      'inline-block',
+          minWidth:     38,
+          textAlign:    'center',
+          padding:      '3px 8px',
+          borderRadius: 999,
+          fontSize:     12,
+          fontWeight:   700,
+          color:        score.color,
+          background:   `${score.color}${active ? '22' : '12'}`,
+          outline:      active ? `1.5px solid ${score.color}40` : 'none',
+          cursor:       'default',
+        }}
+      >
+        {val != null ? val.toFixed(1) : '—'}
+      </span>
+    </div>
+  );
 }
 
-// ─── Fund card ────────────────────────────────────────────────────────────────
+// ─── Table Row ────────────────────────────────────────────────────────────────
 
-function FundCard({ fund, rank, sortKey }) {
+function FundRow({ fund, rank, sortKey }) {
   const scores  = fund.scores  ?? {};
   const returns = fund.returns ?? {};
 
-  const heroScore = SCORES.find(s => s.key === sortKey);
-  const heroVal   = scores[sortKey];
-
   return (
-    <div style={{
-      background:   'var(--color-background-primary)',
-      border:       '0.5px solid var(--color-border-tertiary)',
-      borderRadius: 'var(--border-radius-lg)',
-      padding:      '14px 16px',
-    }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
-        <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)', paddingTop: 2, width: 20, flexShrink: 0 }}>
-          #{rank}
-        </span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-primary)', lineHeight: 1.35, marginBottom: 5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {fund.scheme_name}
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 10, background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', borderRadius: 20, padding: '2px 8px', whiteSpace: 'nowrap' }}>
-              {fund.category}
-            </span>
-            <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>
-              NAV ₹{fund.nav} · {fmtNavDate(fund.nav_date)}
-            </span>
-          </div>
-        </div>
-      </div>
+    <tr style={{ borderTop: '0.5px solid var(--color-border-tertiary)' }}
+        className="hover:bg-[var(--color-background-secondary)]">
+      {/* Rank */}
+      <td style={{ padding: '10px 10px 10px 14px', fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+        {rank}
+      </td>
 
-      {/* Divider */}
-      <div style={{ borderTop: '0.5px solid var(--color-border-tertiary)', margin: '10px 0' }} />
+      {/* Fund name + category */}
+      <td style={{ padding: '10px 12px', verticalAlign: 'middle', maxWidth: 0, width: '100%' }}>
+        <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {fund.scheme_name}
+        </p>
+        <p style={{ fontSize: 10, color: 'var(--color-text-tertiary)', marginTop: 2 }}>
+          {fund.category}
+        </p>
+      </td>
 
-      {/* Hero score */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 10 }}>
-        <span style={{ fontSize: 28, fontWeight: 500, color: heroScore?.color ?? '#6366F1', lineHeight: 1 }}>
-          {heroVal != null ? heroVal.toFixed(1) : '—'}
-        </span>
-        <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
-          {heroScore?.label} score
-        </span>
-      </div>
+      {/* Score pills */}
+      {SCORES.map(s => (
+        <td key={s.key} style={{ padding: '10px 6px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+          <ScorePill score={s} val={scores[s.key]} active={s.key === sortKey} />
+        </td>
+      ))}
 
-      {/* 5 score tiles — each has its own color, active is stronger */}
-      <div style={{ display: 'flex', gap: 6 }}>
-        {SCORES.map(s => {
-          const active = s.key === sortKey;
-          const val    = scores[s.key];
-          return (
-            <div
-              key={s.key}
-              title={s.tooltip}
-              style={{
-                flex:         1,
-                textAlign:    'center',
-                padding:      '5px 4px',
-                borderRadius: 'var(--border-radius-md)',
-                background:   `${s.color}${active ? '18' : '0d'}`,
-                cursor:       'default',
-                outline:      active ? `1.5px solid ${s.color}30` : 'none',
-              }}
-            >
-              <span style={{ fontSize: 9, color: s.color, opacity: active ? 1 : 0.65, display: 'block', marginBottom: 2 }}>
-                {s.short}
-              </span>
-              <span style={{ fontSize: 12, fontWeight: 500, color: s.color, opacity: active ? 1 : 0.8, display: 'block' }}>
-                {val != null ? val.toFixed(1) : '—'}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Divider */}
-      <div style={{ borderTop: '0.5px solid var(--color-border-tertiary)', margin: '10px 0' }} />
-
-      {/* Returns row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)' }}>
-        {RETURNS.map(r => {
-          const val = returns[r.key];
-          const pos = val != null && val >= 0;
-          return (
-            <div key={r.key} style={{ textAlign: 'center' }}>
-              <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)', display: 'block', marginBottom: 2 }}>
-                {r.label}
-              </span>
-              <span style={{ fontSize: 11, fontWeight: 500, color: val == null ? 'var(--color-text-tertiary)' : pos ? '#059669' : '#E11D48' }}>
-                {fmtReturn(val)}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+      {/* Returns */}
+      {RETURNS.map(r => {
+        const val = returns[r.key];
+        const pos = val != null && val >= 0;
+        return (
+          <td
+            key={r.key}
+            style={{
+              padding:      '10px 10px 10px 6px',
+              fontSize:     12,
+              fontWeight:   500,
+              textAlign:    'right',
+              whiteSpace:   'nowrap',
+              verticalAlign: 'middle',
+              color: val == null
+                ? 'var(--color-text-tertiary)'
+                : pos ? '#059669' : '#E11D48',
+            }}
+          >
+            {fmtReturn(val)}
+          </td>
+        );
+      })}
+    </tr>
   );
 }
 
@@ -192,17 +166,15 @@ export default function Trending() {
     [data],
   );
 
+  // ── Loading skeleton ──
   if (loading) return (
     <div className="space-y-4">
       <div className="skeleton h-10 w-64 rounded-xl" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} className="skeleton h-52 rounded-2xl" />
-        ))}
-      </div>
+      <div className="skeleton h-96 rounded-xl" />
     </div>
   );
 
+  // ── Error ──
   if (error) return (
     <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-rose-700">
       <p className="font-semibold">Failed to load trending data</p>
@@ -213,7 +185,7 @@ export default function Trending() {
 
   return (
     <div>
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="flex items-start justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -243,16 +215,17 @@ export default function Trending() {
         </div>
       </div>
 
-      {/* Controls */}
+      {/* ── Controls ── */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
         <div className="flex items-center gap-1 overflow-x-auto">
           {SCORES.map(s => (
             <button
               key={s.key}
               onClick={() => setSortKey(s.key)}
+              style={sortKey === s.key ? { background: s.color, color: '#fff' } : {}}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
                 sortKey === s.key
-                  ? 'bg-indigo-600 text-white'
+                  ? ''
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -286,19 +259,19 @@ export default function Trending() {
         </div>
       </div>
 
-      {/* Meta */}
+      {/* ── Meta row ── */}
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs text-slate-400 dark:text-slate-500">
           {filtered.length} funds · sorted by {SCORES.find(s => s.key === sortKey)?.label}
           {catFilter !== 'All' && ` · ${catFilter}`}
-          {' · hover score tiles for formula'}
+          {' · hover score pills for formula'}
         </p>
         {totalPages > 1 && (
           <p className="text-xs text-slate-400 dark:text-slate-500">Page {page + 1} of {totalPages}</p>
         )}
       </div>
 
-      {/* Grid */}
+      {/* ── Table ── */}
       {filtered.length === 0 ? (
         <div className="text-center py-20 text-slate-400 dark:text-slate-500">
           <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -306,19 +279,65 @@ export default function Trending() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {paginated.map((fund, i) => (
-              <FundCard
-                key={fund.scheme_code}
-                fund={fund}
-                rank={page * PAGE_SIZE + i + 1}
-                sortKey={sortKey}
-              />
-            ))}
+          <div style={{
+            border:       '0.5px solid var(--color-border-tertiary)',
+            borderRadius: 'var(--border-radius-lg)',
+            overflow:     'hidden',
+          }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
+                <thead>
+                  <tr style={{ background: 'var(--color-background-secondary)' }}>
+                    <th style={{ padding: '9px 10px 9px 14px', fontSize: 10, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'left', whiteSpace: 'nowrap' }}>#</th>
+                    <th style={{ padding: '9px 12px', fontSize: 10, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'left', whiteSpace: 'nowrap' }}>Fund</th>
+
+                    {SCORES.map(s => (
+                      <th
+                        key={s.key}
+                        style={{
+                          padding:    '9px 6px',
+                          fontSize:   10,
+                          fontWeight: 600,
+                          textAlign:  'center',
+                          whiteSpace: 'nowrap',
+                          color:      s.key === sortKey ? s.color : 'var(--color-text-tertiary)',
+                        }}
+                      >
+                        {s.short}
+                        {s.key === sortKey && (
+                          direction === 'desc'
+                            ? <ChevronDown style={{ display: 'inline', width: 10, height: 10, marginLeft: 2, verticalAlign: 'middle' }} />
+                            : <ChevronUp   style={{ display: 'inline', width: 10, height: 10, marginLeft: 2, verticalAlign: 'middle' }} />
+                        )}
+                      </th>
+                    ))}
+
+                    {RETURNS.map(r => (
+                      <th
+                        key={r.key}
+                        style={{ padding: '9px 10px 9px 6px', fontSize: 10, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'right', whiteSpace: 'nowrap' }}
+                      >
+                        {r.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginated.map((fund, i) => (
+                    <FundRow
+                      key={fund.scheme_code}
+                      fund={fund}
+                      rank={page * PAGE_SIZE + i + 1}
+                      sortKey={sortKey}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-3 mt-8">
+            <div className="flex items-center justify-center gap-3 mt-6">
               <button
                 onClick={() => { setPage(p => p - 1); window.scrollTo(0, 0); }}
                 disabled={page === 0}
