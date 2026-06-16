@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { TrendingUp, RefreshCw, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { getTrending } from '../api/client.js';
 
@@ -335,42 +336,48 @@ function FundSearch({ value, onChange, allFunds }) {
         </button>
       )}
 
-      {/* Fixed-position dropdown — escapes any overflow:hidden or stacking context */}
-      {open && suggestions.length > 0 && rect && (
-        <div style={{
-          position:     'fixed',
-          top:          rect.bottom + 4,
-          left:         rect.left,
-          width:        360,
-          zIndex:       9999,
-          background:   'var(--color-background-primary)',
-          border:       '1px solid #e2e8f0',
-          borderRadius: 10,
-          boxShadow:    '0 8px 32px rgba(0,0,0,0.14)',
-          overflow:     'hidden',
-          maxHeight:    320,
-          overflowY:    'auto',
-        }}>
+      {/* Portal dropdown — rendered into document.body, fully above everything */}
+      {open && suggestions.length > 0 && rect && createPortal(
+        <div
+          onMouseDown={e => e.stopPropagation()}
+          style={{
+            position:     'fixed',
+            top:          rect.bottom + 4,
+            left:         rect.left,
+            width:        Math.max(rect.width, 360),
+            zIndex:       99999,
+            background:   '#ffffff',
+            border:       '1px solid #e2e8f0',
+            borderRadius: 10,
+            boxShadow:    '0 12px 40px rgba(0,0,0,0.18)',
+            overflow:     'hidden',
+            maxHeight:    320,
+            overflowY:    'auto',
+          }}
+        >
           {suggestions.map((fund, i) => (
             <div
               key={fund.scheme_code}
               onMouseDown={e => { e.preventDefault(); onChange(fund.scheme_name); setOpen(false); }}
               style={{
-                padding:    '9px 12px',
-                cursor:     'pointer',
-                borderTop:  i > 0 ? '1px solid #f1f5f9' : 'none',
+                padding:         '10px 14px',
+                cursor:          'pointer',
+                borderTop:       i > 0 ? '1px solid #f1f5f9' : 'none',
+                backgroundColor: 'transparent',
               }}
-              className="hover:bg-slate-50 dark:hover:bg-slate-700"
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <p style={{ fontSize: 12, color: 'var(--color-text-primary)', lineHeight: 1.4 }}>
+              <p style={{ fontSize: 12, color: '#1e293b', lineHeight: 1.4, margin: 0 }}>
                 {highlight(fund.scheme_name)}
               </p>
-              <p style={{ fontSize: 10, color: 'var(--color-text-tertiary)', marginTop: 2 }}>
+              <p style={{ fontSize: 10, color: '#94a3b8', marginTop: 3, margin: 0 }}>
                 {fund.category}
               </p>
             </div>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
