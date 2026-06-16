@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { TrendingUp, TrendingDown, RefreshCw, Info, ChevronUp, ChevronDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, RefreshCw, Info, ChevronUp, ChevronDown, Filter } from 'lucide-react';
 import { getTrending } from '../api/client.js';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -117,19 +117,30 @@ export default function Trending() {
 
   useEffect(() => { load(); }, []);
 
-  // Funds for the active sort tab
-  const baseFunds = data?.[sortKey] ?? [];
-
-  // Category filter
+  // Sort + filter entirely client-side so category filter works across the full dataset
   const filtered = useMemo(() => {
-    let list = catFilter === 'All' ? baseFunds : baseFunds.filter(f => f.category === catFilter);
-    if (direction === 'asc') list = [...list].reverse();
-    return list;
-  }, [baseFunds, catFilter, direction]);
+    if (!data?.funds) return [];
+    const tab = SORT_TABS.find(t => t.key === sortKey);
+    const returnKey = { by1m: '1m', by3m: '3m', by6m: '6m', by1y: '1y' }[sortKey];
 
-  // Category options from current sort list (not all categories — only what's visible)
+    let list = [...data.funds];
+
+    // Category filter
+    if (catFilter !== 'All') list = list.filter(f => f.category === catFilter);
+
+    // Sort
+    list.sort((a, b) => {
+      const av = returnKey ? (a.returns[returnKey] ?? -Infinity) : a.score;
+      const bv = returnKey ? (b.returns[returnKey] ?? -Infinity) : b.score;
+      return bv - av;
+    });
+
+    if (direction === 'asc') list.reverse();
+    return list;
+  }, [data, sortKey, catFilter, direction]);
+
   const categories = useMemo(() => {
-    if (!data) return [];
+    if (!data) return ['All'];
     return ['All', ...data.categories];
   }, [data]);
 
@@ -193,53 +204,56 @@ export default function Trending() {
         </span>
       </div>
 
-      {/* Sort tabs */}
-      <div className="flex items-center gap-1 mb-4 overflow-x-auto pb-1">
-        {SORT_TABS.map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => { setSortKey(tab.key); setCatFilter('All'); }}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-              sortKey === tab.key
-                ? 'bg-indigo-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Controls row: sort tabs + category dropdown + direction */}
+      <div className="flex items-center gap-2 mb-5 flex-wrap">
+        {/* Sort tabs */}
+        <div className="flex items-center gap-1 overflow-x-auto">
+          {SORT_TABS.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setSortKey(tab.key)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                sortKey === tab.key
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-        {/* Direction toggle */}
-        <button
-          onClick={() => setDirection(d => d === 'desc' ? 'asc' : 'desc')}
-          title={direction === 'desc' ? 'Showing best first' : 'Showing worst first'}
-          className="ml-auto flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-400 whitespace-nowrap"
-        >
-          {direction === 'desc' ? <><ChevronDown className="w-3.5 h-3.5" /> Best first</> : <><ChevronUp className="w-3.5 h-3.5" /> Worst first</>}
-        </button>
-      </div>
+        <div className="flex items-center gap-2 ml-auto">
+          {/* Category dropdown */}
+          <div className="flex items-center gap-1.5">
+            <Filter className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+            <select
+              value={catFilter}
+              onChange={e => setCatFilter(e.target.value)}
+              className="text-sm border border-slate-200 dark:border-slate-600 rounded-lg px-2.5 py-1.5
+                         bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200
+                         focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
 
-      {/* Category filter chips */}
-      <div className="flex gap-1.5 flex-wrap mb-6">
-        {categories.map(cat => (
+          {/* Direction toggle */}
           <button
-            key={cat}
-            onClick={() => setCatFilter(cat)}
-            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              catFilter === cat
-                ? 'bg-violet-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-            }`}
+            onClick={() => setDirection(d => d === 'desc' ? 'asc' : 'desc')}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-400 whitespace-nowrap"
           >
-            {cat}
+            {direction === 'desc' ? <><ChevronDown className="w-3.5 h-3.5" /> Best first</> : <><ChevronUp className="w-3.5 h-3.5" /> Worst first</>}
           </button>
-        ))}
+        </div>
       </div>
 
       {/* Showing count */}
       <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
         Showing {filtered.length} funds
-        {catFilter !== 'All' && ` in "${catFilter}"`}
+        {catFilter !== 'All' && ` · ${catFilter}`}
         {activeTab?.tooltip && <span className="ml-2 text-slate-300 dark:text-slate-600">· {activeTab.tooltip}</span>}
       </p>
 
