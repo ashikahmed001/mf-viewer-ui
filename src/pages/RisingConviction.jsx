@@ -366,7 +366,7 @@ function ConvictionPanel({ direction }) {
   const [lookback, setLookback]   = useState(6);
   const [minStreak, setMinStreak] = useState(2);
   const [multiOnly, setMultiOnly] = useState(false);
-  const [viewMode, setViewMode]           = useState('cards');
+  const [viewMode, setViewMode]           = useState('table');
   const [selectedIndustries, setSelectedIndustries] = useState(new Set());
   const [minGain, setMinGain]             = useState(null);
   const [industryOpen, setIndustryOpen]   = useState(false);
