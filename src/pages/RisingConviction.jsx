@@ -361,7 +361,17 @@ function ConvictionPanel({ direction }) {
   const [lookback, setLookback]   = useState(6);
   const [minStreak, setMinStreak] = useState(2);
   const [multiOnly, setMultiOnly] = useState(false);
-  const [viewMode, setViewMode]   = useState('cards');
+  const [viewMode, setViewMode]           = useState('cards');
+  const [selectedIndustries, setSelectedIndustries] = useState(new Set());
+  const [minGain, setMinGain]             = useState(null);
+
+  function toggleIndustry(ind) {
+    setSelectedIndustries(prev => {
+      const next = new Set(prev);
+      next.has(ind) ? next.delete(ind) : next.add(ind);
+      return next;
+    });
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -371,6 +381,11 @@ function ConvictionPanel({ direction }) {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [lookback, direction]);
+
+  const industries = useMemo(() => {
+    const set = new Set(data.map(d => d.industry).filter(Boolean));
+    return [...set].sort();
+  }, [data]);
 
   const stockGroups = useMemo(() => {
     const map = new Map();
@@ -388,12 +403,15 @@ function ConvictionPanel({ direction }) {
     });
   }, [data, minStreak]);
 
-  const flatRows     = useMemo(() => stockGroups.flatMap(g => g.entries), [stockGroups]);
-  const filtered     = multiOnly ? stockGroups.filter(g => g.entries.length >= 2) : stockGroups;
-  const flatFiltered = multiOnly ? flatRows.filter(e => {
-    const g = stockGroups.find(sg => sg.isin === e.isin);
-    return g && g.entries.length >= 2;
-  }) : flatRows;
+  const filtered = useMemo(() => stockGroups
+    .filter(g => !multiOnly || g.entries.length >= 2)
+    .filter(g => selectedIndustries.size === 0 || selectedIndustries.has(g.industry))
+    .filter(g => {
+      if (minGain === null) return true;
+      const avg = g.entries.reduce((s, e) => s + e.gain, 0) / g.entries.length;
+      return Math.abs(avg) >= minGain;
+    }),
+  [stockGroups, multiOnly, selectedIndustries, minGain]);
 
   const maxStreak  = data.length > 0 ? Math.max(...data.map(d => d.streak), 1) : 1;
   const multiCount = stockGroups.filter(g => g.entries.length >= 2).length;
@@ -433,7 +451,9 @@ function ConvictionPanel({ direction }) {
       )}
 
       {/* Filter bar */}
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-6">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm mb-6 flex flex-col gap-3">
+
+        {/* Row 1: window · streak · multi-fund · view toggle */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -463,8 +483,8 @@ function ConvictionPanel({ direction }) {
 
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <div onClick={() => setMultiOnly(v => !v)}
-              className={`w-9 h-5 rounded-full transition-colors relative ${multiOnly ? 'bg-violet-600' : 'bg-slate-200'}`}>
-              <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white dark:bg-slate-800 rounded-full shadow transition-transform ${multiOnly ? 'translate-x-4' : ''}`} />
+              className={`w-9 h-5 rounded-full transition-colors relative ${multiOnly ? 'bg-violet-600' : 'bg-slate-200 dark:bg-slate-600'}`}>
+              <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${multiOnly ? 'translate-x-4' : ''}`} />
             </div>
             <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Multi-fund only</span>
           </label>
@@ -475,16 +495,59 @@ function ConvictionPanel({ direction }) {
             </span>
             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
               <button onClick={() => setViewMode('cards')} title="Card view"
-                className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards' ? 'bg-white dark:bg-slate-800 shadow-sm text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:text-slate-500'}`}>
+                className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards' ? 'bg-white dark:bg-slate-800 shadow-sm text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'}`}>
                 <LayoutGrid className="w-4 h-4" />
               </button>
-              <button onClick={() => setViewMode('table')} title="Table view"
-                className={`p-1.5 rounded-md transition-colors ${viewMode === 'table' ? 'bg-white dark:bg-slate-800 shadow-sm text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:text-slate-500'}`}>
+              <button onClick={() => setViewMode('table')} title="Leaderboard view"
+                className={`p-1.5 rounded-md transition-colors ${viewMode === 'table' ? 'bg-white dark:bg-slate-800 shadow-sm text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'}`}>
                 <Table2 className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
+
+        {/* Row 2: industry pills */}
+        {!loading && industries.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400 shrink-0">Industry:</span>
+            {industries.map(ind => (
+              <button key={ind} onClick={() => toggleIndustry(ind)}
+                className={`px-2 py-1 text-xs font-medium rounded-lg border transition-colors ${
+                  selectedIndustries.has(ind)
+                    ? isRising
+                      ? 'bg-emerald-600 text-white border-emerald-600'
+                      : 'bg-red-500 text-white border-red-500'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-slate-400'
+                }`}>
+                {ind}
+              </button>
+            ))}
+            {selectedIndustries.size > 0 && (
+              <button
+                onClick={() => setSelectedIndustries(new Set())}
+                className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline ml-1"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Row 3: min gain/drop */}
+        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400 shrink-0">
+            Min {isRising ? 'gain' : 'drop'}:
+          </span>
+          {[null, 0.25, 0.5, 1, 2].map(val => (
+            <button key={val ?? 'any'} onClick={() => setMinGain(val)}
+              className={`px-2.5 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${
+                minGain === val ? accentActive : `bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 ${accentHover}`
+              }`}>
+              {val === null ? 'Any' : `≥${val}%`}
+            </button>
+          ))}
+        </div>
+
       </div>
 
       {error && (
