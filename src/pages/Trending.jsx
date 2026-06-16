@@ -5,11 +5,11 @@ import { getTrending } from '../api/client.js';
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const SCORES = [
-  { key: 'momentum',     label: 'Momentum',     short: 'Mom',  tooltip: 'Recency-weighted return — 1M×40% + 3M×35% + 6M×25%, normalized 0–10' },
-  { key: 'acceleration', label: 'Acceleration', short: 'Acc',  tooltip: 'Annualised 3-month return minus 1-year return — funds picking up pace score higher' },
-  { key: 'consistency',  label: 'Consistency',  short: 'Con',  tooltip: '% of last 12 months with positive returns, scaled to 10' },
-  { key: 'recovery',     label: 'Recovery',     short: 'Rec',  tooltip: '1-month gain offset against any 6-month drawdown — rewards bounce-backs' },
-  { key: 'riskAdj',      label: 'Risk-adj',     short: 'Risk', tooltip: '6-month return ÷ monthly volatility (Sharpe-like), normalized 0–10' },
+  { key: 'momentum',     label: 'Momentum',     short: 'Mom',  color: '#6366F1', tooltip: 'Recency-weighted return — 1M×40% + 3M×35% + 6M×25%, normalized 0–10' },
+  { key: 'acceleration', label: 'Acceleration', short: 'Acc',  color: '#F59E0B', tooltip: 'Annualised 3-month return minus 1-year return — funds picking up pace score higher' },
+  { key: 'consistency',  label: 'Consistency',  short: 'Con',  color: '#10B981', tooltip: '% of last 12 months with positive returns, scaled to 10' },
+  { key: 'recovery',     label: 'Recovery',     short: 'Rec',  color: '#0EA5E9', tooltip: '1-month gain offset against any 6-month drawdown — rewards bounce-backs' },
+  { key: 'riskAdj',      label: 'Risk-adj',     short: 'Risk', color: '#A855F7', tooltip: '6-month return ÷ monthly volatility (Sharpe-like), normalized 0–10' },
 ];
 
 const RETURNS = [
@@ -77,7 +77,7 @@ function FundCard({ fund, rank, sortKey }) {
 
       {/* Hero score */}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 10 }}>
-        <span style={{ fontSize: 28, fontWeight: 500, color: '#6366F1', lineHeight: 1 }}>
+        <span style={{ fontSize: 28, fontWeight: 500, color: heroScore?.color ?? '#6366F1', lineHeight: 1 }}>
           {heroVal != null ? heroVal.toFixed(1) : '—'}
         </span>
         <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
@@ -85,7 +85,7 @@ function FundCard({ fund, rank, sortKey }) {
         </span>
       </div>
 
-      {/* 5 score tiles */}
+      {/* 5 score tiles — each has its own color, active is stronger */}
       <div style={{ display: 'flex', gap: 6 }}>
         {SCORES.map(s => {
           const active = s.key === sortKey;
@@ -99,14 +99,15 @@ function FundCard({ fund, rank, sortKey }) {
                 textAlign:    'center',
                 padding:      '5px 4px',
                 borderRadius: 'var(--border-radius-md)',
-                background:   active ? 'rgba(99,102,241,0.1)' : 'var(--color-background-secondary)',
+                background:   `${s.color}${active ? '18' : '0d'}`,
                 cursor:       'default',
+                outline:      active ? `1.5px solid ${s.color}30` : 'none',
               }}
             >
-              <span style={{ fontSize: 9, color: active ? '#6366F1' : 'var(--color-text-tertiary)', display: 'block', marginBottom: 2 }}>
+              <span style={{ fontSize: 9, color: s.color, opacity: active ? 1 : 0.65, display: 'block', marginBottom: 2 }}>
                 {s.short}
               </span>
-              <span style={{ fontSize: 12, fontWeight: 500, color: active ? '#6366F1' : 'var(--color-text-primary)', display: 'block' }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: s.color, opacity: active ? 1 : 0.8, display: 'block' }}>
                 {val != null ? val.toFixed(1) : '—'}
               </span>
             </div>
