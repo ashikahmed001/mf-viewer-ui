@@ -369,6 +369,7 @@ function ConvictionPanel({ direction }) {
   const [viewMode, setViewMode]           = useState('cards');
   const [selectedIndustries, setSelectedIndustries] = useState(new Set());
   const [minGain, setMinGain]             = useState(null);
+  const [industryOpen, setIndustryOpen]   = useState(false);
 
   function toggleIndustry(ind) {
     setSelectedIndustries(prev => {
@@ -511,26 +512,73 @@ function ConvictionPanel({ direction }) {
           </div>
         </div>
 
-        {/* Row 2: industry pills */}
+        {/* Row 2: industry dropdown */}
         {!loading && industries.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
+          <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
             <span className="text-sm font-medium text-slate-500 dark:text-slate-400 shrink-0">Industry:</span>
-            {industries.map(ind => (
-              <button key={ind} onClick={() => toggleIndustry(ind)}
-                className={`px-2 py-1 text-xs font-medium rounded-lg border transition-colors ${
-                  selectedIndustries.has(ind)
+            <div className="relative">
+              <button
+                onClick={() => setIndustryOpen(v => !v)}
+                className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors ${
+                  selectedIndustries.size > 0
                     ? isRising
-                      ? 'bg-emerald-600 text-white border-emerald-600'
-                      : 'bg-red-500 text-white border-red-500'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700'
+                      : 'bg-red-50 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700'
                     : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-slate-400'
-                }`}>
-                {ind}
+                }`}
+              >
+                {selectedIndustries.size === 0
+                  ? 'All industries'
+                  : selectedIndustries.size === 1
+                    ? [...selectedIndustries][0]
+                    : `${selectedIndustries.size} selected`}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${industryOpen ? 'rotate-180' : ''}`} />
               </button>
-            ))}
+
+              {industryOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setIndustryOpen(false)} />
+                  <div className="absolute left-0 top-full mt-1.5 z-20 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-1 min-w-[220px] max-h-72 overflow-y-auto">
+                    {selectedIndustries.size > 0 && (
+                      <button
+                        onClick={() => { setSelectedIndustries(new Set()); setIndustryOpen(false); }}
+                        className="w-full text-left px-3 py-2 text-xs font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 border-b border-slate-100 dark:border-slate-700 transition-colors"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                    {industries.map(ind => (
+                      <button
+                        key={ind}
+                        onClick={() => toggleIndustry(ind)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <span className={`w-4 h-4 rounded flex-shrink-0 flex items-center justify-center border transition-colors ${
+                          selectedIndustries.has(ind)
+                            ? isRising
+                              ? 'bg-emerald-600 border-emerald-600'
+                              : 'bg-red-500 border-red-500'
+                            : 'border-slate-300 dark:border-slate-600'
+                        }`}>
+                          {selectedIndustries.has(ind) && (
+                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                              <path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </span>
+                        <span className={`text-sm ${selectedIndustries.has(ind) ? 'font-medium text-slate-800 dark:text-slate-200' : 'text-slate-600 dark:text-slate-400'}`}>
+                          {ind}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
             {selectedIndustries.size > 0 && (
               <button
                 onClick={() => setSelectedIndustries(new Set())}
-                className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline ml-1"
+                className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline"
               >
                 Clear
               </button>
