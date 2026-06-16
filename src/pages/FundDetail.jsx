@@ -610,47 +610,71 @@ function NavHistoryPanel({ navData, canRolling }) {
       {/* ── Rolling returns — pro gated ──────────────────────────────────────── */}
       {canRolling ? (
         <>
-          {/* Returns card */}
+          {/* Returns card — HM-2A violet spectrum */}
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Point-in-time returns</h3>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              {rollingReturns.map(({ label, days, ret, cagr, sinceTs }) => {
+              {rollingReturns.map(({ label, ret, cagr, sinceTs }) => {
                 const isNull = ret === null;
-                const isPos  = !isNull && ret >= 0;
-                const sinceStr = sinceTs
-                  ? new Date(sinceTs).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })
-                  : null;
-                return (
-                  <div key={label} className={`rounded-xl px-3 py-3.5 text-center border flex flex-col gap-1 ${
-                    isNull ? 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-700'
-                    : isPos ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900/50'
-                    :         'bg-rose-50 dark:bg-rose-950/40 border-rose-100 dark:border-rose-900/50'
-                  }`}>
-                    {/* Period label */}
-                    <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 tracking-wide">{label}</p>
+                const isNeg  = !isNull && ret < 0;
 
-                    {/* Return value */}
-                    <p className={`text-xl font-bold leading-none ${
-                      isNull ? 'text-slate-300 dark:text-slate-600'
-                      : isPos ? 'text-emerald-600 dark:text-emerald-400'
-                      :         'text-rose-600 dark:text-rose-400'
-                    }`}>
-                      {isNull ? '—' : `${isPos ? '+' : ''}${ret.toFixed(1)}%`}
+                // Violet spectrum: lighter for short periods, darker for long.
+                // Negative returns always get the rose treatment.
+                const PALETTE = {
+                  '1M': { bg: '#ede9fe', bgDark: '#2e1065', text: '#5b21b6', textDark: '#c4b5fd', sub: '#7c3aed',  subDark: '#a78bfa' },
+                  '3M': { bg: '#ddd6fe', bgDark: '#3b0764', text: '#4c1d95', textDark: '#ddd6fe', sub: '#5b21b6',  subDark: '#c4b5fd' },
+                  '6M': { bg: '#c4b5fd', bgDark: '#4c1d95', text: '#3b0764', textDark: '#ede9fe', sub: '#4c1d95',  subDark: '#ddd6fe' },
+                  '1Y': { bg: '#c4b5fd', bgDark: '#4c1d95', text: '#3b0764', textDark: '#ede9fe', sub: '#4c1d95',  subDark: '#ddd6fe' },
+                  '3Y': { bg: '#8b5cf6', bgDark: '#6d28d9', text: '#ffffff', textDark: '#ffffff', sub: '#ffffff',  subDark: '#e9d5ff', dark: true },
+                  '5Y': { bg: '#6d28d9', bgDark: '#5b21b6', text: '#ffffff', textDark: '#ffffff', sub: '#ffffff',  subDark: '#e9d5ff', dark: true },
+                };
+                const c = isNeg ? null : (PALETTE[label] ?? PALETTE['1M']);
+
+                const sinceStr = sinceTs
+                  ? (() => {
+                      const d = new Date(sinceTs);
+                      const mon = d.toLocaleDateString('en-IN', { month: 'short' });
+                      const yr  = String(d.getFullYear()).slice(-2);
+                      return `${mon} '${yr}`;
+                    })()
+                  : null;
+
+                return (
+                  <div
+                    key={label}
+                    className="rounded-xl py-4 px-2 text-center flex flex-col gap-1.5"
+                    style={isNull
+                      ? { background: 'var(--color-bg-secondary, #f8fafc)' }
+                      : isNeg
+                        ? { background: '#fee2e2' }
+                        : { background: c.bg }
+                    }
+                  >
+                    {/* Period label */}
+                    <p className="text-[11px] font-semibold leading-none"
+                       style={{ color: isNull ? '#94a3b8' : isNeg ? '#991b1b' : c.text }}>
+                      {label}
                     </p>
 
-                    {/* CAGR for multi-year periods */}
-                    {cagr !== null && !isNull && (
-                      <p className={`text-[10px] font-medium leading-none ${
-                        isPos ? 'text-emerald-500/70 dark:text-emerald-500/60'
-                              : 'text-rose-500/70 dark:text-rose-500/60'
-                      }`}>
-                        {isPos ? '+' : ''}{cagr.toFixed(1)}% p.a.
+                    {/* Return value */}
+                    <p className="text-xl font-bold leading-none"
+                       style={{ color: isNull ? '#cbd5e1' : isNeg ? '#991b1b' : c.text }}>
+                      {isNull ? '—' : `${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%`}
+                    </p>
+
+                    {/* CAGR (1Y+) or since date (short periods) */}
+                    {!isNull && (
+                      <p className="text-[10px] leading-none"
+                         style={{ color: isNeg ? '#b91c1c' : c.sub, opacity: c?.dark ? 0.8 : 0.7 }}>
+                        {cagr !== null
+                          ? `${ret >= 0 ? '+' : ''}${cagr.toFixed(1)}% p.a.`
+                          : sinceStr ? `since ${sinceStr}` : ''}
                       </p>
                     )}
-
-                    {/* Since date */}
-                    {sinceStr && !isNull && (
-                      <p className="text-[10px] text-slate-400 dark:text-slate-600 leading-none">
+                    {/* Since date for multi-year (below CAGR) */}
+                    {!isNull && cagr !== null && sinceStr && (
+                      <p className="text-[10px] leading-none"
+                         style={{ color: isNeg ? '#b91c1c' : c.sub, opacity: c?.dark ? 0.6 : 0.5 }}>
                         since {sinceStr}
                       </p>
                     )}
