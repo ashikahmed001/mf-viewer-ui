@@ -290,21 +290,26 @@ function LeaderboardView({ stockGroups, maxStreak, direction }) {
 
                   {/* stock + fund pills */}
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                    <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
                       <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{group.stock_name}</span>
                       <CapBadge cap={group.entries[0]?.market_cap_cat} />
                     </div>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {group.entries.map((e, i) => (
+                    <div className="flex gap-1 flex-wrap">
+                      {group.entries.slice(0, 4).map((e, i) => (
                         <span
                           key={i}
-                          className="inline-flex items-center text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded"
+                          className="inline-flex items-center text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-px rounded"
                           title={e.fund_name}
                         >
                           {e.fund_name.split(' ').slice(0, 3).join(' ')}
                           {e.fund_name.split(' ').length > 3 ? '…' : ''}
                         </span>
                       ))}
+                      {group.entries.length > 4 && (
+                        <span className="inline-flex items-center text-[10px] font-medium text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-1.5 py-px rounded">
+                          +{group.entries.length - 4} more
+                        </span>
+                      )}
                     </div>
                   </td>
 
