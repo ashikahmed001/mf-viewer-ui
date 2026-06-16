@@ -133,10 +133,6 @@ function ScoreTooltip({ score, children }) {
             </div>
           </div>
 
-          {/* All scores 0-10 note */}
-          <p style={{ fontSize: 9, color: 'var(--color-text-tertiary)', marginTop: 8, paddingTop: 6, borderTop: '0.5px solid var(--color-border-tertiary)' }}>
-            All scores normalized 0–10 across all funds
-          </p>
         </div>
       )}
     </span>
@@ -298,9 +294,10 @@ export default function Trending() {
     if (!data?.funds) return [];
     let list = [...data.funds];
     if (catFilter !== 'All') list = list.filter(f => f.category === catFilter);
+    const isReturn = RETURNS.some(r => r.key === sortKey);
     list.sort((a, b) => {
-      const av = a.scores?.[sortKey] ?? -Infinity;
-      const bv = b.scores?.[sortKey] ?? -Infinity;
+      const av = isReturn ? (a.returns?.[sortKey] ?? -Infinity) : (a.scores?.[sortKey] ?? -Infinity);
+      const bv = isReturn ? (b.returns?.[sortKey] ?? -Infinity) : (b.scores?.[sortKey] ?? -Infinity);
       return direction === 'desc' ? bv - av : av - bv;
     });
     return list;
@@ -416,14 +413,33 @@ export default function Trending() {
                       />
                     ))}
 
-                    {RETURNS.map(r => (
-                      <th
-                        key={r.key}
-                        style={{ padding: '9px 10px 9px 6px', fontSize: 10, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'right', whiteSpace: 'nowrap' }}
-                      >
-                        {r.label}
-                      </th>
-                    ))}
+                    {RETURNS.map(r => {
+                      const active = sortKey === r.key;
+                      const Icon   = active ? (direction === 'desc' ? ChevronDown : ChevronUp) : ChevronsUpDown;
+                      return (
+                        <th key={r.key} style={{ padding: '9px 10px 9px 6px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          <button
+                            onClick={() => handleSort(r.key)}
+                            style={{
+                              display:    'inline-flex',
+                              alignItems: 'center',
+                              gap:        3,
+                              fontSize:   10,
+                              fontWeight: active ? 700 : 500,
+                              color:      active ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
+                              background: 'none',
+                              border:     'none',
+                              cursor:     'pointer',
+                              padding:    0,
+                              userSelect: 'none',
+                            }}
+                          >
+                            {r.label}
+                            <Icon style={{ width: 10, height: 10, flexShrink: 0, opacity: active ? 1 : 0.4 }} />
+                          </button>
+                        </th>
+                      );
+                    })}
                   </tr>
                 </thead>
                 <tbody>
