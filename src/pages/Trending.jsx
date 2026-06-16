@@ -1,15 +1,45 @@
-import { useEffect, useState, useMemo } from 'react';
-import { TrendingUp, RefreshCw, ChevronUp, ChevronDown, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { TrendingUp, RefreshCw, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTrending } from '../api/client.js';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const SCORES = [
-  { key: 'momentum',     label: 'Momentum',     short: 'Mom',  color: '#6366F1', tooltip: 'Recency-weighted return — 1M×40% + 3M×35% + 6M×25%, normalized 0–10' },
-  { key: 'acceleration', label: 'Acceleration', short: 'Acc',  color: '#F59E0B', tooltip: 'Annualised 3-month return minus 1-year return — funds picking up pace score higher' },
-  { key: 'consistency',  label: 'Consistency',  short: 'Con',  color: '#10B981', tooltip: '% of last 12 months with positive returns, scaled to 10' },
-  { key: 'recovery',     label: 'Recovery',     short: 'Rec',  color: '#0EA5E9', tooltip: '1-month gain offset against any 6-month drawdown — rewards bounce-backs' },
-  { key: 'riskAdj',      label: 'Risk-adj',     short: 'Risk', color: '#A855F7', tooltip: '6-month return ÷ monthly volatility (Sharpe-like), normalized 0–10' },
+  {
+    key: 'momentum', label: 'Momentum', short: 'Mom', color: '#6366F1',
+    formula:     '1M × 40% + 3M × 35% + 6M × 25%',
+    what:        'Measures how strongly a fund has been gaining recently by weighting short-term returns more heavily than older ones.',
+    high:        'Fund has delivered strong returns across all recent periods — consistent upward movement.',
+    low:         'Recent returns are weak or negative; the fund may be losing steam.',
+  },
+  {
+    key: 'acceleration', label: 'Acceleration', short: 'Acc', color: '#F59E0B',
+    formula:     'Annualised 3M return − 1Y return',
+    what:        'Captures whether a fund is speeding up — i.e. its recent pace is outrunning its longer-term average.',
+    high:        'Fund is accelerating: the last 3 months are outpacing the full-year trend.',
+    low:         'Fund is decelerating or has slowed down compared to its 1-year trajectory.',
+  },
+  {
+    key: 'consistency', label: 'Consistency', short: 'Con', color: '#10B981',
+    formula:     '(Positive months ÷ 12) × 100, scaled 0–10',
+    what:        'Measures how reliably a fund delivers positive returns across the last 12 months, regardless of magnitude.',
+    high:        'Fund rarely has down months — steady and dependable across market conditions.',
+    low:         'Fund frequently posts negative monthly returns; performance is erratic.',
+  },
+  {
+    key: 'recovery', label: 'Recovery', short: 'Rec', color: '#0EA5E9',
+    formula:     '1M return − min(0, 6M return)',
+    what:        'Rewards funds that bounced back after a drawdown. If the 6M return was negative, it adds that as extra credit for the 1M rebound.',
+    high:        'Fund recovered sharply from recent weakness — strong bounce-back signal.',
+    low:         'Fund is still in drawdown or the 1M recovery is minimal.',
+  },
+  {
+    key: 'riskAdj', label: 'Risk-adj', short: 'Risk', color: '#A855F7',
+    formula:     '6M return ÷ monthly return std dev',
+    what:        'A Sharpe-like ratio: how much return the fund earned per unit of volatility over 6 months. Normalized 0–10 across all funds.',
+    high:        'Fund delivered strong returns with low volatility — efficient risk-reward.',
+    low:         'Either returns are weak or the fund is very volatile relative to its gain.',
+  },
 ];
 
 const RETURNS = [
@@ -29,26 +59,144 @@ function fmtReturn(val) {
   return `${val >= 0 ? '+' : ''}${val.toFixed(1)}%`;
 }
 
+// ─── Tooltip ─────────────────────────────────────────────────────────────────
+
+function ScoreTooltip({ score, children }) {
+  const [visible, setVisible] = useState(false);
+  const [pos, setPos]         = useState({ top: 0, left: 0 });
+  const ref = useRef(null);
+
+  const show = () => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    // prefer below, but clamp to viewport
+    let top  = rect.bottom + 8;
+    let left = rect.left + rect.width / 2;
+    setPos({ top, left });
+    setVisible(true);
+  };
+
+  return (
+    <span
+      ref={ref}
+      onMouseEnter={show}
+      onMouseLeave={() => setVisible(false)}
+      style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
+    >
+      {children}
+      {visible && (
+        <div style={{
+          position:      'fixed',
+          top:           pos.top,
+          left:          pos.left,
+          transform:     'translateX(-50%)',
+          zIndex:        9999,
+          background:    'var(--color-background-primary)',
+          border:        `1px solid ${score.color}30`,
+          borderTop:     `2px solid ${score.color}`,
+          borderRadius:  10,
+          padding:       '12px 14px',
+          width:         260,
+          boxShadow:     '0 8px 24px rgba(0,0,0,0.14)',
+          pointerEvents: 'none',
+          textAlign:     'left',
+        }}>
+          {/* Title */}
+          <p style={{ fontSize: 12, fontWeight: 700, color: score.color, marginBottom: 6 }}>
+            {score.label}
+          </p>
+
+          {/* What it measures */}
+          <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', lineHeight: 1.55, marginBottom: 8 }}>
+            {score.what}
+          </p>
+
+          {/* Formula */}
+          <div style={{ background: `${score.color}10`, borderRadius: 6, padding: '5px 8px', marginBottom: 8 }}>
+            <span style={{ fontSize: 9, fontWeight: 600, color: score.color, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 2 }}>
+              Formula
+            </span>
+            <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--color-text-primary)', fontWeight: 500 }}>
+              {score.formula}
+            </span>
+          </div>
+
+          {/* High / Low */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#059669', flexShrink: 0, marginTop: 1 }}>High</span>
+              <span style={{ fontSize: 10, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>{score.high}</span>
+            </div>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#E11D48', flexShrink: 0, marginTop: 1 }}>Low</span>
+              <span style={{ fontSize: 10, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>{score.low}</span>
+            </div>
+          </div>
+
+          {/* All scores 0-10 note */}
+          <p style={{ fontSize: 9, color: 'var(--color-text-tertiary)', marginTop: 8, paddingTop: 6, borderTop: '0.5px solid var(--color-border-tertiary)' }}>
+            All scores normalized 0–10 across all funds
+          </p>
+        </div>
+      )}
+    </span>
+  );
+}
+
+// ─── Sortable column header ───────────────────────────────────────────────────
+
+function SortTh({ score, sortKey, direction, onSort }) {
+  const active = sortKey === score.key;
+  const Icon   = active ? (direction === 'desc' ? ChevronDown : ChevronUp) : ChevronsUpDown;
+
+  const btn = (
+    <button
+      onClick={() => onSort(score.key)}
+      style={{
+        display:    'inline-flex',
+        alignItems: 'center',
+        gap:        3,
+        fontSize:   10,
+        fontWeight: active ? 700 : 500,
+        color:      active ? score.color : 'var(--color-text-tertiary)',
+        background: 'none',
+        border:     'none',
+        cursor:     'pointer',
+        padding:    0,
+        userSelect: 'none',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {score.short}
+      <Icon style={{ width: 10, height: 10, flexShrink: 0, opacity: active ? 1 : 0.4 }} />
+    </button>
+  );
+
+  return (
+    <th style={{ padding: '9px 6px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+      <ScoreTooltip score={score}>{btn}</ScoreTooltip>
+    </th>
+  );
+}
+
 // ─── Score Pill ───────────────────────────────────────────────────────────────
 
 function ScorePill({ score, val, active }) {
   return (
-    <div title={score.tooltip} style={{ display: 'flex', justifyContent: 'center' }}>
-      <span
-        style={{
-          display:      'inline-block',
-          minWidth:     38,
-          textAlign:    'center',
-          padding:      '3px 8px',
-          borderRadius: 999,
-          fontSize:     12,
-          fontWeight:   700,
-          color:        score.color,
-          background:   `${score.color}${active ? '22' : '12'}`,
-          outline:      active ? `1.5px solid ${score.color}40` : 'none',
-          cursor:       'default',
-        }}
-      >
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <span style={{
+        display:      'inline-block',
+        minWidth:     38,
+        textAlign:    'center',
+        padding:      '3px 8px',
+        borderRadius: 999,
+        fontSize:     12,
+        fontWeight:   700,
+        color:        score.color,
+        background:   `${score.color}${active ? '22' : '12'}`,
+        outline:      active ? `1.5px solid ${score.color}40` : 'none',
+        cursor:       'default',
+      }}>
         {val != null ? val.toFixed(1) : '—'}
       </span>
     </div>
@@ -62,14 +210,14 @@ function FundRow({ fund, rank, sortKey }) {
   const returns = fund.returns ?? {};
 
   return (
-    <tr style={{ borderTop: '0.5px solid var(--color-border-tertiary)' }}
-        className="hover:bg-[var(--color-background-secondary)]">
-      {/* Rank */}
+    <tr
+      style={{ borderTop: '0.5px solid var(--color-border-tertiary)' }}
+      className="hover:bg-[var(--color-background-secondary)] transition-colors"
+    >
       <td style={{ padding: '10px 10px 10px 14px', fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
         {rank}
       </td>
 
-      {/* Fund name + category */}
       <td style={{ padding: '10px 12px', verticalAlign: 'middle', maxWidth: 0, width: '100%' }}>
         <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {fund.scheme_name}
@@ -79,32 +227,27 @@ function FundRow({ fund, rank, sortKey }) {
         </p>
       </td>
 
-      {/* Score pills */}
       {SCORES.map(s => (
-        <td key={s.key} style={{ padding: '10px 6px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+        <td key={s.key} style={{ padding: '8px 6px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
           <ScorePill score={s} val={scores[s.key]} active={s.key === sortKey} />
         </td>
       ))}
 
-      {/* Returns */}
       {RETURNS.map(r => {
         const val = returns[r.key];
         const pos = val != null && val >= 0;
         return (
-          <td
-            key={r.key}
-            style={{
-              padding:      '10px 10px 10px 6px',
-              fontSize:     12,
-              fontWeight:   500,
-              textAlign:    'right',
-              whiteSpace:   'nowrap',
-              verticalAlign: 'middle',
-              color: val == null
-                ? 'var(--color-text-tertiary)'
-                : pos ? '#059669' : '#E11D48',
-            }}
-          >
+          <td key={r.key} style={{
+            padding:       '10px 10px 10px 6px',
+            fontSize:      12,
+            fontWeight:    500,
+            textAlign:     'right',
+            whiteSpace:    'nowrap',
+            verticalAlign: 'middle',
+            color: val == null
+              ? 'var(--color-text-tertiary)'
+              : pos ? '#059669' : '#E11D48',
+          }}>
             {fmtReturn(val)}
           </td>
         );
@@ -121,8 +264,8 @@ export default function Trending() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError]           = useState(null);
   const [sortKey, setSortKey]       = useState('momentum');
-  const [catFilter, setCatFilter]   = useState('All');
   const [direction, setDirection]   = useState('desc');
+  const [catFilter, setCatFilter]   = useState('All');
   const [page, setPage]             = useState(0);
 
   const load = async (refresh = false) => {
@@ -142,6 +285,15 @@ export default function Trending() {
   useEffect(() => { load(); }, []);
   useEffect(() => { setPage(0); }, [sortKey, catFilter, direction]);
 
+  const handleSort = (col) => {
+    if (col === sortKey) {
+      setDirection(d => d === 'desc' ? 'asc' : 'desc');
+    } else {
+      setSortKey(col);
+      setDirection('desc');
+    }
+  };
+
   const filtered = useMemo(() => {
     if (!data?.funds) return [];
     let list = [...data.funds];
@@ -149,11 +301,10 @@ export default function Trending() {
     list.sort((a, b) => {
       const av = a.scores?.[sortKey] ?? -Infinity;
       const bv = b.scores?.[sortKey] ?? -Infinity;
-      return bv - av;
+      return direction === 'desc' ? bv - av : av - bv;
     });
-    if (direction === 'asc') list.reverse();
     return list;
-  }, [data, sortKey, catFilter, direction]);
+  }, [data, sortKey, direction, catFilter]);
 
   const paginated  = useMemo(
     () => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
@@ -166,7 +317,6 @@ export default function Trending() {
     [data],
   );
 
-  // ── Loading skeleton ──
   if (loading) return (
     <div className="space-y-4">
       <div className="skeleton h-10 w-64 rounded-xl" />
@@ -174,7 +324,6 @@ export default function Trending() {
     </div>
   );
 
-  // ── Error ──
   if (error) return (
     <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-rose-700">
       <p className="font-semibold">Failed to load trending data</p>
@@ -217,58 +366,24 @@ export default function Trending() {
 
       {/* ── Controls ── */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
-        <div className="flex items-center gap-1 overflow-x-auto">
-          {SCORES.map(s => (
-            <button
-              key={s.key}
-              onClick={() => setSortKey(s.key)}
-              style={sortKey === s.key ? { background: s.color, color: '#fff' } : {}}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                sortKey === s.key
-                  ? ''
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2 ml-auto">
-          <div className="flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-            <select
-              value={catFilter}
-              onChange={e => setCatFilter(e.target.value)}
-              className="text-sm border border-slate-200 dark:border-slate-600 rounded-lg px-2.5 py-1.5
-                         bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-            >
-              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-            </select>
-          </div>
-
-          <button
-            onClick={() => setDirection(d => d === 'desc' ? 'asc' : 'desc')}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-400 whitespace-nowrap"
+        <div className="flex items-center gap-1.5">
+          <Filter className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+          <select
+            value={catFilter}
+            onChange={e => setCatFilter(e.target.value)}
+            className="text-sm border border-slate-200 dark:border-slate-600 rounded-lg px-2.5 py-1.5
+                       bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
           >
-            {direction === 'desc'
-              ? <><ChevronDown className="w-3.5 h-3.5" /> Best first</>
-              : <><ChevronUp   className="w-3.5 h-3.5" /> Worst first</>}
-          </button>
+            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          </select>
         </div>
-      </div>
 
-      {/* ── Meta row ── */}
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-xs text-slate-400 dark:text-slate-500">
-          {filtered.length} funds · sorted by {SCORES.find(s => s.key === sortKey)?.label}
+        <div className="ml-auto flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+          {filtered.length} funds
           {catFilter !== 'All' && ` · ${catFilter}`}
-          {' · hover score pills for formula'}
-        </p>
-        {totalPages > 1 && (
-          <p className="text-xs text-slate-400 dark:text-slate-500">Page {page + 1} of {totalPages}</p>
-        )}
+          {totalPages > 1 && ` · Page ${page + 1} of ${totalPages}`}
+        </div>
       </div>
 
       {/* ── Table ── */}
@@ -288,28 +403,17 @@ export default function Trending() {
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
                 <thead>
                   <tr style={{ background: 'var(--color-background-secondary)' }}>
-                    <th style={{ padding: '9px 10px 9px 14px', fontSize: 10, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'left', whiteSpace: 'nowrap' }}>#</th>
-                    <th style={{ padding: '9px 12px', fontSize: 10, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'left', whiteSpace: 'nowrap' }}>Fund</th>
+                    <th style={{ padding: '9px 10px 9px 14px', fontSize: 10, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'left' }}>#</th>
+                    <th style={{ padding: '9px 12px', fontSize: 10, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'left' }}>Fund</th>
 
                     {SCORES.map(s => (
-                      <th
+                      <SortTh
                         key={s.key}
-                        style={{
-                          padding:    '9px 6px',
-                          fontSize:   10,
-                          fontWeight: 600,
-                          textAlign:  'center',
-                          whiteSpace: 'nowrap',
-                          color:      s.key === sortKey ? s.color : 'var(--color-text-tertiary)',
-                        }}
-                      >
-                        {s.short}
-                        {s.key === sortKey && (
-                          direction === 'desc'
-                            ? <ChevronDown style={{ display: 'inline', width: 10, height: 10, marginLeft: 2, verticalAlign: 'middle' }} />
-                            : <ChevronUp   style={{ display: 'inline', width: 10, height: 10, marginLeft: 2, verticalAlign: 'middle' }} />
-                        )}
-                      </th>
+                        score={s}
+                        sortKey={sortKey}
+                        direction={direction}
+                        onSort={handleSort}
+                      />
                     ))}
 
                     {RETURNS.map(r => (
