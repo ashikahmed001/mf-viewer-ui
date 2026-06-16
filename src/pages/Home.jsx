@@ -87,12 +87,14 @@ function AmcLogo({ name }) {
 
   if (!failed && domain) {
     return (
-      <img
-        src={`https://logo.clearbit.com/${domain}?size=80`}
-        alt=""
-        onError={() => setFailed(true)}
-        className="w-9 h-9 rounded-xl object-contain bg-white p-0.5 border border-slate-100 dark:border-slate-700 flex-shrink-0"
-      />
+      <div className="w-9 h-9 rounded-xl bg-white border border-slate-100 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <img
+          src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
+          alt=""
+          onError={() => setFailed(true)}
+          className="w-6 h-6 object-contain"
+        />
+      </div>
     );
   }
 
