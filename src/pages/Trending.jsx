@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { TrendingUp, RefreshCw, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
+import { TrendingUp, RefreshCw, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, X, Info, ChevronDown as ChevDown } from 'lucide-react';
 import { getTrending } from '../api/client.js';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -271,6 +271,94 @@ function FundRow({ fund, rank, sortKey, odd }) {
   );
 }
 
+// ─── Score guide panel ────────────────────────────────────────────────────────
+
+function ScoreGuide() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div style={{
+      border:       '1px solid #e2e8f0',
+      borderRadius: 12,
+      overflow:     'hidden',
+      marginBottom: 20,
+    }}>
+      {/* Toggle header */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width:          '100%',
+          display:        'flex',
+          alignItems:     'center',
+          justifyContent: 'space-between',
+          padding:        '10px 16px',
+          background:     '#f8fafc',
+          border:         'none',
+          cursor:         'pointer',
+          gap:            8,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <Info style={{ width: 14, height: 14, color: '#6366F1', flexShrink: 0 }} />
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#334155' }}>How scores are calculated</span>
+        </div>
+        <ChevronDown style={{
+          width: 14, height: 14, color: '#94a3b8',
+          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          transition: 'transform 0.2s',
+        }} />
+      </button>
+
+      {/* Cards */}
+      {open && (
+        <div style={{
+          display:             'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap:                 1,
+          background:          '#e2e8f0',
+          borderTop:           '1px solid #e2e8f0',
+        }}>
+          {SCORES.map(s => (
+            <div key={s.key} style={{ background: '#ffffff', padding: '14px 16px' }}>
+              {/* Score name */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                <span style={{
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: s.color, flexShrink: 0,
+                }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: s.color }}>{s.label}</span>
+              </div>
+
+              {/* What it measures */}
+              <p style={{ fontSize: 11, color: '#475569', lineHeight: 1.55, marginBottom: 10 }}>
+                {s.what}
+              </p>
+
+              {/* Formula */}
+              <div style={{
+                background:   `${s.color}0d`,
+                borderLeft:   `2px solid ${s.color}`,
+                borderRadius: '0 4px 4px 0',
+                padding:      '5px 8px',
+                marginBottom: 10,
+              }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: s.color, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 2 }}>Formula</span>
+                <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#1e293b' }}>{s.formula}</span>
+              </div>
+
+              {/* Advantage */}
+              <div style={{ display: 'flex', gap: 5, alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#059669', flexShrink: 0, marginTop: 1 }}>✓</span>
+                <span style={{ fontSize: 11, color: '#475569', lineHeight: 1.5 }}>{s.high}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Fund autocomplete search ─────────────────────────────────────────────────
 
 function FundSearch({ value, onChange, allFunds }) {
@@ -496,6 +584,9 @@ export default function Trending() {
           </button>
         </div>
       </div>
+
+      {/* ── Score guide ── */}
+      <ScoreGuide />
 
       {/* ── Controls ── */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
