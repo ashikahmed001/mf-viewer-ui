@@ -2770,11 +2770,40 @@ function BackupTab() {
 
       <SectionCard className="p-5">
         <div className="flex items-start justify-between gap-4 mb-5">
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">On-Demand Backup</h3>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 max-w-sm">
-              Force a checkpoint now — flushes all pending writes from SQLite's WAL into the main database file, then Litestream syncs it to Cloudflare R2 within seconds.
-            </p>
+          <div className="flex items-start gap-4 flex-1 min-w-0">
+            <svg width="80" height="70" viewBox="0 0 110 96" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 mt-1">
+              <style>{`
+                @keyframes rkt-bob   { 0%,100%{transform:translateY(0)}  50%{transform:translateY(-5px)} }
+                @keyframes rkt-glow  { 0%,100%{opacity:.3} 50%{opacity:.9} }
+                @keyframes rkt-spark { 0%,100%{opacity:.15;transform:scale(1)} 50%{opacity:1;transform:scale(1.9)} }
+              `}</style>
+              <g style={{animation:'rkt-glow 2.5s ease-in-out infinite', transformOrigin:'72px 22px'}}>
+                <path d="M52 28 Q50 28 50 24 Q50 18 57 18 Q59 12 66 12 Q73 12 75 18 Q82 18 82 24 Q82 28 80 28 Z" fill="#e0e7ff" stroke="#6366f1" strokeWidth="1.2"/>
+                <path d="M60 22 L64 18 L68 22" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <line x1="64" y1="18" x2="64" y2="25" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round"/>
+              </g>
+              <g style={{animation:'rkt-bob 2.8s ease-in-out infinite', transformOrigin:'42px 56px'}}>
+                <path d="M42 28 Q54 28 54 40 L54 68 Q54 72 50 74 L42 80 L34 74 Q30 72 30 68 L30 40 Q30 28 42 28Z" fill="#eef2ff" stroke="#6366f1" strokeWidth="1.5"/>
+                <path d="M34 38 Q34 30 42 28 Q50 28 50 38Z" fill="#6366f1"/>
+                <circle cx="42" cy="46" r="5" fill="#ede9fe" stroke="#818cf8" strokeWidth="0.8"/>
+                <ellipse cx="42" cy="44" rx="3.5" ry="1.2" fill="#6366f1"/>
+                <rect x="38.5" y="44" width="7" height="3" fill="#818cf8"/>
+                <ellipse cx="42" cy="47" rx="3.5" ry="1.2" fill="#6366f1"/>
+                <path d="M28 64 L20 72 L28 68 Z" fill="#c7d2fe" stroke="#818cf8" strokeWidth="1"/>
+                <path d="M56 64 L64 72 L56 68 Z" fill="#c7d2fe" stroke="#818cf8" strokeWidth="1"/>
+              </g>
+              <path d="M52 56 Q58 40 62 28" stroke="#a5b4fc" strokeWidth="1" strokeDasharray="3 4" fill="none"/>
+              <circle cx="10"  cy="14" r="2"   style={{animation:'rkt-spark 2.2s ease-in-out infinite'}}       fill="#818cf8"/>
+              <circle cx="100" cy="12" r="1.6" style={{animation:'rkt-spark 2.2s ease-in-out infinite 0.8s'}}  fill="#6366f1"/>
+              <circle cx="100" cy="82" r="1.6" style={{animation:'rkt-spark 2.2s ease-in-out infinite 1.6s'}}  fill="#a5b4fc"/>
+              <circle cx="10"  cy="82" r="1.8" style={{animation:'rkt-spark 2.2s ease-in-out infinite 2.4s'}}  fill="#818cf8"/>
+            </svg>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">On-Demand Backup</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 max-w-sm">
+                Force a checkpoint now — flushes all pending writes from SQLite's WAL into the main database file, then Litestream syncs it to Cloudflare R2 within seconds.
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
@@ -2824,52 +2853,7 @@ function BackupTab() {
         )}
       </SectionCard>
 
-      {/* Rocket doodle */}
-      <div className="flex justify-center py-1">
-        <svg width="110" height="96" viewBox="0 0 110 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <style>{`
-            @keyframes rkt-bob   { 0%,100%{transform:translateY(0)}  50%{transform:translateY(-5px)} }
-            @keyframes rkt-glow  { 0%,100%{opacity:.3} 50%{opacity:.9} }
-            @keyframes rkt-spark { 0%,100%{opacity:.15;transform:scale(1)} 50%{opacity:1;transform:scale(1.9)} }
-          `}</style>
-          {/* Cloud destination */}
-          <g style={{animation:'rkt-glow 2.5s ease-in-out infinite', transformOrigin:'72px 22px'}}>
-            <path d="M52 28 Q50 28 50 24 Q50 18 57 18 Q59 12 66 12 Q73 12 75 18 Q82 18 82 24 Q82 28 80 28 Z" fill="#e0e7ff" stroke="#6366f1" strokeWidth="1.2"/>
-            <path d="M60 22 L64 18 L68 22" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            <line x1="64" y1="18" x2="64" y2="25" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round"/>
-          </g>
-          {/* Rocket */}
-          <g style={{animation:'rkt-bob 2.4s ease-in-out infinite', transformOrigin:'42px 54px'}}>
-            {/* Exhaust flames */}
-            <ellipse cx="34" cy="76" rx="4" ry="6" fill="#fde68a" style={{animation:'rkt-glow 0.4s ease-in-out infinite'}} opacity="0.8"/>
-            <ellipse cx="34" cy="78" rx="2.5" ry="4" fill="#fbbf24" style={{animation:'rkt-glow 0.4s ease-in-out infinite 0.1s'}} opacity="0.9"/>
-            <ellipse cx="42" cy="76" rx="5" ry="7" fill="#fed7aa" style={{animation:'rkt-glow 0.5s ease-in-out infinite 0.2s'}} opacity="0.8"/>
-            <ellipse cx="42" cy="79" rx="3" ry="5" fill="#f97316" style={{animation:'rkt-glow 0.5s ease-in-out infinite'}} opacity="0.9"/>
-            <ellipse cx="50" cy="76" rx="4" ry="6" fill="#fde68a" style={{animation:'rkt-glow 0.4s ease-in-out infinite 0.3s'}} opacity="0.8"/>
-            {/* Rocket body */}
-            <path d="M28 68 L28 44 Q28 28 42 20 Q56 28 56 44 L56 68 Z" fill="#e0e7ff" stroke="#6366f1" strokeWidth="1.5"/>
-            {/* Nose cone */}
-            <path d="M28 44 Q28 28 42 20 Q56 28 56 44" fill="#c7d2fe" stroke="#6366f1" strokeWidth="1.2"/>
-            {/* Window */}
-            <circle cx="42" cy="46" r="8" fill="#ddd6fe" stroke="#6366f1" strokeWidth="1.2"/>
-            <circle cx="42" cy="46" r="5" fill="#ede9fe" stroke="#818cf8" strokeWidth="0.8"/>
-            {/* DB symbol in window */}
-            <ellipse cx="42" cy="44" rx="3.5" ry="1.2" fill="#6366f1"/>
-            <rect x="38.5" y="44" width="7" height="3" fill="#818cf8"/>
-            <ellipse cx="42" cy="47" rx="3.5" ry="1.2" fill="#6366f1"/>
-            {/* Fins */}
-            <path d="M28 64 L20 72 L28 68 Z" fill="#c7d2fe" stroke="#818cf8" strokeWidth="1"/>
-            <path d="M56 64 L64 72 L56 68 Z" fill="#c7d2fe" stroke="#818cf8" strokeWidth="1"/>
-          </g>
-          {/* Trajectory dashes */}
-          <path d="M52 56 Q58 40 62 28" stroke="#a5b4fc" strokeWidth="1" strokeDasharray="3 4" fill="none"/>
-          {/* Corner sparkles */}
-          <circle cx="10"  cy="14" r="2"   style={{animation:'rkt-spark 2.2s ease-in-out infinite'}}       fill="#818cf8"/>
-          <circle cx="100" cy="12" r="1.6" style={{animation:'rkt-spark 2.2s ease-in-out infinite 0.8s'}}  fill="#6366f1"/>
-          <circle cx="100" cy="82" r="1.6" style={{animation:'rkt-spark 2.2s ease-in-out infinite 1.6s'}}  fill="#a5b4fc"/>
-          <circle cx="10"  cy="82" r="1.8" style={{animation:'rkt-spark 2.2s ease-in-out infinite 2.4s'}}  fill="#818cf8"/>
-        </svg>
-      </div>
+
 
       <SectionCard className="p-5">
         <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">How it works</h3>
