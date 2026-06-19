@@ -26,6 +26,7 @@ import {
 } from '../api/client.js';
 import { getIndustryColor, industryBadgeClass } from '../utils/industryColors.js';
 import CapBadge from '../components/CapBadge.jsx';
+import { useStockDialog } from '../context/StockDialogContext.jsx';
 
 function fmt(n, dec = 2) {
   if (n == null) return '—';
@@ -316,6 +317,7 @@ function FundSelect({ funds, value, onChange, shortNames, placeholder = 'Search 
 // ─── Overlap Trend tab ────────────────────────────────────────────────────────
 
 function OverlapTrend({ matrixFunds, shortNames }) {
+  const { openStockDialog } = useStockDialog();
   const [fundAId, setFundAId] = useState(null);
   const [fundBId, setFundBId] = useState(null);
   const [trendData, setTrendData] = useState(null);
@@ -534,7 +536,7 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                     {(monthSel.unique_a ?? []).map(h => (
                       <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
+                          <button onClick={() => openStockDialog({ isin: h.isin, stock_name: h.stock_name, market_cap_cat: h.market_cap_cat, industry: h.industry })} className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug hover:text-violet-700 dark:hover:text-violet-400 hover:underline underline-offset-2 text-left transition-colors">{h.stock_name}</button>
                           <CapBadge cap={h.market_cap_cat} />
                         </div>
                         <div className="flex items-center justify-between mt-0.5">
@@ -561,7 +563,7 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                     {monthSel.shared_holdings.map(h => (
                       <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
+                          <button onClick={() => openStockDialog({ isin: h.isin, stock_name: h.stock_name, market_cap_cat: h.market_cap_cat, industry: h.industry })} className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug hover:text-violet-700 dark:hover:text-violet-400 hover:underline underline-offset-2 text-left transition-colors">{h.stock_name}</button>
                           <CapBadge cap={h.market_cap_cat} />
                         </div>
                         <div className="flex items-center justify-between mt-0.5">
@@ -592,7 +594,7 @@ function OverlapTrend({ matrixFunds, shortNames }) {
                     {(monthSel.unique_b ?? []).map(h => (
                       <div key={h.isin} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">{h.stock_name}</p>
+                          <button onClick={() => openStockDialog({ isin: h.isin, stock_name: h.stock_name, market_cap_cat: h.market_cap_cat, industry: h.industry })} className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug hover:text-violet-700 dark:hover:text-violet-400 hover:underline underline-offset-2 text-left transition-colors">{h.stock_name}</button>
                           <CapBadge cap={h.market_cap_cat} />
                         </div>
                         <div className="flex items-center justify-between mt-0.5">
@@ -1260,6 +1262,7 @@ function SectorDrift({ allFunds }) {
 // ─── Hidden Gems tab ──────────────────────────────────────────────────────────
 
 function HiddenGems() {
+  const { openStockDialog } = useStockDialog();
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
@@ -1383,7 +1386,7 @@ function HiddenGems() {
                         <td className="px-4 py-2.5 text-xs text-slate-400 dark:text-slate-500">{i + 1}</td>
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-1.5">
-                            <p className="font-medium text-slate-800 dark:text-slate-200">{g.stock_name}</p>
+                            <button onClick={() => openStockDialog({ isin: g.isin, stock_name: g.stock_name, market_cap_cat: g.market_cap_cat, industry: g.industry })} className="font-medium text-slate-800 dark:text-slate-200 hover:text-violet-700 dark:hover:text-violet-400 hover:underline underline-offset-2 transition-colors text-left">{g.stock_name}</button>
                             <CapBadge cap={g.market_cap_cat} />
                           </div>
                           <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{g.isin}</p>
@@ -1907,6 +1910,7 @@ const DIFF_COLORS = {
 };
 
 function MonthlyDiff({ allFunds }) {
+  const { openStockDialog } = useStockDialog();
   const [fundId,      setFundId]     = useState(allFunds[0]?.id ?? null);
   const [extractions, setExtractions] = useState([]);
   const [monthA,      setMonthA]     = useState(null);
@@ -2069,7 +2073,7 @@ function MonthlyDiff({ allFunds }) {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="font-semibold text-slate-800 dark:text-slate-200">{row.stock_name}</p>
+                          <button onClick={() => openStockDialog({ isin: row.isin, stock_name: row.stock_name, market_cap_cat: row.market_cap_cat, industry: row.industry })} className="font-semibold text-slate-800 dark:text-slate-200 hover:text-violet-700 dark:hover:text-violet-400 hover:underline underline-offset-2 transition-colors text-left">{row.stock_name}</button>
                           <CapBadge cap={row.market_cap_cat} />
                         </div>
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{row.industry}</p>
@@ -3371,6 +3375,7 @@ function BubbleTooltip({ active, payload }) {
 }
 
 function HighConviction() {
+  const { openStockDialog } = useStockDialog();
   const [data, setData]           = useState([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState(null);
@@ -3510,7 +3515,7 @@ function HighConviction() {
                         <tr key={d.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700">
                           <td className="px-4 py-2.5">
                             <div className="flex items-center gap-1.5">
-                              <p className="font-medium text-slate-800 dark:text-slate-200">{d.stock_name}</p>
+                              <button onClick={() => openStockDialog({ isin: d.isin, stock_name: d.stock_name, market_cap_cat: d.market_cap_cat, industry: d.industry })} className="font-medium text-slate-800 dark:text-slate-200 hover:text-violet-700 dark:hover:text-violet-400 hover:underline underline-offset-2 transition-colors text-left">{d.stock_name}</button>
                               <CapBadge cap={d.market_cap_cat} />
                             </div>
                             <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">{d.isin}</p>
@@ -3554,6 +3559,7 @@ function HighConviction() {
 // ─── All-Funds New Entries ────────────────────────────────────────────────────
 
 function NewEntries() {
+  const { openStockDialog } = useStockDialog();
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(null);
@@ -3624,7 +3630,7 @@ function NewEntries() {
                   <tr key={r.isin} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <p className="font-semibold text-slate-800 dark:text-slate-200">{r.stock_name}</p>
+                        <button onClick={() => openStockDialog({ isin: r.isin, stock_name: r.stock_name, market_cap_cat: r.market_cap_cat, industry: r.industry })} className="font-semibold text-slate-800 dark:text-slate-200 hover:text-violet-700 dark:hover:text-violet-400 hover:underline underline-offset-2 transition-colors text-left">{r.stock_name}</button>
                         <CapBadge cap={r.market_cap_cat} />
                       </div>
                       <p className="text-xs text-slate-400 dark:text-slate-500">{r.isin}</p>

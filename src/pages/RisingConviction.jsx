@@ -6,6 +6,7 @@ import {
 import { getRisingConviction } from '../api/client.js';
 import { getIndustryColor, industryBadgeClass } from '../utils/industryColors.js';
 import CapBadge from '../components/CapBadge.jsx';
+import { useStockDialog } from '../context/StockDialogContext.jsx';
 
 function fmt(n, dec = 2) {
   if (n == null) return '—';
@@ -106,6 +107,7 @@ function FundRow({ entry, maxStreak, direction }) {
 
 function StockCard({ stockGroup, maxStreak, isMultiFund, direction }) {
   const { stock_name, isin, industry, entries } = stockGroup;
+  const { openStockDialog } = useStockDialog();
   const bestStreak = Math.max(...entries.map(e => e.streak));
   const avgGain    = entries.reduce((s, e) => s + e.gain, 0) / entries.length;
   const isRising   = direction === 'rising';
@@ -134,10 +136,13 @@ function StockCard({ stockGroup, maxStreak, isMultiFund, direction }) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1.5">
-            <p className="font-semibold text-slate-800 dark:text-slate-200 text-sm leading-snug">{stock_name}</p>
+          <button
+            onClick={() => openStockDialog({ isin, stock_name, market_cap_cat: entries[0]?.market_cap_cat, industry })}
+            className="flex items-center gap-1.5 text-left group"
+          >
+            <p className="font-semibold text-slate-800 dark:text-slate-200 text-sm leading-snug group-hover:text-violet-700 dark:group-hover:text-violet-400 group-hover:underline underline-offset-2 transition-colors">{stock_name}</p>
             <CapBadge cap={entries[0]?.market_cap_cat} />
-          </div>
+          </button>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-mono mt-0.5">{isin}</p>
         </div>
         <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
@@ -216,6 +221,7 @@ function LeaderboardView({ stockGroups, maxStreak, direction }) {
   const [sortCol, setSortCol] = useState(null);
   const [sortDir, setSortDir] = useState('desc');
   const isRising = direction === 'rising';
+  const { openStockDialog } = useStockDialog();
 
   function handleSort(col) {
     if (sortCol === col) {
@@ -291,7 +297,12 @@ function LeaderboardView({ stockGroups, maxStreak, direction }) {
                   {/* stock + fund pills */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
-                      <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{group.stock_name}</span>
+                      <button
+                        onClick={() => openStockDialog({ isin: group.isin, stock_name: group.stock_name, market_cap_cat: group.entries[0]?.market_cap_cat, industry: group.industry })}
+                        className="font-medium text-slate-800 dark:text-slate-200 text-sm hover:text-violet-700 dark:hover:text-violet-400 hover:underline underline-offset-2 transition-colors text-left"
+                      >
+                        {group.stock_name}
+                      </button>
                       <CapBadge cap={group.entries[0]?.market_cap_cat} />
                     </div>
                     <div className="flex gap-1 flex-wrap">

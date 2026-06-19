@@ -6,6 +6,8 @@ import AuthProvider from './components/AuthProvider.jsx';
 import { SubscriptionProvider } from './context/SubscriptionContext.jsx';
 import { FeatureFlagsProvider } from './context/FeatureFlagsContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
+import { StockDialogProvider } from './context/StockDialogContext.jsx';
+import StockIntelligenceDialog from './components/StockIntelligenceDialog.jsx';
 import GatedPage from './components/GatedPage.jsx';
 
 // ─── Auth shell — always bundled, needed before any plan check ────────────────
@@ -67,6 +69,8 @@ export default function App() {
               <AuthProvider>
                 <SubscriptionProvider>
                 <FeatureFlagsProvider>
+                <StockDialogProvider>
+                <StockIntelligenceDialog />
                 <Layout>
                   <Suspense fallback={<PageLoader />}>
                     <Routes>
@@ -105,6 +109,7 @@ export default function App() {
                     </Routes>
                   </Suspense>
                 </Layout>
+                </StockDialogProvider>
                 </FeatureFlagsProvider>
                 </SubscriptionProvider>
               </AuthProvider>

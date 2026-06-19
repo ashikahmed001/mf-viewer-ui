@@ -13,6 +13,7 @@ import IndustryPieChart from '../components/IndustryPieChart.jsx';
 import TopHoldingsBarChart from '../components/TopHoldingsBarChart.jsx';
 import TrendLineChart from '../components/TrendLineChart.jsx';
 import { getIndustryColor } from '../utils/industryColors.js';
+import { useStockDialog } from '../context/StockDialogContext.jsx';
 
 export default function FundDetail() {
   const { id } = useParams();
@@ -28,6 +29,7 @@ export default function FundDetail() {
   const [navData, setNavData]     = useState(null);
   const { flags, overrides } = useFeatureFlags();
   const { isPro }            = useSubscription();
+  const { openStockDialog }  = useStockDialog();
   const canNav          = canUseFeature(flags, overrides, isPro, 'nav_history');
   const canTrend        = canUseFeature(flags, overrides, isPro, 'stock_trend');
   const canRolling      = canUseFeature(flags, overrides, isPro, 'rolling_returns');
@@ -270,11 +272,11 @@ export default function FundDetail() {
                   </div>
                 )}
               </ChartCard>
-              {/* All holdings clickable for trend */}
+              {/* All holdings — click for trend, right-click / long-tap opens dialog */}
               {canTrend && (holdingsData?.holdings ?? []).length > 0 && (
                 <div className="lg:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Click to view trend:</p>
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Click for trend · <span className="font-normal text-slate-400 dark:text-slate-500">double-click for details</span></p>
                     <span className="text-xs text-slate-400 dark:text-slate-500">{holdingsData.holdings.length} holdings</span>
                   </div>
                   <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
@@ -282,6 +284,7 @@ export default function FundDetail() {
                       <button
                         key={h.isin}
                         onClick={() => handleStockTrend(h.isin, h.stock_name, h.industry)}
+                        onDoubleClick={(e) => { e.stopPropagation(); openStockDialog({ isin: h.isin, stock_name: h.stock_name, market_cap_cat: h.market_cap_cat, industry: h.industry }); }}
                         className={`text-xs px-3 py-1.5 rounded-lg border transition-colors font-medium whitespace-nowrap`}
                         style={trendStock === h.stock_name ? {
                           backgroundColor: getIndustryColor(h.industry).hex,
