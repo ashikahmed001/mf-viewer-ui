@@ -1,18 +1,19 @@
 /**
  * StockIntelligenceDialog
  * ─────────────────────────────────────────────────────────────
- * A full-screen modal that renders the Stock Intelligence report
- * (conviction score, stat cards, adoption trend, fund breakdown,
- * sector peers) for any stock. Open it by calling openStockDialog()
- * from useStockDialog().
+ * Enhancements over v1:
+ *   • Streak badge  — rising / fading / stable based on last 6 months of fund count
+ *   • Peak alloc    — highest avg allocation ever + current as % of peak
+ *   • First seen    — which month this stock was first picked up
+ *   • Per-fund chart — tab showing individual fund allocation lines over time
  */
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { ArrowUp, ArrowDown, Minus, X } from 'lucide-react';
+import { ArrowUp, ArrowDown, Minus, X, TrendingUp, TrendingDown } from 'lucide-react';
 import { useStockDialog } from '../context/StockDialogContext.jsx';
 import { getStockTracker, getStockPeers } from '../api/client.js';
 import CapBadge from './CapBadge.jsx';
@@ -79,21 +80,18 @@ export default function StockIntelligenceDialog() {
   const [loading,    setLoading]    = useState(false);
   const [error,      setError]      = useState(null);
   const [showExited, setShowExited] = useState(false);
+  const [chartTab,   setChartTab]   = useState('adoption'); // 'adoption' | 'per-fund'
 
-  // Fetch data when stock changes
   useEffect(() => {
     if (!stock) return;
-    setLoading(true); setError(null); setTracker(null); setPeers(null); setShowExited(false);
-    Promise.all([
-      getStockTracker(stock.isin),
-      getStockPeers(stock.isin),
-    ])
+    setLoading(true); setError(null); setTracker(null); setPeers(null);
+    setShowExited(false); setChartTab('adoption');
+    Promise.all([getStockTracker(stock.isin), getStockPeers(stock.isin)])
       .then(([t, p]) => { setTracker(t); setPeers(p); })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [stock?.isin]);
 
-  // Close on Escape
   useEffect(() => {
     if (!stock) return;
     const handler = (e) => { if (e.key === 'Escape') closeStockDialog(); };
@@ -101,19 +99,16 @@ export default function StockIntelligenceDialog() {
     return () => document.removeEventListener('keydown', handler);
   }, [stock, closeStockDialog]);
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = stock ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [stock]);
 
-  // Process tracker → analytics
   const processed = useMemo(() => {
     if (!tracker?.length) return null;
-    const months     = [...new Set(tracker.map(r => r.report_month))].sort();
-    const latest     = months[months.length - 1];
-    const sixAgo     = months[Math.max(0, months.length - 7)];
-    const totalFunds = 57; // reasonable estimate; exact count not needed for display
+    const months  = [...new Set(tracker.map(r => r.report_month))].sort();
+    const latest  = months[months.length - 1];
+    const sixAgo  = months[Math.max(0, months.length - 7)];
 
     const monthStats = months.map(m => {
       const holders = tracker.filter(r => r.report_month === m);
@@ -128,7 +123,23 @@ export default function StockIntelligenceDialog() {
     const delta6m       = +(currentAvg - pastAvg).toFixed(4);
     const peakCount     = Math.max(...monthStats.map(s => s.fund_count));
 
-    // Conviction score (0–100)
+    // ── Peak allocation ──────────────────────────────────────────────────────
+    const peakAvg      = Math.max(...monthStats.map(s => s.avg_pct));
+    const peakAvgMonth = monthStats.find(s => s.avg_pct === peakAvg)?.month;
+    const pctOfPeak    = peakAvg > 0 ? Math.round((currentAvg / peakAvg) * 100) : 0;
+
+    // ── Streak (last 6 months of fund_count direction) ───────────────────────
+    const recent = monthStats.slice(-6);
+    let rises = 0, falls = 0;
+    for (let i = 1; i < recent.length; i++) {
+      if (recent[i].fund_count > recent[i-1].fund_count) rises++;
+      else if (recent[i].fund_count < recent[i-1].fund_count) falls++;
+    }
+    const streakDir      = rises > falls ? 'rising' : falls > rises ? 'fading' : 'stable';
+    const streakMonths   = Math.max(rises, falls);
+
+    // ── Conviction score ─────────────────────────────────────────────────────
+    const totalFunds  = 57;
     const adoptionPts = Math.min(35, (latestHolders.length / Math.max(totalFunds, 1)) * 100 * 0.35);
     const trendPts    = pastHolders.length === 0 && latestHolders.length > 0 ? 20
       : delta6m > 0.5 ? 30 : delta6m > 0.1 ? 22 : delta6m >= -0.1 ? 15
@@ -138,7 +149,20 @@ export default function StockIntelligenceDialog() {
     const peakPts       = peakCount > 0 ? (latestHolders.length / peakCount) * 15 : 0;
     const score         = Math.round(adoptionPts + trendPts + sustainPts + peakPts);
 
+    // ── Per-fund chart data ──────────────────────────────────────────────────
     const fundIds = [...new Map(tracker.map(r => [r.fund_id, r.fund_name])).keys()];
+    const byFund  = new Map();
+    for (const r of tracker) {
+      if (!byFund.has(r.fund_id)) byFund.set(r.fund_id, new Map());
+      byFund.get(r.fund_id).set(r.report_month, r.pct_nav);
+    }
+    const perFundData = months.map(m => {
+      const obj = { month: m };
+      for (const fid of fundIds) obj[`f${fid}`] = byFund.get(fid)?.get(m) ?? null;
+      return obj;
+    });
+
+    // ── Fund breakdown ───────────────────────────────────────────────────────
     const fundBreakdown = fundIds.map(fid => {
       const rows            = tracker.filter(r => r.fund_id === fid).sort((a,b) => a.report_month.localeCompare(b.report_month));
       const fundLatestMonth = rows[0]?.fund_latest_month ?? latest;
@@ -147,19 +171,22 @@ export default function StockIntelligenceDialog() {
       const latRow          = is_current ? rows[rows.length - 1] : null;
       const pstRow          = rows.find(r => r.report_month === sixAgo);
       return {
-        fund_id:           fid,
-        fund_name:         rows[0].fund_name,
-        current_pct:       latRow?.pct_nav ?? null,
-        delta:             (latRow && pstRow) ? +(latRow.pct_nav - pstRow.pct_nav).toFixed(4) : null,
-        first_month:       rows[0].report_month,
-        last_month:        lastHeldMonth,
-        fund_latest_month: fundLatestMonth,
-        is_current,
+        fund_id: fid, fund_name: rows[0].fund_name,
+        current_pct: latRow?.pct_nav ?? null,
+        delta: (latRow && pstRow) ? +(latRow.pct_nav - pstRow.pct_nav).toFixed(4) : null,
+        first_month: rows[0].report_month, last_month: lastHeldMonth,
+        fund_latest_month: fundLatestMonth, is_current,
       };
     }).sort((a, b) => (b.current_pct ?? -1) - (a.current_pct ?? -1));
 
-    return { months, monthStats, latest, currentCount: latestHolders.length,
-      peakCount, currentAvg, delta6m, score, fundBreakdown };
+    return {
+      months, monthStats, latest, sixAgo,
+      currentCount: latestHolders.length, peakCount,
+      currentAvg, delta6m, score, fundBreakdown,
+      peakAvg, peakAvgMonth, pctOfPeak,
+      streakDir, streakMonths,
+      fundIds, byFund, perFundData,
+    };
   }, [tracker]);
 
   const colors = useMemo(() =>
@@ -175,7 +202,13 @@ export default function StockIntelligenceDialog() {
     : processed.score >= 40 ? { label: 'Building', color: 'text-amber-700',   bg: 'bg-amber-50 border-amber-200',     bar: 'bg-amber-400'   }
     :                          { label: 'Fading',   color: 'text-red-600',     bg: 'bg-red-50 border-red-200',         bar: 'bg-red-400'     };
 
-  const ChartTooltip = ({ active, payload, label }) => {
+  const streakMeta = !processed ? null
+    : processed.streakDir === 'rising'  ? { label: `Growing · ${processed.streakMonths}mo`, icon: <TrendingUp className="w-3 h-3" />,   cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+    : processed.streakDir === 'fading'  ? { label: `Fading · ${processed.streakMonths}mo`,  icon: <TrendingDown className="w-3 h-3" />, cls: 'bg-red-50 text-red-600 border-red-200' }
+    : { label: 'Stable',                                                                      icon: <Minus className="w-3 h-3" />,       cls: 'bg-slate-100 text-slate-500 border-slate-200' };
+
+  // Shared tooltip for adoption chart
+  const AdoptionTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
       <div className="bg-slate-900 text-white rounded-xl px-3 py-2.5 shadow-2xl text-xs min-w-[160px]">
@@ -195,20 +228,35 @@ export default function StockIntelligenceDialog() {
     );
   };
 
+  // Per-fund tooltip
+  const PerFundTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+    const pts = payload.filter(p => p.value != null).sort((a,b) => b.value - a.value);
+    if (!pts.length) return null;
+    return (
+      <div className="bg-slate-900 text-white rounded-xl px-3 py-2.5 shadow-2xl text-xs min-w-[180px]">
+        <p className="font-semibold mb-1.5 text-slate-300">{fmtMonth(label)}</p>
+        {pts.map(p => (
+          <div key={p.dataKey} className="flex items-center justify-between gap-4 mb-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+              <span className="text-slate-300 truncate" style={{ maxWidth: 130 }}>{p.name}</span>
+            </div>
+            <span className="font-bold tabular-nums">{fmt(p.value, 2)}%</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   if (!stock) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={closeStockDialog}
-      />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeStockDialog} />
 
-      {/* Dialog */}
       <div className="relative z-10 w-full max-w-4xl mx-auto my-8 px-4">
         <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden">
-          {/* Close button */}
           <button
             onClick={closeStockDialog}
             className="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
@@ -217,7 +265,6 @@ export default function StockIntelligenceDialog() {
           </button>
 
           <div className="p-6 space-y-5">
-            {/* Loading */}
             {loading && (
               <div className="space-y-4 pt-4">
                 {[...Array(4)].map((_,i) => (
@@ -225,22 +272,25 @@ export default function StockIntelligenceDialog() {
                 ))}
               </div>
             )}
-
-            {/* Error */}
             {error && !loading && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>
             )}
 
-            {/* Content */}
             {processed && !loading && (
               <>
-                {/* Header card */}
+                {/* ── Header card ── */}
                 <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{stock.stock_name}</h2>
                         <CapBadge cap={stock.market_cap_cat} />
+                        {/* Streak badge */}
+                        {streakMeta && (
+                          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${streakMeta.cls}`}>
+                            {streakMeta.icon}{streakMeta.label}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         <span className="text-xs text-slate-400 dark:text-slate-500 font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
@@ -273,12 +323,12 @@ export default function StockIntelligenceDialog() {
                   </div>
                 </div>
 
-                {/* 4 stat cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* ── 6 stat cards ── */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <StatCard
                     label="Funds Holding"
                     value={processed.currentCount}
-                    sub={`peak ${processed.peakCount}`}
+                    sub={`of ${processed.peakCount} peak`}
                   />
                   <StatCard
                     label="Avg Allocation"
@@ -298,62 +348,139 @@ export default function StockIntelligenceDialog() {
                     sub="avg allocation change"
                   />
                   <StatCard
+                    label="Peak Allocation"
+                    value={`${fmt(processed.peakAvg, 2)}%`}
+                    sub={`${fmtMonth(processed.peakAvgMonth)} · now at ${processed.pctOfPeak}% of peak`}
+                  />
+                  <StatCard
                     label="Months Tracked"
                     value={processed.months.length}
                     sub={`since ${fmtMonth(processed.months[0])}`}
                   />
+                  <StatCard
+                    label="First Seen"
+                    value={fmtMonth(processed.months[0])}
+                    sub={`${processed.months.length} months in universe`}
+                  />
                 </div>
 
-                {/* Chart + Fund breakdown */}
+                {/* ── Charts + Fund breakdown ── */}
                 <div className="grid grid-cols-5 gap-4">
-                  {/* Adoption trend chart */}
+                  {/* Chart panel with tab switcher */}
                   <div className="col-span-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
-                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Adoption Trend</h3>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 mb-4">
-                      Fund count (purple) and avg allocation % (amber) over time
-                    </p>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <LineChart data={processed.monthStats} margin={{ top: 4, right: 50, bottom: 0, left: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="month" tickFormatter={fmtMonth}
-                          tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false}
-                          interval={Math.max(0, Math.floor(processed.months.length / 7))} />
-                        <YAxis yAxisId="left" tick={{ fontSize: 10, fill: '#94a3b8' }}
-                          axisLine={false} tickLine={false} width={28}
-                          domain={[0, Math.max(processed.peakCount + 1, 4)]} allowDecimals={false} />
-                        <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: '#94a3b8' }}
-                          axisLine={false} tickLine={false} width={42} tickFormatter={v => `${v}%`} />
-                        <Tooltip content={<ChartTooltip />} />
-                        <Line yAxisId="left" dataKey="fund_count" name="Funds Holding"
-                          stroke="#8b5cf6" strokeWidth={2.5} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-                        <Line yAxisId="right" dataKey="avg_pct" name="Avg Alloc %"
-                          stroke="#f59e0b" strokeWidth={2} dot={false} strokeDasharray="4 3"
-                          activeDot={{ r: 4, strokeWidth: 0 }} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div className="mt-3 flex items-center gap-5 border-t border-slate-100 dark:border-slate-800 pt-3">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-4 inline-block rounded-full" style={{ height: 3, backgroundColor: '#8b5cf6' }} />
-                        <span className="text-xs text-slate-500 dark:text-slate-400">Funds Holding</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-4 inline-block rounded-full" style={{ height: 2, backgroundColor: '#f59e0b' }} />
-                        <span className="text-xs text-slate-500 dark:text-slate-400">Avg Allocation %</span>
+                    {/* Tab header */}
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        {chartTab === 'adoption' ? 'Adoption Trend' : 'Per-Fund Trend'}
+                      </h3>
+                      <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5">
+                        {[
+                          { id: 'adoption',  label: 'Adoption' },
+                          { id: 'per-fund',  label: 'Per Fund' },
+                        ].map(tab => (
+                          <button key={tab.id} onClick={() => setChartTab(tab.id)}
+                            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                              chartTab === tab.id
+                                ? 'bg-white dark:bg-slate-800 text-violet-700 dark:text-violet-400 shadow-sm'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
+                            }`}>
+                            {tab.label}
+                          </button>
+                        ))}
                       </div>
                     </div>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
+                      {chartTab === 'adoption'
+                        ? 'Fund count (purple) and avg allocation % (amber) over time'
+                        : 'Individual fund % NAV allocation over time'}
+                    </p>
+
+                    {/* Adoption tab */}
+                    {chartTab === 'adoption' && (
+                      <>
+                        <ResponsiveContainer width="100%" height={200}>
+                          <LineChart data={processed.monthStats} margin={{ top: 4, right: 50, bottom: 0, left: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                            <XAxis dataKey="month" tickFormatter={fmtMonth}
+                              tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false}
+                              interval={Math.max(0, Math.floor(processed.months.length / 7))} />
+                            <YAxis yAxisId="left" tick={{ fontSize: 10, fill: '#94a3b8' }}
+                              axisLine={false} tickLine={false} width={28}
+                              domain={[0, Math.max(processed.peakCount + 1, 4)]} allowDecimals={false} />
+                            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: '#94a3b8' }}
+                              axisLine={false} tickLine={false} width={42} tickFormatter={v => `${v}%`} />
+                            <Tooltip content={<AdoptionTooltip />} />
+                            <Line yAxisId="left" dataKey="fund_count" name="Funds Holding"
+                              stroke="#8b5cf6" strokeWidth={2.5} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+                            <Line yAxisId="right" dataKey="avg_pct" name="Avg Alloc %"
+                              stroke="#f59e0b" strokeWidth={2} dot={false} strokeDasharray="4 3"
+                              activeDot={{ r: 4, strokeWidth: 0 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                        <div className="mt-3 flex items-center gap-5 border-t border-slate-100 dark:border-slate-800 pt-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-4 inline-block rounded-full" style={{ height: 3, backgroundColor: '#8b5cf6' }} />
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Funds Holding</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-4 inline-block rounded-full" style={{ height: 2, backgroundColor: '#f59e0b' }} />
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Avg Allocation %</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Per-fund tab */}
+                    {chartTab === 'per-fund' && (
+                      <>
+                        <ResponsiveContainer width="100%" height={200}>
+                          <LineChart data={processed.perFundData} margin={{ top: 4, right: 16, bottom: 0, left: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                            <XAxis dataKey="month" tickFormatter={fmtMonth}
+                              tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false}
+                              interval={Math.max(0, Math.floor(processed.months.length / 7))} />
+                            <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false}
+                              width={42} tickFormatter={v => `${v}%`} />
+                            <Tooltip content={<PerFundTooltip />} />
+                            {processed.fundIds.map(fid => (
+                              <Line key={fid}
+                                dataKey={`f${fid}`}
+                                name={shortNames.get(processed.fundBreakdown.find(f => f.fund_id === fid)?.fund_name) ?? ''}
+                                stroke={colors.get(fid)} strokeWidth={2}
+                                dot={false} connectNulls={false}
+                                activeDot={{ r: 4, strokeWidth: 0 }} />
+                            ))}
+                          </LineChart>
+                        </ResponsiveContainer>
+                        {/* Per-fund legend */}
+                        <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 border-t border-slate-100 dark:border-slate-800 pt-3">
+                          {processed.fundIds.map(fid => {
+                            const f = processed.fundBreakdown.find(f => f.fund_id === fid);
+                            return (
+                              <div key={fid} className="flex items-center gap-1.5 min-w-0" title={f?.fund_name}>
+                                <span className="w-3 flex-shrink-0 inline-block rounded-sm"
+                                  style={{ height: 2, backgroundColor: colors.get(fid), display: 'inline-block', verticalAlign: 'middle' }} />
+                                <span className={`text-xs truncate max-w-[140px] ${f?.is_current ? 'text-slate-700 dark:text-slate-300 font-medium' : 'text-slate-400 dark:text-slate-500'}`}>
+                                  {shortNames.get(f?.fund_name) ?? f?.fund_name}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Fund breakdown */}
                   <FundBreakdown
                     fundBreakdown={processed.fundBreakdown}
                     colors={colors}
-                    shortNames={shortNames}
                     showExited={showExited}
                     setShowExited={setShowExited}
                   />
                 </div>
 
-                {/* Sector peers */}
+                {/* ── Sector peers ── */}
                 {peers?.length > 0 && stock.industry && (
                   <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
                     <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -364,8 +491,7 @@ export default function StockIntelligenceDialog() {
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       {peers.map((p, i) => (
-                        <button
-                          key={p.isin}
+                        <button key={p.isin}
                           onClick={() => openStockDialog({ isin: p.isin, stock_name: p.stock_name, market_cap_cat: p.market_cap_cat, industry: stock.industry })}
                           className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-violet-200 hover:bg-violet-50 dark:hover:bg-violet-900/20 text-left transition-colors group"
                         >
@@ -402,7 +528,7 @@ function StatCard({ label, value, sub }) {
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">{label}</p>
-      <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{value}</p>
+      <div className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{value}</div>
       <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{sub}</p>
     </div>
   );
@@ -446,7 +572,7 @@ function FundBreakdown({ fundBreakdown, colors, showExited, setShowExited }) {
           {activeFunds.length} active · {exitedFunds.length} exited
         </p>
       </div>
-      <div className="flex-1 overflow-y-auto p-3 space-y-1.5" style={{ maxHeight: 260 }}>
+      <div className="flex-1 overflow-y-auto p-3 space-y-1.5" style={{ maxHeight: 280 }}>
         {activeFunds.length === 0 && (
           <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No funds currently hold this stock</p>
         )}
