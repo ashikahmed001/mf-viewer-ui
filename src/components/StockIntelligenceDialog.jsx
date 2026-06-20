@@ -14,7 +14,7 @@ import {
 } from 'recharts';
 import { ArrowUp, ArrowDown, Minus, X } from 'lucide-react';
 import { useStockDialog } from '../context/StockDialogContext.jsx';
-import { getStockTracker, getStockPeers } from '../api/client.js';
+import { getStockTracker, getStockPeers, getStockPrice } from '../api/client.js';
 import CapBadge from './CapBadge.jsx';
 import { industryBadgeClass } from '../utils/industryColors.js';
 
@@ -79,11 +79,14 @@ export default function StockIntelligenceDialog() {
   const [loading,    setLoading]    = useState(false);
   const [error,      setError]      = useState(null);
   const [showExited, setShowExited] = useState(false);
+  const [priceData,  setPriceData]  = useState(null);
+  const [priceLoading, setPriceLoading] = useState(false);
 
-  // Fetch data when stock changes
+  // Fetch tracker + peers when stock changes
   useEffect(() => {
     if (!stock) return;
-    setLoading(true); setError(null); setTracker(null); setPeers(null); setShowExited(false);
+    setLoading(true); setError(null); setTracker(null); setPeers(null);
+    setShowExited(false); setPriceData(null);
     Promise.all([
       getStockTracker(stock.isin),
       getStockPeers(stock.isin),
@@ -92,6 +95,50 @@ export default function StockIntelligenceDialog() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [stock?.isin]);
+
+  // Fetch Yahoo Finance price once we have symbol_nse from tracker
+  useEffect(() => {
+    const symbol = tracker?.[0]?.symbol_nse;
+    if (!symbol) return;
+    setPriceLoading(true);
+    getStockPrice(symbol)
+      .then(raw => {
+        const result = raw?.chart?.result?.[0];
+        if (!result) return;
+        const closes     = result.indicators.quote[0].close;
+        const timestamps = result.timestamp;
+        // Build {date, close} pairs — filter nulls
+        const candles = timestamps
+          .map((ts, i) => ({ date: new Date(ts * 1000), close: closes[i] }))
+          .filter(c => c.close != null);
+        if (!candles.length) return;
+        const current = candles[candles.length - 1].close;
+        const priceAt = (daysAgo) => {
+          const target = Date.now() - daysAgo * 86_400_000;
+          // nearest candle at or before target
+          const idx = candles.findLastIndex(c => c.date.getTime() <= target);
+          return idx >= 0 ? candles[idx].close : null;
+        };
+        const pct = (past) => past != null ? ((current - past) / past) * 100 : null;
+        setPriceData({
+          symbol: `${symbol}.NS`,
+          currency: result.meta.currency,
+          current,
+          w1:  priceAt(7),
+          m1:  priceAt(30),
+          m3:  priceAt(91),
+          m6:  priceAt(182),
+          y1:  priceAt(365),
+          pctW1:  pct(priceAt(7)),
+          pctM1:  pct(priceAt(30)),
+          pctM3:  pct(priceAt(91)),
+          pctM6:  pct(priceAt(182)),
+          pctY1:  pct(priceAt(365)),
+        });
+      })
+      .catch(() => {}) // silent — price is best-effort
+      .finally(() => setPriceLoading(false));
+  }, [tracker]);
 
   // Close on Escape
   useEffect(() => {
@@ -303,6 +350,59 @@ export default function StockIntelligenceDialog() {
                     sub={`since ${fmtMonth(processed.months[0])}`}
                   />
                 </div>
+
+                {/* Price section */}
+                {(priceData || priceLoading) && (
+                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Market Price</h3>
+                        {priceData && (
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                            {priceData.symbol} · live via Yahoo Finance
+                          </p>
+                        )}
+                      </div>
+                      {priceData && (
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+                            ₹{fmt(priceData.current, 2)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {priceLoading && !priceData && (
+                      <div className="h-12 bg-slate-100 dark:bg-slate-700 rounded-xl animate-pulse" />
+                    )}
+                    {priceData && (
+                      <div className="grid grid-cols-5 gap-2">
+                        {[
+                          { label: '1W', pct: priceData.pctW1,  price: priceData.w1  },
+                          { label: '1M', pct: priceData.pctM1,  price: priceData.m1  },
+                          { label: '3M', pct: priceData.pctM3,  price: priceData.m3  },
+                          { label: '6M', pct: priceData.pctM6,  price: priceData.m6  },
+                          { label: '1Y', pct: priceData.pctY1,  price: priceData.y1  },
+                        ].map(({ label, pct, price }) => (
+                          <div key={label} className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 text-center">
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mb-1">{label}</p>
+                            {pct != null ? (
+                              <>
+                                <p className={`text-sm font-bold tabular-nums ${pct > 0 ? 'text-emerald-600' : pct < 0 ? 'text-red-500' : 'text-slate-500'}`}>
+                                  {pct > 0 ? '+' : ''}{pct.toFixed(1)}%
+                                </p>
+                                <p className="text-[10px] text-slate-400 dark:text-slate-500 tabular-nums mt-0.5">
+                                  ₹{fmt(price, 0)}
+                                </p>
+                              </>
+                            ) : (
+                              <p className="text-xs text-slate-300 dark:text-slate-600">—</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Chart + Fund breakdown */}
                 <div className="grid grid-cols-5 gap-4">

@@ -134,6 +134,9 @@ export const getStockTracker = (isin) =>
 export const getStockPeers = (isin) =>
   api.get(`/holdings/stock-peers/${encodeURIComponent(isin)}`).then(r => r.data);
 
+export const getStockPrice = (symbol) =>
+  api.get(`/holdings/stock-price/${encodeURIComponent(symbol)}`).then(r => r.data);
+
 export const getFeed = (months = 6) =>
   api.get('/feed', { params: { months } }).then(r => r.data);
 
