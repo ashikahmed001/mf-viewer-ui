@@ -120,20 +120,25 @@ export default function StockIntelligenceDialog() {
           return idx >= 0 ? candles[idx].close : null;
         };
         const pct = (past) => past != null ? ((current - past) / past) * 100 : null;
+        const w52High = result.meta.fiftyTwoWeekHigh ?? Math.max(...candles.map(c => c.close));
+        const w52Low  = result.meta.fiftyTwoWeekLow  ?? Math.min(...candles.map(c => c.close));
+        const rangePos = w52High > w52Low
+          ? Math.round(((current - w52Low) / (w52High - w52Low)) * 100)
+          : 50;
         setPriceData({
           symbol: `${symbol}.NS`,
           currency: result.meta.currency,
           current,
-          w1:  priceAt(7),
-          m1:  priceAt(30),
-          m3:  priceAt(91),
-          m6:  priceAt(182),
-          y1:  priceAt(365),
-          pctW1:  pct(priceAt(7)),
-          pctM1:  pct(priceAt(30)),
-          pctM3:  pct(priceAt(91)),
-          pctM6:  pct(priceAt(182)),
-          pctY1:  pct(priceAt(365)),
+          w52High, w52Low, rangePos,
+          dayHigh: result.meta.regularMarketDayHigh,
+          dayLow:  result.meta.regularMarketDayLow,
+          returns: [
+            { label: '1W', pct: pct(priceAt(7)),   price: priceAt(7)   },
+            { label: '1M', pct: pct(priceAt(30)),  price: priceAt(30)  },
+            { label: '3M', pct: pct(priceAt(91)),  price: priceAt(91)  },
+            { label: '6M', pct: pct(priceAt(182)), price: priceAt(182) },
+            { label: '1Y', pct: pct(priceAt(365)), price: priceAt(365) },
+          ],
         });
       })
       .catch(() => {}) // silent — price is best-effort
@@ -351,54 +356,48 @@ export default function StockIntelligenceDialog() {
                   />
                 </div>
 
-                {/* Price section */}
+                {/* Price section — ticker style */}
                 {(priceData || priceLoading) && (
-                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Market Price</h3>
-                        {priceData && (
-                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                            {priceData.symbol} · live via Yahoo Finance
-                          </p>
-                        )}
-                      </div>
-                      {priceData && (
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-                            ₹{fmt(priceData.current, 2)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
                     {priceLoading && !priceData && (
-                      <div className="h-12 bg-slate-100 dark:bg-slate-700 rounded-xl animate-pulse" />
+                      <div className="flex items-center gap-4 p-4">
+                        <div className="h-9 w-28 bg-slate-100 dark:bg-slate-700 rounded-lg animate-pulse" />
+                        <div className="h-6 flex-1 bg-slate-100 dark:bg-slate-700 rounded animate-pulse" />
+                      </div>
                     )}
                     {priceData && (
-                      <div className="grid grid-cols-5 gap-2">
-                        {[
-                          { label: '1W', pct: priceData.pctW1,  price: priceData.w1  },
-                          { label: '1M', pct: priceData.pctM1,  price: priceData.m1  },
-                          { label: '3M', pct: priceData.pctM3,  price: priceData.m3  },
-                          { label: '6M', pct: priceData.pctM6,  price: priceData.m6  },
-                          { label: '1Y', pct: priceData.pctY1,  price: priceData.y1  },
-                        ].map(({ label, pct, price }) => (
-                          <div key={label} className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 text-center">
-                            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mb-1">{label}</p>
-                            {pct != null ? (
-                              <>
-                                <p className={`text-sm font-bold tabular-nums ${pct > 0 ? 'text-emerald-600' : pct < 0 ? 'text-red-500' : 'text-slate-500'}`}>
-                                  {pct > 0 ? '+' : ''}{pct.toFixed(1)}%
-                                </p>
-                                <p className="text-[10px] text-slate-400 dark:text-slate-500 tabular-nums mt-0.5">
-                                  ₹{fmt(price, 0)}
-                                </p>
-                              </>
-                            ) : (
-                              <p className="text-xs text-slate-300 dark:text-slate-600">—</p>
-                            )}
+                      <div className="flex items-stretch divide-x divide-slate-100 dark:divide-slate-700">
+                        {/* Price block */}
+                        <div className="px-5 py-4 flex-shrink-0">
+                          <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5">{priceData.symbol}</p>
+                          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums leading-none">₹{fmt(priceData.current, 2)}</p>
+                        </div>
+
+                        {/* Period returns */}
+                        {priceData.returns.map(({ label, pct }) => (
+                          <div key={label} className="flex-1 px-4 py-4 text-center">
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">{label}</p>
+                            <p className={`text-sm font-bold tabular-nums ${
+                              pct == null ? 'text-slate-300 dark:text-slate-600'
+                              : pct > 0   ? 'text-emerald-600 dark:text-emerald-400'
+                              :             'text-red-500 dark:text-red-400'
+                            }`}>
+                              {pct == null ? '—' : `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`}
+                            </p>
                           </div>
                         ))}
+
+                        {/* 52W low / high */}
+                        <div className="flex-shrink-0 flex items-center divide-x divide-slate-100 dark:divide-slate-700">
+                          <div className="px-4 py-4 text-center">
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">52W Low</p>
+                            <p className="text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums">₹{fmt(priceData.w52Low, 0)}</p>
+                          </div>
+                          <div className="px-4 py-4 text-center">
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">52W High</p>
+                            <p className="text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums">₹{fmt(priceData.w52High, 0)}</p>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
