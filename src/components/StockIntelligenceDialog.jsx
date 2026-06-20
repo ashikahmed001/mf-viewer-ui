@@ -14,7 +14,7 @@ import {
 } from 'recharts';
 import { ArrowUp, ArrowDown, Minus, X } from 'lucide-react';
 import { useStockDialog } from '../context/StockDialogContext.jsx';
-import { getStockTracker, getStockPeers, getStockPrice } from '../api/client.js';
+import { getStockTracker, getStockPeers, getStockPriceByIsin } from '../api/client.js';
 import CapBadge from './CapBadge.jsx';
 import { industryBadgeClass } from '../utils/industryColors.js';
 
@@ -86,7 +86,7 @@ export default function StockIntelligenceDialog() {
   useEffect(() => {
     if (!stock) return;
     setLoading(true); setError(null); setTracker(null); setPeers(null);
-    setShowExited(false); setPriceData(null);
+    setShowExited(false); setPriceData(null); setPriceLoading(false);
     Promise.all([
       getStockTracker(stock.isin),
       getStockPeers(stock.isin),
@@ -96,12 +96,11 @@ export default function StockIntelligenceDialog() {
       .finally(() => setLoading(false));
   }, [stock?.isin]);
 
-  // Fetch Yahoo Finance price once we have symbol_nse from tracker
+  // Fetch Yahoo Finance price as soon as we have an ISIN
   useEffect(() => {
-    const symbol = tracker?.[0]?.symbol_nse;
-    if (!symbol) return;
+    if (!stock?.isin) return;
     setPriceLoading(true);
-    getStockPrice(symbol)
+    getStockPriceByIsin(stock.isin)
       .then(raw => {
         const result = raw?.chart?.result?.[0];
         if (!result) return;
@@ -126,7 +125,7 @@ export default function StockIntelligenceDialog() {
           ? Math.round(((current - w52Low) / (w52High - w52Low)) * 100)
           : 50;
         setPriceData({
-          symbol: `${symbol}.NS`,
+          symbol: raw.resolvedSymbol ?? result.meta.symbol ?? stock.isin,
           currency: result.meta.currency,
           current,
           w52High, w52Low, rangePos,
@@ -143,7 +142,7 @@ export default function StockIntelligenceDialog() {
       })
       .catch(() => {}) // silent — price is best-effort
       .finally(() => setPriceLoading(false));
-  }, [tracker]);
+  }, [stock?.isin]);
 
   // Close on Escape
   useEffect(() => {

@@ -137,6 +137,9 @@ export const getStockPeers = (isin) =>
 export const getStockPrice = (symbol) =>
   api.get(`/holdings/stock-price/${encodeURIComponent(symbol)}`).then(r => r.data);
 
+export const getStockPriceByIsin = (isin) =>
+  api.get(`/holdings/stock-price-by-isin/${encodeURIComponent(isin)}`).then(r => r.data);
+
 export const getFeed = (months = 6) =>
   api.get('/feed', { params: { months } }).then(r => r.data);
 
