@@ -22,7 +22,7 @@ import {
   getFunds, getFundExtractions,
   getAllFundsNewEntries, getFundChurnRates, getSectorRotationCalendar,
   getStockDiscoveryChain, getConcentrationScores, getBlendedHoldings,
-  getStockPeers,
+  getStockPeers, getStockPriceByIsin,
 } from '../api/client.js';
 import { getIndustryColor, industryBadgeClass } from '../utils/industryColors.js';
 import CapBadge from '../components/CapBadge.jsx';
@@ -4375,6 +4375,8 @@ function StockIntelligence({ allFunds }) {
   const [loading,     setLoading]     = useState(false);
   const [error,       setError]       = useState(null);
   const [showExited,  setShowExited]  = useState(false);
+  const [priceData,   setPriceData]   = useState(null);
+  const [priceLoading,setPriceLoading]= useState(false);
   const skipSearch = useRef(false);
 
   // Debounced search
@@ -4387,16 +4389,56 @@ function StockIntelligence({ allFunds }) {
     return () => clearTimeout(t);
   }, [query]);
 
-  // Fetch on selection
+  // Fetch tracker + peers on selection
   useEffect(() => {
     if (!selected) return;
     setLoading(true); setError(null); setTracker(null); setPeers(null);
+    setPriceData(null); setPriceLoading(false);
     Promise.all([
       getStockTracker(selected.isin),
       getStockPeers(selected.isin),
     ]).then(([t, p]) => { setTracker(t); setPeers(p); })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
+  }, [selected?.isin]);
+
+  // Fetch price data from Yahoo Finance
+  useEffect(() => {
+    if (!selected?.isin) return;
+    setPriceLoading(true);
+    getStockPriceByIsin(selected.isin)
+      .then(raw => {
+        const result = raw?.chart?.result?.[0];
+        if (!result) return;
+        const closes     = result.indicators.quote[0].close;
+        const timestamps = result.timestamp;
+        const candles    = timestamps
+          .map((ts, i) => ({ date: new Date(ts * 1000), close: closes[i] }))
+          .filter(c => c.close != null);
+        if (!candles.length) return;
+        const current = candles[candles.length - 1].close;
+        const priceAt = (daysAgo) => {
+          const target = Date.now() - daysAgo * 86_400_000;
+          const idx = candles.findLastIndex(c => c.date.getTime() <= target);
+          return idx >= 0 ? candles[idx].close : null;
+        };
+        const pct = (past) => past != null ? ((current - past) / past) * 100 : null;
+        const w52High = result.meta.fiftyTwoWeekHigh ?? Math.max(...candles.map(c => c.close));
+        const w52Low  = result.meta.fiftyTwoWeekLow  ?? Math.min(...candles.map(c => c.close));
+        setPriceData({
+          symbol: raw.resolvedSymbol ?? result.meta.symbol ?? selected.isin,
+          current, w52High, w52Low,
+          returns: [
+            { label: '1W', pct: pct(priceAt(7))   },
+            { label: '1M', pct: pct(priceAt(30))  },
+            { label: '3M', pct: pct(priceAt(91))  },
+            { label: '6M', pct: pct(priceAt(182)) },
+            { label: '1Y', pct: pct(priceAt(365)) },
+          ],
+        });
+      })
+      .catch(() => {})
+      .finally(() => setPriceLoading(false));
   }, [selected?.isin]);
 
   // Process tracker into analytics
@@ -4700,6 +4742,44 @@ function StockIntelligence({ allFunds }) {
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">since {fmtMonth(processed.months[0])}</p>
             </div>
           </div>
+
+          {/* ── Market Price ticker ── */}
+          {(priceData || priceLoading) && (
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
+              {priceLoading && !priceData && (
+                <div className="flex items-center gap-4 p-4">
+                  <div className="h-9 w-28 bg-slate-100 dark:bg-slate-700 rounded-lg animate-pulse" />
+                  <div className="h-6 flex-1 bg-slate-100 dark:bg-slate-700 rounded animate-pulse" />
+                </div>
+              )}
+              {priceData && (
+                <div className="flex items-stretch divide-x divide-slate-100 dark:divide-slate-700">
+                  <div className="px-5 py-4 flex-shrink-0">
+                    <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5">{priceData.symbol}</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums leading-none">₹{fmt(priceData.current, 2)}</p>
+                  </div>
+                  {priceData.returns.map(({ label, pct }) => (
+                    <div key={label} className="flex-1 px-4 py-4 text-center">
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">{label}</p>
+                      <p className={`text-sm font-bold tabular-nums ${pct == null ? 'text-slate-300 dark:text-slate-600' : pct > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                        {pct == null ? '—' : `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`}
+                      </p>
+                    </div>
+                  ))}
+                  <div className="flex-shrink-0 flex items-center divide-x divide-slate-100 dark:divide-slate-700">
+                    <div className="px-4 py-4 text-center">
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">52W Low</p>
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums">₹{fmt(priceData.w52Low, 0)}</p>
+                    </div>
+                    <div className="px-4 py-4 text-center">
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">52W High</p>
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums">₹{fmt(priceData.w52High, 0)}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── Trend chart + Fund breakdown ── */}
           <div className="grid grid-cols-5 gap-4">
