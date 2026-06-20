@@ -4698,7 +4698,37 @@ function StockIntelligence({ allFunds }) {
                   <span className={`text-3xl font-black tabular-nums ${scoreMeta.color}`}>{processed.score}</span>
                   <span className={`text-xs font-bold uppercase tracking-wide ${scoreMeta.color}`}>{scoreMeta.label}</span>
                 </div>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Conviction Score</p>
+                <div className="flex items-center justify-center gap-1 mt-1 relative group">
+                  <p className="text-xs text-slate-400 dark:text-slate-500">Conviction Score</p>
+                  <Info className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 cursor-help flex-shrink-0" />
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full right-0 mb-2 w-72 bg-slate-900 dark:bg-slate-700 text-white rounded-xl shadow-xl p-4 text-left opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-300 mb-2">How the score is calculated</p>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 rounded px-1.5 py-0.5 flex-shrink-0 mt-0.5">35 pts</span>
+                        <p className="text-xs text-slate-300"><span className="font-semibold text-white">Adoption</span> — what % of your funds currently hold this stock</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-[10px] font-bold text-blue-400 bg-blue-400/10 rounded px-1.5 py-0.5 flex-shrink-0 mt-0.5">30 pts</span>
+                        <p className="text-xs text-slate-300"><span className="font-semibold text-white">Allocation trend</span> — whether avg allocation is growing (+0.5%), stable, or shrinking over 6 months</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 rounded px-1.5 py-0.5 flex-shrink-0 mt-0.5">20 pts</span>
+                        <p className="text-xs text-slate-300"><span className="font-semibold text-white">Sustainability</span> — how many months 2+ funds held this stock simultaneously</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-[10px] font-bold text-purple-400 bg-purple-400/10 rounded px-1.5 py-0.5 flex-shrink-0 mt-0.5">15 pts</span>
+                        <p className="text-xs text-slate-300"><span className="font-semibold text-white">Retention</span> — current holders vs peak holders (are funds still in, or exiting?)</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-2.5 border-t border-slate-600 flex gap-3 text-[10px] text-slate-400">
+                      <span><span className="text-emerald-400 font-bold">70+</span> Strong</span>
+                      <span><span className="text-amber-400 font-bold">40–69</span> Building</span>
+                      <span><span className="text-slate-400 font-bold">&lt;40</span> Fading</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             {/* Score bar */}
