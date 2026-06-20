@@ -79,14 +79,15 @@ export default function StockIntelligenceDialog() {
   const [loading,    setLoading]    = useState(false);
   const [error,      setError]      = useState(null);
   const [showExited, setShowExited] = useState(false);
-  const [priceData,  setPriceData]  = useState(null);
+  const [priceData,    setPriceData]    = useState(null);
   const [priceLoading, setPriceLoading] = useState(false);
+  const [priceError,   setPriceError]   = useState(false);
 
   // Fetch tracker + peers when stock changes
   useEffect(() => {
     if (!stock) return;
     setLoading(true); setError(null); setTracker(null); setPeers(null);
-    setShowExited(false); setPriceData(null); setPriceLoading(false);
+    setShowExited(false); setPriceData(null); setPriceLoading(false); setPriceError(false);
     Promise.all([
       getStockTracker(stock.isin),
       getStockPeers(stock.isin),
@@ -140,7 +141,7 @@ export default function StockIntelligenceDialog() {
           ],
         });
       })
-      .catch(() => {}) // silent — price is best-effort
+      .catch(e => { console.error('[price]', e?.response?.data ?? e?.message); setPriceError(true); })
       .finally(() => setPriceLoading(false));
   }, [stock?.isin]);
 
@@ -356,12 +357,17 @@ export default function StockIntelligenceDialog() {
                 </div>
 
                 {/* Price section — ticker style */}
-                {(priceData || priceLoading) && (
+                {(priceData || priceLoading || priceError) && (
                   <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
                     {priceLoading && !priceData && (
                       <div className="flex items-center gap-4 p-4">
                         <div className="h-9 w-28 bg-slate-100 dark:bg-slate-700 rounded-lg animate-pulse" />
                         <div className="h-6 flex-1 bg-slate-100 dark:bg-slate-700 rounded animate-pulse" />
+                      </div>
+                    )}
+                    {priceError && !priceData && (
+                      <div className="flex items-center gap-2 px-5 py-3 text-xs text-slate-400 dark:text-slate-500">
+                        <span>Market price unavailable</span>
                       </div>
                     )}
                     {priceData && (

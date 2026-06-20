@@ -4377,6 +4377,7 @@ function StockIntelligence({ allFunds }) {
   const [showExited,  setShowExited]  = useState(false);
   const [priceData,   setPriceData]   = useState(null);
   const [priceLoading,setPriceLoading]= useState(false);
+  const [priceError,  setPriceError]  = useState(false);
   const skipSearch = useRef(false);
 
   // Debounced search
@@ -4393,7 +4394,7 @@ function StockIntelligence({ allFunds }) {
   useEffect(() => {
     if (!selected) return;
     setLoading(true); setError(null); setTracker(null); setPeers(null);
-    setPriceData(null); setPriceLoading(false);
+    setPriceData(null); setPriceLoading(false); setPriceError(false);
     Promise.all([
       getStockTracker(selected.isin),
       getStockPeers(selected.isin),
@@ -4437,7 +4438,7 @@ function StockIntelligence({ allFunds }) {
           ],
         });
       })
-      .catch(() => {})
+      .catch(e => { console.error('[price]', e?.response?.data ?? e?.message); setPriceError(true); })
       .finally(() => setPriceLoading(false));
   }, [selected?.isin]);
 
@@ -4774,12 +4775,17 @@ function StockIntelligence({ allFunds }) {
           </div>
 
           {/* ── Market Price ticker ── */}
-          {(priceData || priceLoading) && (
+          {(priceData || priceLoading || priceError) && (
             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
               {priceLoading && !priceData && (
                 <div className="flex items-center gap-4 p-4">
                   <div className="h-9 w-28 bg-slate-100 dark:bg-slate-700 rounded-lg animate-pulse" />
                   <div className="h-6 flex-1 bg-slate-100 dark:bg-slate-700 rounded animate-pulse" />
+                </div>
+              )}
+              {priceError && !priceData && (
+                <div className="flex items-center gap-2 px-5 py-3 text-xs text-slate-400 dark:text-slate-500">
+                  <span>Market price unavailable</span>
                 </div>
               )}
               {priceData && (
