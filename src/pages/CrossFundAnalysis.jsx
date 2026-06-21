@@ -1008,7 +1008,11 @@ function SectorWaterfall({ data, topN, fundName }) {
         <div className="flex items-center gap-2 text-xs">
           <select
             value={fromIdx}
-            onChange={e => setFromIdx(Number(e.target.value))}
+            onChange={e => {
+              const next = Number(e.target.value);
+              setFromIdx(next);
+              if (toIdx <= next) setToIdx(next + 1);
+            }}
             className="border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {months.map((m, i) => i < months.length - 1 && (
