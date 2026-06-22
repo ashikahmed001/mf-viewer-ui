@@ -10,8 +10,7 @@ function fmt(n, dec = 2) {
 }
 
 const COLUMNS = [
-  { key: 'stock_name',   label: 'Stock Name',        sortable: true },
-  { key: 'isin',         label: 'ISIN',              sortable: false },
+  { key: 'stock_name',   label: 'Stock',             sortable: true },
   { key: 'industry',     label: 'Industry',          sortable: false },
   { key: 'rating',       label: 'Rating',            sortable: false },
   { key: 'quantity',     label: 'Quantity',          sortable: true,  align: 'right' },
@@ -123,17 +122,19 @@ export default function HoldingsTable({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
               {holdings.map((h, idx) => (
                 <tr key={h.id || idx} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200 max-w-[220px]">
+                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200 max-w-[260px]">
                     <button
                       onClick={() => openStockDialog({ isin: h.isin, stock_name: h.stock_name, market_cap_cat: h.market_cap_cat, industry: h.industry })}
                       title={h.stock_name}
-                      className="flex items-center gap-1.5 min-w-0 text-left hover:text-violet-700 dark:hover:text-violet-400 transition-colors group"
+                      className="flex flex-col items-start min-w-0 text-left hover:text-violet-700 dark:hover:text-violet-400 transition-colors group"
                     >
-                      <span className="truncate group-hover:underline underline-offset-2">{h.stock_name}</span>
-                      <CapBadge cap={h.market_cap_cat} />
+                      <div className="flex items-center gap-1.5 min-w-0 w-full">
+                        <span className="truncate group-hover:underline underline-offset-2">{h.stock_name}</span>
+                        <CapBadge cap={h.market_cap_cat} />
+                      </div>
+                      <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 mt-0.5 tracking-wide">{h.isin}</span>
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">{h.isin}</td>
                   <td className="px-4 py-3">
                     {h.industry ? (
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${industryBadgeClass(h.industry)}`}>
