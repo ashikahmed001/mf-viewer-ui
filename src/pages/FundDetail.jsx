@@ -8,6 +8,7 @@ import { useSubscription } from '../context/SubscriptionContext.jsx';
 import UpgradePrompt from '../components/UpgradePrompt.jsx';
 import MonthSelector from '../components/MonthSelector.jsx';
 import ExtractionMetaBar from '../components/ExtractionMetaBar.jsx';
+import ErrorDoodle from '../components/ErrorDoodle.jsx';
 import HoldingsTable from '../components/HoldingsTable.jsx';
 import IndustryPieChart from '../components/IndustryPieChart.jsx';
 import TopHoldingsBarChart from '../components/TopHoldingsBarChart.jsx';
@@ -117,12 +118,7 @@ export default function FundDetail() {
     URL.revokeObjectURL(url);
   }
 
-  if (error) return (
-    <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-red-700">
-      <p className="font-semibold">Error loading fund</p>
-      <p className="text-sm mt-1">{error}</p>
-    </div>
-  );
+  if (error) return <ErrorDoodle message={`Error loading fund — ${error}`} />;
 
   const extraction = holdingsData?.extraction ?? null;
 

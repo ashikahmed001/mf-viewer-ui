@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Calendar, ChevronRight, Search } from 'lucide-react';
 import { getFunds } from '../api/client.js';
+import ErrorDoodle from '../components/ErrorDoodle.jsx';
 
 function fmtMonth(dateStr) {
   if (!dateStr) return '—';
@@ -49,10 +50,7 @@ export default function Home() {
   );
 
   if (error) return (
-    <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-red-700">
-      <p className="font-semibold">Failed to load funds</p>
-      <p className="text-sm mt-1">{error}</p>
-    </div>
+    <ErrorDoodle message={`Failed to load funds — ${error}`} />
   );
 
   return (

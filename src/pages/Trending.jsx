@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { TrendingUp, RefreshCw, Filter, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, X, Info, ChevronDown as ChevDown } from 'lucide-react';
 import { getTrending } from '../api/client.js';
+import ErrorDoodle from '../components/ErrorDoodle.jsx';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -546,10 +547,9 @@ export default function Trending() {
   );
 
   if (error) return (
-    <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-rose-700">
-      <p className="font-semibold">Failed to load trending data</p>
-      <p className="text-sm mt-1">{error}</p>
-      <button onClick={() => load()} className="mt-3 text-sm underline">Retry</button>
+    <div className="flex flex-col items-center gap-3">
+      <ErrorDoodle message={`Failed to load trending data — ${error}`} />
+      <button onClick={() => load()} className="text-sm text-indigo-500 hover:underline">Retry</button>
     </div>
   );
 

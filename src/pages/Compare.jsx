@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, TrendingDown, Minus, GitCompare, ChevronDown, ChevronRight, Activity } from 'lucide-react';
 import { getFund, getFundExtractions, compareFundMonths, getHoldingsSummary, getMultiMonthRange } from '../api/client.js';
 import { industryBadgeClass } from '../utils/industryColors.js';
+import ErrorDoodle from '../components/ErrorDoodle.jsx';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell, LabelList,
@@ -704,7 +705,7 @@ export default function Compare() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm mb-6">{error}</div>
+        <ErrorDoodle message={error} />
       )}
 
       {loading && (

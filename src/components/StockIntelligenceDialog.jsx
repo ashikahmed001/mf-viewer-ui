@@ -17,6 +17,7 @@ import { useStockDialog } from '../context/StockDialogContext.jsx';
 import { getStockTracker, getStockPeers, getStockPriceByIsin } from '../api/client.js';
 import CapBadge from './CapBadge.jsx';
 import { industryBadgeClass } from '../utils/industryColors.js';
+import ErrorDoodle from './ErrorDoodle.jsx';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -280,7 +281,7 @@ export default function StockIntelligenceDialog() {
 
             {/* Error */}
             {error && !loading && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>
+              <ErrorDoodle message={error} compact />
             )}
 
             {/* Content */}

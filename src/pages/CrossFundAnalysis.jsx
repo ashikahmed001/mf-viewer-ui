@@ -27,6 +27,7 @@ import {
 import { getIndustryColor, industryBadgeClass } from '../utils/industryColors.js';
 import CapBadge from '../components/CapBadge.jsx';
 import { useStockDialog } from '../context/StockDialogContext.jsx';
+import ErrorDoodle from '../components/ErrorDoodle.jsx';
 
 function fmt(n, dec = 2) {
   if (n == null) return '—';
@@ -405,7 +406,7 @@ function OverlapTrend({ matrixFunds, shortNames }) {
         </div>
       )}
 
-      {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>}
+      {error && <ErrorDoodle message={error} compact />}
 
       {trendData && trendData.length === 0 && (
         <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400 text-sm">
@@ -1183,7 +1184,7 @@ function SectorDrift({ allFunds }) {
       </div>
 
       {loading && <div className="skeleton h-80 rounded-2xl" />}
-      {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>}
+      {error && <ErrorDoodle message={error} compact />}
 
       {data && (
         <>
@@ -1281,7 +1282,7 @@ function HiddenGems() {
   }, []);
 
   if (loading) return <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="skeleton h-16 rounded-2xl" />)}</div>;
-  if (error)   return <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>;
+  if (error)   return <ErrorDoodle message={error} compact />;
   if (!data)   return null;
 
   const filtered = data
@@ -1593,7 +1594,7 @@ function EntryExitTimeline({ allFunds }) {
     </div>
   );
   if (error) return (
-    <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>
+    <ErrorDoodle message={error} compact />
   );
 
   return (
@@ -2022,7 +2023,7 @@ function MonthlyDiff({ allFunds }) {
       </div>
 
       {loading && <div className="skeleton h-40 rounded-2xl" />}
-      {error   && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>}
+      {error   && <ErrorDoodle message={error} compact />}
 
       {counts && (
         <>
@@ -2497,7 +2498,7 @@ function OverlapMatrix() {
     </div>
   );
   if (error) return (
-    <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>
+    <ErrorDoodle message={error} compact />
   );
   if (!data || !activeFunds) return null;
 
@@ -3422,7 +3423,7 @@ function HighConviction() {
         </div>
       )}
 
-      {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm mb-6">{error}</div>}
+      {error && <ErrorDoodle message={error} compact />}
       {loading && <div className="space-y-4">{[...Array(3)].map((_, i) => <div key={i} className="skeleton h-24 rounded-2xl" />)}</div>}
 
       {!loading && !error && (
@@ -3588,7 +3589,7 @@ function NewEntries() {
   }, [data, minFunds]);
 
   if (loading) return <div className="space-y-3">{[...Array(5)].map((_, i) => <div key={i} className="skeleton h-14 rounded-2xl" />)}</div>;
-  if (error)   return <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>;
+  if (error)   return <ErrorDoodle message={error} compact />;
 
   const multiRows = rows.filter(r => r.fund_count >= 2);
   const soloRows  = rows.filter(r => r.fund_count === 1);
@@ -3710,7 +3711,7 @@ function FundChurn({ allFunds }) {
     }), [allMonths, funds, byFund, selected]);
 
   if (loading) return <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="skeleton h-20 rounded-2xl" />)}</div>;
-  if (error)   return <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>;
+  if (error)   return <ErrorDoodle message={error} compact />;
 
   const ChurnTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
@@ -3871,7 +3872,7 @@ function SectorRotationCalendar() {
   }
 
   if (loading) return <div className="space-y-3">{[...Array(4)].map((_, i) => <div key={i} className="skeleton h-10 rounded-2xl" />)}</div>;
-  if (error)   return <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>;
+  if (error)   return <ErrorDoodle message={error} compact />;
 
   // Show last 18 months to keep table manageable
   const visMonths = months.slice(-18);
@@ -3991,7 +3992,7 @@ function StockDiscovery() {
   }, [data, minGrowth, sortBy, search, industry, trend]);
 
   if (loading) return <div className="space-y-3">{[...Array(5)].map((_, i) => <div key={i} className="skeleton h-14 rounded-2xl" />)}</div>;
-  if (error)   return <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>;
+  if (error)   return <ErrorDoodle message={error} compact />;
 
   const allMonths = data ? [...new Set(data.map(r => r.report_month))].sort() : [];
   const visMonths = allMonths.slice(-18);
@@ -4259,7 +4260,7 @@ function ConcentrationScore({ allFunds }) {
   const metricFmt   = metric === 'holding_count' ? (v) => Math.round(v) : (v) => fmt(v, metric === 'hhi' ? 1 : 2) + (metric === 'top_holding_pct' ? '%' : '');
 
   if (loading) return <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="skeleton h-20 rounded-2xl" />)}</div>;
-  if (error)   return <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>;
+  if (error)   return <ErrorDoodle message={error} compact />;
 
   const ConcentrationTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
@@ -4678,7 +4679,7 @@ function StockIntelligence({ allFunds }) {
           {[...Array(4)].map((_,i) => <div key={i} className="skeleton h-24 rounded-2xl" />)}
         </div>
       )}
-      {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>}
+      {error && <ErrorDoodle message={error} compact />}
 
       {processed && selected && (
         <>
@@ -5096,7 +5097,7 @@ function PortfolioBlender({ allFunds }) {
         {/* Right: results */}
         <div className="col-span-2">
           {loading && <div className="skeleton h-64 rounded-2xl" />}
-          {error   && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>}
+          {error   && <ErrorDoodle message={error} compact />}
           {!selected.length && !loading && (
             <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-12 text-center text-slate-400 dark:text-slate-500 text-sm">
               Enter an amount for 1+ funds to see where your money goes

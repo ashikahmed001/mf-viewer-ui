@@ -17,6 +17,7 @@ import {
   adminListStocks,
   getAuthHeader,
 } from '../api/client.js';
+import ErrorDoodle from '../components/ErrorDoodle.jsx';
 import api from '../api/client.js';
 import { AlertTriangle, CheckCircle, RefreshCw, ChevronDown, ChevronRight, Settings, X, Search, Activity, TrendingUp, Lock, Unlock, Download } from 'lucide-react';
 
@@ -3544,7 +3545,7 @@ function ContinuityTab({ onCountChange: _onCountChange }) {
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>
+        <ErrorDoodle message={error} compact />
       )}
 
       {loading && !data && (

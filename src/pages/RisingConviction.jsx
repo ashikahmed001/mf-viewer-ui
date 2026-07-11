@@ -7,6 +7,7 @@ import { getRisingConviction } from '../api/client.js';
 import { getIndustryColor, industryBadgeClass } from '../utils/industryColors.js';
 import CapBadge from '../components/CapBadge.jsx';
 import { useStockDialog } from '../context/StockDialogContext.jsx';
+import ErrorDoodle from '../components/ErrorDoodle.jsx';
 
 function fmt(n, dec = 2) {
   if (n == null) return '—';
@@ -615,7 +616,7 @@ function ConvictionPanel({ direction }) {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm mb-6">{error}</div>
+        <ErrorDoodle message={error} />
       )}
 
       {loading && (
