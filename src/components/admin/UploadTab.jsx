@@ -745,8 +745,17 @@ function ExtractionReview({ draft, onDiscard, onSaved }) {
           <div className="mt-4 flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3">
             <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
             <div className="text-xs text-amber-800 dark:text-amber-300">
-              <span className="font-semibold">Confidence deductions: </span>
-              {data.confidence.deductions.join(', ')}
+              <span className="font-semibold">Confidence deductions:</span>
+              <ul className="mt-1 list-disc list-inside space-y-0.5">
+                {data.confidence.deductions.map((d, i) => (
+                  <li key={i}>
+                    {typeof d === 'string' ? d : (d.reason ?? d.message ?? d.label ?? JSON.stringify(d))}
+                    {typeof d === 'object' && d.penalty != null && (
+                      <span className="ml-1 opacity-60">(-{d.penalty})</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         )}
