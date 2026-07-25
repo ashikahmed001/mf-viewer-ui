@@ -158,6 +158,116 @@ function InfoTooltip({ desc, tip }) {
   );
 }
 
+// ─── Fund category detection (keyword match on SEBI-mandated fund names) ─────
+
+function getFundCategory(name) {
+  const n = name.toLowerCase();
+  if (n.includes('overnight') || n.includes('liquid') || n.includes('money market')) return 'Debt';
+  if (n.includes('index') || n.includes('nifty') || n.includes('sensex') || n.includes('nasdaq') || n.includes('s&p')) return 'Index';
+  if (n.includes('small cap'))                                      return 'Small Cap';
+  if (n.includes('mid cap') && n.includes('large'))                 return 'Large & Mid Cap';
+  if (n.includes('mid cap'))                                        return 'Mid Cap';
+  if (n.includes('large cap'))                                      return 'Large Cap';
+  if (n.includes('multi cap'))                                      return 'Multi Cap';
+  if (n.includes('flexi cap') || n.includes('flexi-cap'))           return 'Flexi Cap';
+  if (n.includes('elss') || n.includes('tax saver') || n.includes('tax saving')) return 'ELSS';
+  if (n.includes('focused'))                                        return 'Focused';
+  if (n.includes('value') && !n.includes('balanced'))               return 'Value';
+  if (n.includes('contra'))                                         return 'Contra';
+  if (n.includes('dividend yield'))                                 return 'Dividend Yield';
+  if (n.includes('aggressive hybrid') || (n.includes('balanced') && n.includes('advantage'))) return 'Hybrid';
+  if (n.includes('equity savings'))                                 return 'Hybrid';
+  if (n.includes('fund of fund') || n.includes('fof') || n.includes('overseas') || n.includes('global') || n.includes('international')) return 'FoF / Overseas';
+  if (n.includes('sectoral') || n.includes('thematic') || n.includes('pharma') || n.includes('banking') || n.includes('technology') || n.includes('infra') || n.includes('defence') || n.includes('energy') || n.includes('consumption') || n.includes('manufacturing') || n.includes('psu') || n.includes('momentum')) return 'Sectoral';
+  return 'Other';
+}
+
+// Category chip colours — { inactive, active } both fully static for Tailwind JIT
+const CATEGORY_COLORS = {
+  'Large Cap':      { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-blue-100 border-blue-400 text-blue-800 dark:bg-blue-900/50 dark:border-blue-500 dark:text-blue-200' },
+  'Mid Cap':        { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-violet-100 border-violet-400 text-violet-800 dark:bg-violet-900/50 dark:border-violet-500 dark:text-violet-200' },
+  'Small Cap':      { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-pink-100 border-pink-400 text-pink-800 dark:bg-pink-900/50 dark:border-pink-500 dark:text-pink-200' },
+  'Large & Mid Cap':{ inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-indigo-100 border-indigo-400 text-indigo-800 dark:bg-indigo-900/50 dark:border-indigo-500 dark:text-indigo-200' },
+  'Flexi Cap':      { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-cyan-100 border-cyan-400 text-cyan-800 dark:bg-cyan-900/50 dark:border-cyan-500 dark:text-cyan-200' },
+  'Multi Cap':      { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-teal-100 border-teal-400 text-teal-800 dark:bg-teal-900/50 dark:border-teal-500 dark:text-teal-200' },
+  'ELSS':           { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-900/50 dark:border-emerald-500 dark:text-emerald-200' },
+  'Focused':        { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-amber-100 border-amber-400 text-amber-800 dark:bg-amber-900/50 dark:border-amber-500 dark:text-amber-200' },
+  'Index':          { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-slate-200 border-slate-400 text-slate-800 dark:bg-slate-700 dark:border-slate-400 dark:text-slate-100' },
+  'Value':          { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-orange-100 border-orange-400 text-orange-800 dark:bg-orange-900/50 dark:border-orange-500 dark:text-orange-200' },
+  'Contra':         { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-rose-100 border-rose-400 text-rose-800 dark:bg-rose-900/50 dark:border-rose-500 dark:text-rose-200' },
+  'Hybrid':         { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-purple-100 border-purple-400 text-purple-800 dark:bg-purple-900/50 dark:border-purple-500 dark:text-purple-200' },
+  'Sectoral':       { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-yellow-100 border-yellow-400 text-yellow-800 dark:bg-yellow-900/50 dark:border-yellow-500 dark:text-yellow-200' },
+  'FoF / Overseas': { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-sky-100 border-sky-400 text-sky-800 dark:bg-sky-900/50 dark:border-sky-500 dark:text-sky-200' },
+  'Other':          { inactive: 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400', active: 'bg-slate-100 border-slate-400 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-200' },
+};
+
+function CategoryChips({ funds, activeFunds, onChange }) {
+  // Build category → [fund_id] map
+  const categoryMap = useMemo(() => {
+    const map = new Map();
+    for (const f of funds) {
+      const cat = getFundCategory(f.fund_name);
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat).push(f.fund_id);
+    }
+    // Sort by count desc, then name
+    return new Map([...map.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0])));
+  }, [funds]);
+
+  // Which category (if any) exactly matches the current selection?
+  const activeCategory = useMemo(() => {
+    for (const [cat, ids] of categoryMap) {
+      if (ids.length === activeFunds.size && ids.every(id => activeFunds.has(id))) return cat;
+    }
+    return null;
+  }, [categoryMap, activeFunds]);
+
+  const allSelected = activeFunds.size === funds.length;
+
+  function selectCategory(cat) {
+    if (activeCategory === cat) {
+      // clicking same chip → reset to all
+      onChange(new Set(funds.map(f => f.fund_id)));
+    } else {
+      onChange(new Set(categoryMap.get(cat)));
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap mb-3">
+      <span className="text-xs font-medium text-slate-400 dark:text-slate-500 shrink-0">Group:</span>
+      <button
+        onClick={() => onChange(new Set(funds.map(f => f.fund_id)))}
+        className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors ${
+          allSelected
+            ? 'bg-violet-600 border-violet-600 text-white'
+            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-violet-300 hover:text-violet-700'
+        }`}
+      >
+        All {funds.length}
+      </button>
+      {[...categoryMap.entries()].map(([cat, ids]) => {
+        const isActive = activeCategory === cat;
+        const colors = CATEGORY_COLORS[cat] ?? CATEGORY_COLORS['Other'];
+        return (
+          <button
+            key={cat}
+            onClick={() => selectCategory(cat)}
+            title={`Select all ${cat} funds`}
+            className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors ${
+              isActive
+                ? colors.active
+                : `bg-white dark:bg-slate-800 ${colors.inactive} hover:bg-slate-50 dark:hover:bg-slate-700`
+            }`}
+          >
+            {cat} <span className="opacity-60">{ids.length}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Multi-select fund dropdown ───────────────────────────────────────────────
 
 function FundMultiSelect({ funds, selected, onChange, shortNames }) {
@@ -2533,6 +2643,12 @@ function OverlapMatrix() {
             sub={minOverlap ? `${shortNames.get(minOverlap.fund_a_name)} × ${shortNames.get(minOverlap.fund_b_name)}` : ''} />
         </div>
       </div>
+
+      <CategoryChips
+        funds={funds}
+        activeFunds={activeFunds}
+        onChange={s => { setActiveFunds(s); setSelected(null); }}
+      />
 
       <div className="flex items-center gap-4 mb-4 flex-wrap">
         <FundMultiSelect
