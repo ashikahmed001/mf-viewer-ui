@@ -531,6 +531,8 @@ export default function Compare() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [compareView, setCompareView] = useState('waterfall'); // 'waterfall' | 'columns'
+  const [weightDir,   setWeightDir]   = useState('all');       // 'all' | 'positive' | 'negative'
+  const [minNav,      setMinNav]      = useState(0);           // minimum pct_nav to show
 
   useEffect(() => {
     Promise.all([getFund(id), getFundExtractions(id)])
@@ -729,6 +731,26 @@ export default function Compare() {
       {/* Classic 2-month comparison view */}
       {result && (() => {
         const drifters2 = filteredDrifters(result.navDrifters, scale);
+
+        // Weight changes with direction + NAV % filters applied
+        let filteredWeightChanges = result.weightChanges;
+        if (weightDir === 'positive') filteredWeightChanges = filteredWeightChanges.filter(h => (h.nav_delta ?? 0) > 0);
+        if (weightDir === 'negative') filteredWeightChanges = filteredWeightChanges.filter(h => (h.nav_delta ?? 0) < 0);
+        if (minNav > 0)               filteredWeightChanges = filteredWeightChanges.filter(h => ((h.pct_nav ?? 0) * scale) >= minNav);
+
+        function exportWeightCSV() {
+          const header = ['Stock', 'ISIN', 'Industry', 'Action', 'Prev NAV %', 'New NAV %', 'Δ Weight %'];
+          const rows = filteredWeightChanges.map(h => [
+            h.stock_name, h.isin || '', h.industry || '', h.action || '',
+            Number((h.prev_pct_nav ?? 0) * scale).toFixed(4),
+            Number((h.pct_nav      ?? 0) * scale).toFixed(4),
+            Number((h.nav_delta    ?? 0) * scale).toFixed(4),
+          ]);
+          const csv = [header, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+          const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+          Object.assign(document.createElement('a'), { href: url, download: 'weight_changes.csv' }).click();
+          URL.revokeObjectURL(url);
+        }
         return (
           <div>
             {/* Summary bar + view toggle */}
@@ -859,8 +881,43 @@ export default function Compare() {
 
               <CompareColumn
                 title="Weight Changes"
-                subtitle="Active buys / trims"
-                count={result.weightChanges.length}
+                subtitle={
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">Active buys / trims</span>
+                    <span className="text-slate-300 dark:text-slate-600">·</span>
+                    {[
+                      { id: 'all', label: 'All' },
+                      { id: 'positive', label: '↑' },
+                      { id: 'negative', label: '↓' },
+                    ].map(({ id, label }) => (
+                      <button key={id} onClick={() => setWeightDir(id)}
+                        className={`px-1.5 py-0.5 text-[10px] font-bold rounded border transition-colors ${
+                          weightDir === id
+                            ? id === 'positive' ? 'bg-emerald-500 text-white border-emerald-500'
+                              : id === 'negative' ? 'bg-red-500 text-white border-red-500'
+                              : 'bg-slate-700 text-white border-slate-700'
+                            : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-600 hover:border-slate-400'
+                        }`}>{label}</button>
+                    ))}
+                    <span className="text-slate-300 dark:text-slate-600">·</span>
+                    <select
+                      value={minNav}
+                      onChange={e => setMinNav(Number(e.target.value))}
+                      className="text-[10px] font-semibold border border-slate-200 dark:border-slate-600 rounded px-1 py-0.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                    >
+                      {[0, 0.5, 1, 2, 5].map(v => (
+                        <option key={v} value={v}>{v === 0 ? 'Any NAV%' : `≥${v}%`}</option>
+                      ))}
+                    </select>
+                    {filteredWeightChanges.length > 0 && (
+                      <button onClick={exportWeightCSV}
+                        className="ml-1 text-[10px] font-semibold text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 hover:underline flex items-center gap-0.5">
+                        ↓ CSV
+                      </button>
+                    )}
+                  </div>
+                }
+                count={filteredWeightChanges.length}
                 color="blue"
                 icon={<Minus className="w-4 h-4" />}
                 empty="No weight changes detected"
@@ -897,7 +954,7 @@ export default function Compare() {
                   </svg>
                 }
               >
-                {result.weightChanges.map(h => (
+                {filteredWeightChanges.map(h => (
                   <HoldingRow key={h.isin} h={h} variant="changed" scale={scale} />
                 ))}
               </CompareColumn>
@@ -1014,7 +1071,7 @@ function CompareColumn({ title, subtitle, count, color, icon, children, empty, d
           </span>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${c.badge}`}>{count}</span>
         </div>
-        {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
+        {subtitle && <div className="text-xs text-slate-400 mt-0.5">{subtitle}</div>}
       </div>
       <div className="divide-y divide-slate-100 max-h-[420px] overflow-y-auto">
         {count === 0
@@ -1064,7 +1121,7 @@ function CompareWaterfall({ result, drifters = [], scale, month1Label, month2Lab
         next:      parseFloat(((h.pct_nav      || 0) * scale).toFixed(3)),
         qtyAction: null,
       })),
-      ...result.weightChanges.map(h => {
+      ...filteredWeightChanges.map(h => {
         const navDelta = (h.nav_delta || 0) * scale;
         // Drift cases: bought more but weight fell, or trimmed but weight rose
         let type = h.action;

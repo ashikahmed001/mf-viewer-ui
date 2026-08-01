@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import {
   Newspaper, TrendingUp, TrendingDown, ArrowRightLeft,
-  Zap, ChevronDown, ChevronUp, SlidersHorizontal, Star, Check, X,
+  Zap, ChevronDown, ChevronUp, SlidersHorizontal, Star, Check, X, Download,
 } from 'lucide-react';
 import { getFeed, getFunds } from '../api/client.js';
 import { industryBadgeClass } from '../utils/industryColors.js';
@@ -345,6 +345,10 @@ export default function Feed() {
   const [notable,    setNotable]    = useState(() => loadPref('feed_notable', false));
   const [favFunds,   setFavFunds]   = useState(() => loadPref('feed_favFunds', [])); // [] = all
 
+  // Weight-shift specific filters
+  const [weightDir,  setWeightDir]  = useState('all');  // 'all' | 'positive' | 'negative'
+  const [minNav,     setMinNav]     = useState(0);       // minimum current pct_nav to show
+
   // Persist on change
   useEffect(() => savePref('feed_months',   months),   [months]);
   useEffect(() => savePref('feed_signal',   signal),   [signal]);
@@ -405,12 +409,36 @@ export default function Feed() {
         weight_changes = weight_changes.filter(e => Math.abs(e.delta) >= NOTABLE.delta);
       }
 
+      // Weight-shift direction filter
+      if (weightDir === 'positive') weight_changes = weight_changes.filter(e => (e.delta ?? 0) > 0);
+      if (weightDir === 'negative') weight_changes = weight_changes.filter(e => (e.delta ?? 0) < 0);
+
+      // Weight-shift min NAV% filter
+      if (minNav > 0) weight_changes = weight_changes.filter(e => (e.pct_nav ?? 0) >= minNav);
+
       return { ...m, new_entries, exits, weight_changes, convergence };
     });
-  }, [data, activeFundIds, signal, notable]);
+  }, [data, activeFundIds, signal, notable, weightDir, minNav]);
 
   const latest = filtered[0];
   const totalEvents = filtered.reduce((s, m) => s + m.new_entries.length + m.exits.length + m.weight_changes.length, 0);
+
+  const showWeightFilters = signal === 'all' || signal === 'weight_change';
+  const allWeightChanges  = filtered.flatMap(m => m.weight_changes.map(e => ({ ...e, month: m.month })));
+
+  function exportWeightCSV() {
+    const header = ['Stock', 'ISIN', 'Industry', 'Fund', 'Month', 'Prev NAV %', 'New NAV %', 'Δ Weight %'];
+    const rows   = allWeightChanges.map(e => [
+      e.stock_name, e.isin || '', e.industry || '', e.fund_name, e.month,
+      Number(e.prev_pct_nav ?? 0).toFixed(4),
+      Number(e.pct_nav      ?? 0).toFixed(4),
+      Number(e.delta        ?? 0).toFixed(4),
+    ]);
+    const csv  = [header, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const url  = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    const a    = Object.assign(document.createElement('a'), { href: url, download: 'weight_shifts.csv' });
+    a.click(); URL.revokeObjectURL(url);
+  }
 
   return (
     <div>
@@ -515,6 +543,53 @@ export default function Feed() {
           <p className="text-xs text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2.5">
             Notable threshold: entries ≥ {NOTABLE.entry}% NAV · exits ≥ {NOTABLE.exit}% NAV · weight shifts ≥ {NOTABLE.delta}%
           </p>
+        )}
+
+        {/* Row 3: Weight shift filters — visible when weight_change signal is active */}
+        {showWeightFilters && (
+          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 dark:border-slate-800 pt-2.5">
+            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">Weight</span>
+
+            {/* Direction */}
+            {[
+              { id: 'all',      label: 'All'      },
+              { id: 'positive', label: '↑ Gained' },
+              { id: 'negative', label: '↓ Lost'   },
+            ].map(({ id, label }) => (
+              <button key={id} onClick={() => setWeightDir(id)}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors ${
+                  weightDir === id
+                    ? id === 'positive'
+                      ? 'bg-emerald-600 text-white border-emerald-600'
+                      : id === 'negative'
+                        ? 'bg-red-500 text-white border-red-500'
+                        : 'bg-slate-800 text-white border-slate-800'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400'
+                }`}>{label}</button>
+            ))}
+
+            <span className="text-slate-200 dark:text-slate-700 mx-1">|</span>
+
+            {/* Min NAV % */}
+            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">Min NAV %</span>
+            {[0, 0.5, 1, 2, 5].map(v => (
+              <button key={v} onClick={() => setMinNav(v)}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors ${
+                  minNav === v
+                    ? 'bg-indigo-600 text-white border-indigo-600'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400'
+                }`}>{v === 0 ? 'Any' : `≥${v}%`}</button>
+            ))}
+
+            {/* Export */}
+            {allWeightChanges.length > 0 && (
+              <button onClick={exportWeightCSV}
+                className="ml-auto flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg border border-indigo-200 text-indigo-600 dark:border-indigo-700 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
+                <Download className="w-3.5 h-3.5" />
+                Export {allWeightChanges.length} shifts
+              </button>
+            )}
+          </div>
         )}
       </div>
 
