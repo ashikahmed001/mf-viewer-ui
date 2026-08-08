@@ -1121,7 +1121,7 @@ function CompareWaterfall({ result, drifters = [], scale, month1Label, month2Lab
         next:      parseFloat(((h.pct_nav      || 0) * scale).toFixed(3)),
         qtyAction: null,
       })),
-      ...filteredWeightChanges.map(h => {
+      ...result.weightChanges.map(h => {
         const navDelta = (h.nav_delta || 0) * scale;
         // Drift cases: bought more but weight fell, or trimmed but weight rose
         let type = h.action;
